@@ -1,0 +1,19 @@
+{
+  "name": "money",
+  "version": "1.0.0",
+  "main": "bin/index.js",
+  "scripts": {
+    "lint": "npx eslint .",
+    "format": "npx prettier --write '**/*.js'"
+  },
+  "bin": {
+    "money": "./bin/index.js"
+  },
+  "dependencies": {
+    "auto-parse": "^1.8.0",
+    "chalk": "^3.0.0",
+    "dotenv": "^8.2.0",
+    "moment": "^2.24.0",
+    "yargs": "^15.1.0"
+  }
+}
