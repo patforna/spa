@@ -23,26 +23,27 @@ const options = yargs
 
 module.exports = () => {
   const data = fs.readFileSync(options.file, { encoding: ENCODING });
-  const rows = filter(csv.parse(data));
-
+  let rows = csv.parse(data);
   rows.forEach(categorise);
-  uncategorised(rows).forEach(r => console.log(asString(r)));
+  rows = filter(rows);
+
+  uncategorised(rows).forEach((r) => console.log(asString(r)));
 
   const summary = new Summary(rows);
   if (options.json) console.log(stringify(summary.data));
   else console.log(table(summary));
 };
 
-const filter = rows => {
+const filter = (rows) => {
   return rows
-    .filter(r => r.date.year() === 2020) // hack because can't restrict FKB exports by valuta
-    .filter(r => r.amount < 0 && r.category !== 'ignore');
+    .filter((r) => r.date.year() === 2020) // hack because can't restrict FKB exports by valuta
+    .filter((r) => r.amount < 0 && r.category !== 'ignore');
 };
 
-const uncategorised = rows => {
-  return rows.filter(r => r.category === categorise.noCategory);
+const uncategorised = (rows) => {
+  return rows.filter((r) => r.category === categorise.noCategory);
 };
 
-const asString = row => {
+const asString = (row) => {
   return `${row.date.toISOString()} ${row.description} ${row.amount}`;
 };
