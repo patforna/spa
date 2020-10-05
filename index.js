@@ -18,7 +18,12 @@ const options = yargs
   .option('j', {
     alias: 'json',
     type: 'boolean',
-    describe: 'print result in json instead of table format',
+    describe: 'display result in json instead of table format',
+  })
+  .option('c', {
+    alias: 'category',
+    type: 'string',
+    describe: 'display transactions for given category',
   }).argv;
 
 module.exports = () => {
@@ -27,11 +32,15 @@ module.exports = () => {
   rows.forEach(categorise);
   rows = filter(rows);
 
-  uncategorised(rows).forEach((r) => console.log(asString(r)));
+  // show items without categories
+  category(rows, categorise.noCategory).forEach(display);
+
+  if (options.category) category(rows, options.category).forEach(display);
 
   const summary = new Summary(rows);
   if (options.json) console.log(stringify(summary.data));
-  else console.log(table(summary));
+
+  if (!options.json && !options.category) console.log(table(summary));
 };
 
 const filter = (rows) => {
@@ -40,10 +49,14 @@ const filter = (rows) => {
     .filter((r) => r.amount < 0 && r.category !== 'ignore');
 };
 
-const uncategorised = (rows) => {
-  return rows.filter((r) => r.category === categorise.noCategory);
+const category = (rows, category) => {
+  return rows.filter((r) => r.category === category);
 };
 
 const asString = (row) => {
-  return `${row.date.toISOString()} ${row.description} ${row.amount}`;
+  return `${row.date.format('DD/MM/YYYY')} ${row.description} ${row.amount}`;
+};
+
+const display = (row) => {
+  console.log(asString(row));
 };
