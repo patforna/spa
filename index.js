@@ -5,6 +5,7 @@ const categorise = require('./lib/categorise');
 const csv = require('./lib/csv');
 const table = require('./lib/table');
 const Summary = require('./lib/summary');
+const path = require('path');
 
 const ENCODING = 'latin1';
 
@@ -28,35 +29,35 @@ const options = yargs
 
 module.exports = () => {
   const data = fs.readFileSync(options.file, { encoding: ENCODING });
-  let rows = csv.parse(data);
-  rows.forEach(categorise);
-  rows = filter(rows);
+  let items = csv.parse(data);
+  items.forEach(categorise);
+  items = filter(items);
 
   // show items without categories
-  category(rows, categorise.noCategory).forEach(display);
+  category(items, categorise.noCategory).forEach(display);
 
-  if (options.category) category(rows, options.category).forEach(display);
+  if (options.category) category(items, options.category).forEach(display);
 
-  const summary = new Summary(rows);
+  const summary = new Summary(items);
   if (options.json) console.log(stringify(summary.data));
 
   if (!options.json && !options.category) console.log(table(summary));
 };
 
-const filter = (rows) => {
-  return rows
+const filter = (items) => {
+  return items
     .filter((r) => r.date.year() === 2020) // hack because can't restrict FKB exports by valuta
-    .filter((r) => r.amount < 0 && r.category !== 'ignore');
+    .filter((r) => r.amount < 0 && r.category !== categorise.ignore);
 };
 
-const category = (rows, category) => {
-  return rows.filter((r) => r.category === category);
+const category = (items, category) => {
+  return items.filter((r) => r.category === category);
 };
 
-const asString = (row) => {
-  return `${row.date.format('DD/MM/YYYY')} ${row.description} ${row.amount}`;
+const asString = (item) => {
+  return `${item.date.format('DD.MM.YYYY')} ${item.description} ${item.amount}`;
 };
 
-const display = (row) => {
-  console.log(asString(row));
+const display = (item) => {
+  console.log(asString(item));
 };
