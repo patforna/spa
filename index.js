@@ -2,10 +2,8 @@ const fs = require('fs');
 const yargs = require('yargs');
 const stringify = require('json-stringify-pretty-compact');
 const categorise = require('./lib/categorise');
-const csv = require('./lib/csv');
 const table = require('./lib/table');
-const Summary = require('./lib/summary');
-const path = require('path');
+const summaryx = require('./lib/summary');
 
 const ENCODING = 'latin1';
 
@@ -28,36 +26,25 @@ const options = yargs
   }).argv;
 
 module.exports = () => {
-  const data = fs.readFileSync(options.file, { encoding: ENCODING });
-  let items = csv.parse(data);
-  items.forEach(categorise);
-  items = filter(items);
+  const summary = summaryx.createFromCSV(
+    fs.readFileSync(options.file, { encoding: ENCODING })
+  );
 
   // show items without categories
-  category(items, categorise.noCategory).forEach(display);
+  summary.itemsForCategory(categorise.noCategory).forEach(display);
 
-  if (options.category) category(items, options.category).forEach(display);
+  // show items for a specific category, if category option has been provided,
+  if (options.category) {
+    summary.itemsForCategory(options.category).forEach(display);
+    return;
+  }
 
-  const summary = new Summary(items);
-  if (options.json) console.log(stringify(summary.data));
-
-  if (!options.json && !options.category) console.log(table(summary));
-};
-
-const filter = (items) => {
-  return items
-    .filter((r) => r.date.year() === 2020) // hack because can't restrict FKB exports by valuta
-    .filter((r) => r.amount < 0 && r.category !== categorise.ignore);
-};
-
-const category = (items, category) => {
-  return items.filter((r) => r.category === category);
-};
-
-const asString = (item) => {
-  return `${item.date.format('DD.MM.YYYY')} ${item.description} ${item.amount}`;
+  // show summary in json or table format
+  console.log(options.json ? stringify(summary.data) : table(summary));
 };
 
 const display = (item) => {
-  console.log(asString(item));
+  console.log(
+    `${item.date.format('DD.MM.YYYY')} ${item.description} ${item.amount}`
+  );
 };
