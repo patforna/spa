@@ -1,14 +1,14 @@
 import moment from 'moment';
-import { loadIgnore, loadManual } from '../items.js';
-import rules from './rules.js';
+import { Item, loadIgnore, loadManual } from '../items';
+import rules from './rules';
 
-const NO_CATEGORY = 'no_category';
-const IGNORE = 'ignore';
+export const NO_CATEGORY = 'no_category';
+export const IGNORE = 'ignore';
 
 const ignore = loadIgnore();
 const manual = loadManual();
 
-export default (item) => {
+export function categorise(item: Item): Item {
   if (shouldIgnore(item)) item.category = IGNORE;
   else {
     let category = manualCategory(item);
@@ -19,15 +19,15 @@ export default (item) => {
   if (!item.category) item.category = NO_CATEGORY;
 
   return item;
-};
+}
 
-const shouldIgnore = (item) => {
+const shouldIgnore = (item: Item): boolean => {
   return ignore.some(({ date, amount }) => {
     return moment(date).isSame(item.date) && amount === item.amount;
   });
 };
 
-const manualCategory = (item) => {
+const manualCategory = (item: Item): string => {
   const found = manual.find(({ date, amount }) => {
     return moment(date).isSame(item.date) && amount === item.amount;
   });
@@ -35,7 +35,7 @@ const manualCategory = (item) => {
   return found ? found.category : undefined;
 };
 
-const categoriseUsingRules = (item) => {
+const categoriseUsingRules = (item: Item): void => {
   Object.keys(rules).forEach((category) => {
     rules[category].forEach((regExp) => {
       if (item.category === undefined && regExp.test(item.description))
@@ -43,7 +43,3 @@ const categoriseUsingRules = (item) => {
     });
   });
 };
-
-export const noCategory = NO_CATEGORY;
-const _ignore = IGNORE;
-export { _ignore as ignore };

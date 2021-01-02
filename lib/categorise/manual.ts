@@ -1,5 +1,5 @@
-const moment = require('moment');
-const csv = require('../csv');
+import moment from 'moment';
+import { DATE_FORMAT } from '../csv';
 
 module.exports = [
   ['03.12.20', -281.65, 'shopping'],
@@ -54,4 +54,4 @@ module.exports = [
   ['20.01.20', -17.8, 'shopping'],
   ['19.01.20', -50, 'shopping'],
   ['15.01.20', -240, 'shopping'],
-].map(([d, a, c]) => [moment.utc(d, csv.dateFormat), a, c]);
+].map(([d, a, c]) => [moment.utc(d, DATE_FORMAT), a, c]);
