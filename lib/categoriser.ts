@@ -12,6 +12,12 @@ export class Categoriser {
   }
 
   categorise(item: Item): Item {
+    // hack because can't restrict FKB exports by valuta
+    if (item.date.year() !== 2020 || item.amount > 0) {
+      item.category = IGNORE;
+      return item;
+    }
+
     let category = overriddenCategory(this.#overrides, item);
     if (category) item.category = category;
     else categoriseUsingRules(item);

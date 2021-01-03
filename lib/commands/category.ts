@@ -1,5 +1,4 @@
-import { asString } from '../items';
-import { Summary } from '../summary';
+import { asString, Item, itemsForCategory } from '../items';
 import { Command } from './index.js';
 
 export class CategoryCommand implements Command {
@@ -8,9 +7,9 @@ export class CategoryCommand implements Command {
     this.#category = category;
   }
 
-  async execute(summary: Summary): Promise<void> {
-    summary
-      .itemsForCategory(this.#category)
-      .forEach((item) => console.log(asString(item)));
+  async execute(items: Item[]): Promise<void> {
+    itemsForCategory(items, this.#category).forEach((item) =>
+      console.log(asString(item))
+    );
   }
 }

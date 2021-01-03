@@ -10,13 +10,8 @@ export function createSummaryFromCSV(
 ): Summary {
   let items = parse(data);
   items.forEach((i) => categoriser.categorise(i));
-  return new Summary(filter(items));
+  return new Summary(items);
 }
-
-const filter = (items: Item[]): Item[] =>
-  items
-    .filter((item) => item.date.year() === 2020) // hack because can't restrict FKB exports by valuta
-    .filter((item) => item.amount < 0 && item.category !== IGNORE);
 
 export interface Total {
   amount: number;
@@ -34,17 +29,17 @@ export interface SummaryMonthData {
 const ZERO_TOTAL: Total = { amount: 0, transactions: 0 };
 
 export class Summary {
-  data: SummaryData;
   items: Item[];
+  data: SummaryData;
   constructor(items: Item[]) {
-    const data = {
+    this.data = {
       months: _.range(12).map(() => ({ categories: {} })),
     };
 
-    items.forEach((item) => add(data, `categories.${item.category}`, item));
-
-    this.data = data;
-    this.items = items;
+    this.items = items.filter((item) => item.category !== IGNORE);
+    this.items.forEach((item) =>
+      add(this.data, `categories.${item.category}`, item)
+    );
   }
 
   get monthNames(): string[] {
@@ -92,10 +87,6 @@ export class Summary {
 
   total(): Total {
     return sum(this.totalsByMonth());
-  }
-
-  itemsForCategory(category: string): Item[] {
-    return this.items.filter((item) => item.category === category);
   }
 }
 
