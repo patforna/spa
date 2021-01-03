@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs';
 import stringify from 'json-stringify-pretty-compact';
+import _ from 'lodash';
 import { Moment } from 'moment';
 
 export interface Item {
@@ -27,7 +28,8 @@ export class ItemRepo {
   }
 
   saveAll(items: Item[]): void {
-    writeFileSync(this.#path, stringify(items));
+    const sorted = _.sortBy(items, ['date']);
+    writeFileSync(this.#path, stringify(sorted));
     this.load();
   }
 }

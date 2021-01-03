@@ -18,6 +18,7 @@ export class CategoriseCommand implements Command {
           validate: (input) => _.trim(input) !== '',
         },
       ]);
+      item.category = answers.category;
       itemRepo.save(item); // TODO inject
     }
 
