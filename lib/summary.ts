@@ -1,12 +1,15 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { categorise, IGNORE } from './categorise/index';
+import { Categoriser, IGNORE } from './categoriser';
 import { parse } from './csv';
 import { Item } from './items';
 
-export function createSummaryFromCSV(data: string): Summary {
+export function createSummaryFromCSV(
+  data: string,
+  categoriser: Categoriser
+): Summary {
   let items = parse(data);
-  items.forEach(categorise);
+  items.forEach((i) => categoriser.categorise(i));
   items = filter(items);
   return new Summary(items);
 }

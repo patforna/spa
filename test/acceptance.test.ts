@@ -1,4 +1,5 @@
 import { createSummaryFromCSV } from '../lib/summary';
+import { categoriser } from '../lib/wiring';
 
 const csv = `Kontoauszug bis: 06.12.2020 ;;;
 ;;;
@@ -18,7 +19,7 @@ Datum;Buchungstext;Betrag;Valuta
 03.12.20;Zahlung - Migros ALN Kreuzplatz, Zürich - 01.12.2020 10:00 - Karten-Nr. xxxxxxxxxxxx7837;-8.05;01.12.20`;
 
 test('should pass end to end', () => {
-  const summary = createSummaryFromCSV(csv);
+  const summary = createSummaryFromCSV(csv, categoriser);
   const { amount, transactions } = summary.total();
   expect(amount).toBe(310);
   expect(transactions).toBe(4);

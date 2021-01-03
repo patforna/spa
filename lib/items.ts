@@ -2,7 +2,6 @@
 import { readFileSync, writeFileSync } from 'fs';
 import stringify from 'json-stringify-pretty-compact';
 import { Moment } from 'moment';
-import { join, resolve } from 'path';
 
 export interface Item {
   date: Moment;
@@ -11,36 +10,17 @@ export interface Item {
   category: string;
 }
 
-const root = () => {
-  let x = '/Users/you/code/spa'; // FIXME dirname(require.main.filename);
-  if (x.endsWith('/bin')) x = resolve(x, '..');
-  return x;
-};
+export class ItemRepo {
+  #path: string;
+  constructor(path: string) {
+    this.#path = path;
+  }
 
-const rootDir = root();
-const ignorePath = join(rootDir, 'data', 'ignored.json');
-const manualPath = join(rootDir, 'data', 'manual.json');
+  load(): Item[] {
+    return JSON.parse(readFileSync(this.#path).toString());
+  }
 
-export function loadIgnore(): Item[] {
-  return load(ignorePath);
+  save(items: Item[]): void {
+    writeFileSync(this.#path, stringify(items));
+  }
 }
-
-export function saveIgnore(items: Item[]): void {
-  save(ignorePath, items);
-}
-
-export function loadManual(): Item[] {
-  return load(manualPath);
-}
-
-export function saveManual(items: Item[]): void {
-  save(manualPath, items);
-}
-
-const load = (path: string): Item[] => {
-  return JSON.parse(readFileSync(path).toString());
-};
-
-const save = (path: string, items: Item[]): void => {
-  writeFileSync(path, stringify(items));
-};

@@ -2,10 +2,11 @@ import { readFileSync } from 'fs';
 import stringify from 'json-stringify-pretty-compact';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { NO_CATEGORY } from './categorise/index.js';
+import { NO_CATEGORY } from './categoriser.js';
 import { Item } from './items.js';
 import { createSummaryFromCSV } from './summary.js';
 import { tableFrom } from './table.js';
+import { categoriser } from './wiring.js';
 
 const ENCODING = 'latin1';
 
@@ -31,9 +32,8 @@ const argv = yargs(hideBin(process.argv))
   }).argv;
 
 export default (): void => {
-  const summary = createSummaryFromCSV(
-    readFileSync(argv.f, { encoding: ENCODING })
-  );
+  const data = readFileSync(argv.f, { encoding: ENCODING });
+  const summary = createSummaryFromCSV(data, categoriser);
 
   // show items without categories
   summary.itemsForCategory(NO_CATEGORY).forEach(display);

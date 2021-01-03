@@ -1,34 +1,29 @@
 import moment from 'moment';
-import { Item, loadIgnore, loadManual } from '../items';
+import { Item } from './items';
 import rules from './rules';
 
 export const NO_CATEGORY = 'no_category';
 export const IGNORE = 'ignore';
 
-const ignore = loadIgnore();
-const manual = loadManual();
-
-export function categorise(item: Item): Item {
-  if (shouldIgnore(item)) item.category = IGNORE;
-  else {
-    let category = manualCategory(item);
-    if (category) item.category = category;
-    else categoriseUsingRules(item);
+export class Categoriser {
+  #overrides: Item[];
+  constructor(overrides: Item[]) {
+    this.#overrides = overrides;
   }
 
-  if (!item.category) item.category = NO_CATEGORY;
+  categorise(item: Item): Item {
+    let category = overriddenCategory(this.#overrides, item);
+    if (category) item.category = category;
+    else categoriseUsingRules(item);
 
-  return item;
+    if (!item.category) item.category = NO_CATEGORY;
+
+    return item;
+  }
 }
 
-const shouldIgnore = (item: Item): boolean => {
-  return ignore.some(({ date, amount }) => {
-    return moment(date).isSame(item.date) && amount === item.amount;
-  });
-};
-
-const manualCategory = (item: Item): string => {
-  const found = manual.find(({ date, amount }) => {
+const overriddenCategory = (overrides: Item[], item: Item): string => {
+  const found = overrides.find(({ date, amount }) => {
     return moment(date).isSame(item.date) && amount === item.amount;
   });
 
