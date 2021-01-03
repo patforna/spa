@@ -18,6 +18,8 @@ const config: TableUserConfig = {
     10: { alignment: 'right' },
     11: { alignment: 'right' },
     12: { alignment: 'right' },
+    13: { alignment: 'right' },
+    14: { alignment: 'right' },
   },
 };
 
