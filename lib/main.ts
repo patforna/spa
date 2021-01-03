@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { Args, createCommands } from './commands';
+import { Args, createCommands } from './commands/index';
 import { createSummaryFromCSV } from './summary.js';
 import { categoriser } from './wiring.js';
 
@@ -29,9 +29,15 @@ const args: Args = yargs(hideBin(process.argv))
   }).argv;
 
 export default (): void => {
+  Promise.all([run(args)]);
+};
+
+async function run(args: Args) {
   const data = readFileSync(args.file, { encoding: ENCODING });
   const summary = createSummaryFromCSV(data, categoriser);
   const commands = createCommands(args);
 
-  commands.map((cmd) => cmd.execute(summary));
-};
+  for (const command of commands) {
+    await command.execute(summary);
+  }
+}
