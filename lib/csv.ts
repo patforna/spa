@@ -10,11 +10,11 @@ export function parse(data: string): Item[] {
   return data
     .split(/\r?\n/)
     .splice(FIRST_ROW_NUMBER)
-    .filter(x => x.length > 0)
-    .map(r => parseRow(r));
+    .filter((x) => x.length > 0)
+    .map((r) => parseRow(r));
 }
 
-const parseRow = (row: string): Item => {
+function parseRow(row: string): Item {
   const item = row
     .split(';')
     .splice(1)
@@ -25,4 +25,4 @@ const parseRow = (row: string): Item => {
 
   item.date = moment.utc(item.date, DATE_FORMAT);
   return item;
-};
+}

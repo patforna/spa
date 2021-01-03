@@ -10,8 +10,7 @@ export function createSummaryFromCSV(
 ): Summary {
   let items = parse(data);
   items.forEach((i) => categoriser.categorise(i));
-  items = filter(items);
-  return new Summary(items);
+  return new Summary(filter(items));
 }
 
 const filter = (items: Item[]): Item[] =>
@@ -100,19 +99,19 @@ export class Summary {
   }
 }
 
-const sum = (totals: Total[]): Total => {
+function sum(totals: Total[]): Total {
   const amount = _.sumBy(totals, (x) => x.amount);
   const transactions = _.sumBy(totals, (x) => x.transactions);
   return { amount, transactions };
-};
+}
 
-const mean = (totals: Total[]): Total => {
+function mean(totals: Total[]): Total {
   const amount = _.meanBy(totals, (x) => x.amount);
   const transactions = _.meanBy(totals, (x) => x.transactions);
   return { amount, transactions };
-};
+}
 
-const add = (data: any, field: string, item: Item): void => {
+function add(data: any, field: string, item: Item): void {
   const month = item.date.month();
 
   let obj = _.get(data.months[month], field);
@@ -123,4 +122,4 @@ const add = (data: any, field: string, item: Item): void => {
 
   obj.amount += Math.round(-item.amount);
   obj.transactions += 1;
-};
+}

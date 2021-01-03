@@ -25,7 +25,7 @@ export function tableFrom(summary: Summary): string {
   return _table(tableData(summary), config);
 }
 
-const tableData = (summary: Summary): any[] => {
+function tableData(summary: Summary): any[] {
   let rows = [];
   rows = _.concat(rows, [
     headerOrFooterRow(_.concat(summary.monthNames, 'Avg', 'Total')),
@@ -34,14 +34,14 @@ const tableData = (summary: Summary): any[] => {
   rows = _.concat(rows, [headerOrFooterRow(totalsRow(summary))]);
 
   return rows;
-};
+}
 
-const headerOrFooterRow = (values: string[]): string[] => {
-  return _.concat('', values).map(x => yellow(x));
-};
+function headerOrFooterRow(values: string[]): string[] {
+  return _.concat('', values).map((x) => yellow(x));
+}
 
-const categoryRows = (summary: Summary): string[][] => {
-  return summary.categoryNames.map(c =>
+function categoryRows(summary: Summary): string[][] {
+  return summary.categoryNames.map((c) =>
     _.concat(
       yellow(c),
       formatTotals(summary.totalsForCategoryByMonth(c)),
@@ -49,17 +49,17 @@ const categoryRows = (summary: Summary): string[][] => {
       yellow(format(summary.totalForCategory(c)))
     )
   );
-};
+}
 
-const totalsRow = (summary: Summary): string[] => {
+function totalsRow(summary: Summary): string[] {
   const items = summary.totalsByMonth();
   return formatTotals(_.concat(items, summary.avg(), summary.total()));
-};
+}
 
-const formatTotals = (value: Total[]): string[] => {
+function formatTotals(value: Total[]): string[] {
   return value.map(format);
-};
+}
 
-const format = (value: Total): string => {
+function format(value: Total): string {
   return `${_.round(value.amount)} (${_.round(value.transactions)})`;
-};
+}

@@ -22,19 +22,19 @@ export class Categoriser {
   }
 }
 
-const overriddenCategory = (overrides: Item[], item: Item): string => {
+function overriddenCategory(overrides: Item[], item: Item): string {
   const found = overrides.find(({ date, amount }) => {
     return moment(date).isSame(item.date) && amount === item.amount;
   });
 
   return found ? found.category : undefined;
-};
+}
 
-const categoriseUsingRules = (item: Item): void => {
+function categoriseUsingRules(item: Item): void {
   Object.keys(rules).forEach((category) => {
     rules[category].forEach((regExp) => {
       if (item.category === undefined && regExp.test(item.description))
         item.category = category;
     });
   });
-};
+}
