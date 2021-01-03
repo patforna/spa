@@ -1,55 +1,37 @@
 import { readFileSync } from 'fs';
-import stringify from 'json-stringify-pretty-compact';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { NO_CATEGORY } from './categoriser.js';
-import { Item } from './items.js';
+import { Args, createCommands } from './commands';
 import { createSummaryFromCSV } from './summary.js';
-import { tableFrom } from './table.js';
 import { categoriser } from './wiring.js';
 
 const ENCODING = 'latin1';
 
-const argv = yargs(hideBin(process.argv))
+const args: Args = yargs(hideBin(process.argv))
   .usage('Usage: $0 -f <file>')
   .options({
-    f: {
-      alias: 'file',
+    file: {
+      alias: 'f',
       type: 'string',
       describe: 'the csv file to process',
       demandOption: true,
     },
-    c: {
-      alias: 'category',
+    category: {
+      alias: 'c',
       type: 'string',
       describe: 'display transactions for given category',
     },
-    j: {
-      alias: 'json',
+    json: {
+      alias: 'j',
       type: 'boolean',
       describe: 'display result in json instead of table format',
     },
   }).argv;
 
 export default (): void => {
-  const data = readFileSync(argv.f, { encoding: ENCODING });
+  const data = readFileSync(args.file, { encoding: ENCODING });
   const summary = createSummaryFromCSV(data, categoriser);
+  const commands = createCommands(args);
 
-  // show items without categories
-  summary.itemsForCategory(NO_CATEGORY).forEach(display);
-
-  // show items for a specific category, if category option has been provided,
-  if (argv.c) {
-    summary.itemsForCategory(argv.c).forEach(display);
-    return;
-  }
-
-  // show summary in json or table format
-  console.log(argv.j ? stringify(summary.data) : tableFrom(summary));
-};
-
-const display = (item: Item): void => {
-  console.log(
-    `${item.date.format('DD.MM.YYYY')} ${item.description} ${item.amount}`
-  );
+  commands.map((cmd) => cmd.execute(summary));
 };
