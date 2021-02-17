@@ -3,8 +3,6 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { Args, Command, createCommands } from './commands/index';
 import { parse } from './csv';
-import { createSummaryFromCSV } from './summary.js';
-import { categoriser } from './wiring.js';
 
 const ENCODING = 'latin1';
 

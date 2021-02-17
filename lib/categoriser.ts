@@ -12,8 +12,7 @@ export class Categoriser {
   }
 
   categorise(item: Item): Item {
-    // hack because can't restrict FKB exports by valuta
-    if (item.date.year() !== 2020 || item.amount > 0) {
+    if (item.amount > 0) {
       item.category = IGNORE;
       return item;
     }
