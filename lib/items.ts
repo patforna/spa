@@ -1,10 +1,10 @@
 import { readFileSync, writeFileSync } from 'fs';
 import stringify from 'json-stringify-pretty-compact';
 import _ from 'lodash';
-import { Moment } from 'moment';
+import moment from 'moment';
 
 export interface Item {
-  date: Moment;
+  date: moment.Moment;
   description: string;
   amount: number;
   category: string;
@@ -19,6 +19,7 @@ export class ItemRepo {
 
   load(): Item[] {
     this.#items = JSON.parse(readFileSync(this.#path).toString());
+    _.map(this.#items, (it) => (it.date = moment.utc(it.date)));
     return this.#items;
   }
 
