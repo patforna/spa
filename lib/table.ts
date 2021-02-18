@@ -20,6 +20,7 @@ const config: TableUserConfig = {
     12: { alignment: 'right' },
     13: { alignment: 'right' },
     14: { alignment: 'right' },
+    15: { alignment: 'right' },
   },
 };
 
@@ -30,7 +31,9 @@ export function tableFrom(summary: Summary): string {
 function tableData(summary: Summary): any[] {
   let rows = [];
   rows = _.concat(rows, [
-    headerOrFooterRow(_.concat(summary.monthNames, 'Avg', 'Total')),
+    headerOrFooterRow(
+      _.concat(summary.monthNames, 'Avg', 'Total', '% of Total')
+    ),
   ]);
   rows = _.concat(rows, categoryRows(summary));
   rows = _.concat(rows, [headerOrFooterRow(totalsRow(summary))]);
@@ -48,14 +51,18 @@ function categoryRows(summary: Summary): string[][] {
       yellow(c),
       formatTotals(summary.totalsForCategoryByMonth(c)),
       yellow(format(summary.avgForCategory(c))),
-      yellow(format(summary.totalForCategory(c)))
+      yellow(format(summary.totalForCategory(c))),
+      yellow(summary.percentageForCategory(c) + '%')
     )
   );
 }
 
 function totalsRow(summary: Summary): string[] {
   const items = summary.totalsByMonth();
-  return formatTotals(_.concat(items, summary.avg(), summary.total()));
+  return _.concat(
+    formatTotals(_.concat(items, summary.avg(), summary.total())),
+    ''
+  );
 }
 
 function formatTotals(value: Total[]): string[] {

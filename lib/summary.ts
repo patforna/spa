@@ -67,6 +67,13 @@ export class Summary {
     return sum(this.totalsForCategoryByMonth(category));
   }
 
+  percentageForCategory(category: string): number {
+    return _.round(
+      (100 / this.total().amount) * this.totalForCategory(category).amount,
+      1
+    );
+  }
+
   totalsByMonth(): Total[] {
     return this.data.months.map((_, i: number) => this.totalForMonth(i));
   }
