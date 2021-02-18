@@ -1,5 +1,8 @@
-import { createSummaryFromCSV } from '../lib/summary';
-import { categoriser } from '../lib/wiring';
+import { Command } from '../lib/commands';
+import { CategoriseCommand } from '../lib/commands/categorise';
+import { Item } from '../lib/items';
+import { run } from '../lib/main';
+import { Summary } from '../lib/summary';
 
 const csv = `Kontoauszug bis: 06.12.2020 ;;;
 ;;;
@@ -19,8 +22,17 @@ Datum;Buchungstext;Betrag;Valuta
 03.12.20;Zahlung - Migros ALN Kreuzplatz, Zürich - 01.12.2020 10:00 - Karten-Nr. xxxxxxxxxxxx7837;-8.05;01.12.20`;
 
 test('should pass end to end', () => {
-  const summary = createSummaryFromCSV(csv, categoriser);
-  const { amount, transactions } = summary.total();
+  const capture = new CaptureItemsCommand();
+  Promise.all([run(csv, [new CategoriseCommand(), capture])]);
+  const { amount, transactions } = capture.summary.total();
   expect(amount).toBe(310);
   expect(transactions).toBe(4);
 });
+
+class CaptureItemsCommand implements Command {
+  summary: Summary;
+  async execute(items: Item[]): Promise<void> {
+    console.log('Gote items: ' + items.length);
+    this.summary = new Summary(items);
+  }
+}

@@ -1,17 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { Categoriser, IGNORE } from './categoriser';
-import { parse } from './csv';
+import { IGNORE } from './categoriser';
 import { Item } from './items';
-
-export function createSummaryFromCSV(
-  data: string,
-  categoriser: Categoriser
-): Summary {
-  let items = parse(data);
-  items.forEach((i) => categoriser.categorise(i));
-  return new Summary(items);
-}
 
 export interface Total {
   amount: number;
