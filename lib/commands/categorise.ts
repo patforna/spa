@@ -7,7 +7,10 @@ import { Command } from './index.js';
 
 export class CategoriseCommand implements Command {
   async execute(items: Item[]): Promise<void> {
-    items.forEach((item) => categoriser.categorise(item)); // TODO inject
+    const year = guessYear(items);
+    console.log('Guessing year: ' + year);
+
+    items.forEach((item) => categoriser.categorise(item, year)); // TODO inject
 
     const uncategorised = itemsForCategory(items, NO_CATEGORY);
     for (const item of uncategorised) {
@@ -22,6 +25,11 @@ export class CategoriseCommand implements Command {
       itemRepo.save(item); // TODO inject
     }
 
-    uncategorised.forEach((item) => categoriser.categorise(item));
+    uncategorised.forEach((item) => categoriser.categorise(item, year));
   }
+}
+
+function guessYear(items: Item[]) {
+  const m = _.groupBy(items, (it) => it.date.year());
+  return Number(_.sortBy(Object.entries(m), ([k, v]) => -v.length)[0][0]);
 }

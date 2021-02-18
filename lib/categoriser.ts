@@ -11,8 +11,8 @@ export class Categoriser {
     this.#overrides = overrides;
   }
 
-  categorise(item: Item): Item {
-    if (item.amount > 0) {
+  categorise(item: Item, year: number): Item {
+    if (item.amount > 0 || item.date.year() != year) {
       item.category = IGNORE;
       return item;
     }
