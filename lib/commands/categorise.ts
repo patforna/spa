@@ -20,8 +20,13 @@ export class CategoriseCommand implements Command {
           message: `Unable to categorise: ${asString(item)}\nEnter category:`,
           validate: (input) => _.trim(input) !== '',
         },
+        {
+          name: 'comment',
+          message: `Enter comment (optional):`,
+        },
       ]);
       item.category = answers.category;
+      if (answers.comment != '') item.comment = answers.comment;
       itemRepo.save(item); // TODO inject
     }
 
