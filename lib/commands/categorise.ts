@@ -17,7 +17,7 @@ export class CategoriseCommand implements Command {
       const answers = await inquirer.prompt([
         {
           name: 'category',
-          message: `Unable to categorise: "${asString(item)}"\nEnter category:`,
+          message: `Unable to categorise: ${asString(item)}\nEnter category:`,
           validate: (input) => _.trim(input) !== '',
         },
       ]);

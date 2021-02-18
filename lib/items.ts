@@ -45,5 +45,7 @@ export function itemsForCategory(items: Item[], category: string): Item[] {
 }
 
 export function asString(item: Item): string {
-  return `${item.date.format('DD.MM.YYYY')} ${item.description} ${item.amount}`;
+  return `${item.statement_date.format('DD.MM.YYYY')} - CHF ${item.amount} (${
+    item.description
+  })`;
 }
