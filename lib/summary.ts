@@ -46,10 +46,13 @@ export class Summary {
     return _.take(moment.monthsShort(), this.data.months.length);
   }
 
+  // all category names - sorted by category total
   get categoryNames(): string[] {
-    return _.union<string>(
+    const categories = _.union<string>(
       this.data.months.flatMap((m) => Object.keys(m.categories))
-    ).sort();
+    );
+
+    return _.sortBy(categories, (c) => -this.totalForCategory(c).amount);
   }
 
   totalsForCategoryByMonth(category: string): Total[] {
