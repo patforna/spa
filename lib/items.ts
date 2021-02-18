@@ -6,8 +6,8 @@ import moment from 'moment';
 export interface Item {
   date: moment.Moment;
   statement_date: moment.Moment;
-  description: string;
   amount: number;
+  description: string;
   category: string;
   comment: string;
 }
@@ -34,8 +34,10 @@ export class ItemRepo {
   }
 
   saveAll(items: Item[]): void {
-    const sorted = _.sortBy(items, ['date']);
-    writeFileSync(this.#path, stringify(sorted));
+    const toSave = _.sortBy(items, ['date']).map((it) =>
+      _.pick(it, ['date', 'amount', 'description', 'category', 'comment'])
+    );
+    writeFileSync(this.#path, stringify(toSave));
     this.load();
   }
 }
