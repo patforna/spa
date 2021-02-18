@@ -10,6 +10,13 @@ export interface Item {
   description: string;
   category: string;
   comment: string;
+  card: Card;
+}
+
+export enum Card {
+  Unknown = 0,
+  Partner = 1,
+  Self = 2,
 }
 
 export class ItemRepo {
@@ -47,7 +54,10 @@ export function itemsForCategory(items: Item[], category: string): Item[] {
 }
 
 export function asString(item: Item): string {
-  return `${item.statement_date.format('DD.MM.YYYY')} - CHF ${item.amount} (${
-    item.description
-  })`;
+  const xxx = item.description.split(' - ');
+  const d = xxx.length == 4 ? xxx[1] : item.description;
+
+  return `${item.statement_date.format('DD.MM.YYYY')} | CHF ${
+    item.amount
+  } | ${d} | Card: ${Card[item.card]}`;
 }
