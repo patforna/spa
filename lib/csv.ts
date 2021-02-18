@@ -3,7 +3,7 @@ import moment from 'moment';
 import { Item } from './items';
 
 const FIRST_ROW_NUMBER = 12;
-const COLS = ['description', 'amount', 'date'];
+const COLS = ['statement_date', 'description', 'amount', 'date'];
 export const DATE_FORMAT = 'DD.MM.YY';
 
 export function parse(data: string): Item[] {
@@ -17,12 +17,12 @@ export function parse(data: string): Item[] {
 function parseRow(row: string): Item {
   const item = row
     .split(';')
-    .splice(1)
     .reduce(
       (res, val, i) => ({ ...res, ...{ [COLS[i]]: autoParse(val) } }),
       {}
     ) as Item;
 
   item.date = moment.utc(item.date, DATE_FORMAT);
+  item.statement_date = moment.utc(item.statement_date, DATE_FORMAT);
   return item;
 }

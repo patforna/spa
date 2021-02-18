@@ -1,4 +1,3 @@
-import { Summary } from '../summary';
 import { CategoryCommand } from './category';
 import { JsonCommand } from './json';
 import { TableCommand } from './table';

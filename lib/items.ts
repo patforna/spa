@@ -5,9 +5,11 @@ import moment from 'moment';
 
 export interface Item {
   date: moment.Moment;
+  statement_date: moment.Moment;
   description: string;
   amount: number;
   category: string;
+  comment: string;
 }
 
 export class ItemRepo {
@@ -19,7 +21,10 @@ export class ItemRepo {
 
   load(): Item[] {
     this.#items = JSON.parse(readFileSync(this.#path).toString());
-    _.map(this.#items, (it) => (it.date = moment.utc(it.date)));
+    this.#items.forEach((it) => {
+      it.date = moment.utc(it.date);
+      it.statement_date = moment.utc(it.statement_date);
+    });
     return this.#items;
   }
 
