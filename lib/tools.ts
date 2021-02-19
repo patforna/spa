@@ -36,6 +36,9 @@ export default (): void => {
     case 'regen':
       regen(data);
       break;
+    case 'rulestats':
+      rulestats(data);
+      break;
     default:
       console.error(
         `Unknown action: "${args.action}". Chose one of: { regen, rulestats }.`
@@ -64,4 +67,57 @@ function regen(data: string) {
   });
 
   itemRepo.saveAll(updated);
+}
+
+import rules from './rules';
+interface RuleStat {
+  category: string;
+  rule: string;
+  items: Item[];
+  conflicts: string[];
+}
+function rulestats(data: string) {
+  const items = parse(data);
+  console.log('items length: ' + items.length);
+  const stats: { [k: string]: RuleStat } = {};
+
+  function key([cat, re]) {
+    return `${cat}:${re.source}`;
+  }
+
+  function categoriseUsingRules(item: Item): void {
+    Object.entries(rules).forEach((rule) => {
+      const [cat, res] = rule;
+      res.forEach((re: RegExp) => {
+        const k = key([cat, re]);
+        if (re.test(item.description)) {
+          let ruleStat: RuleStat = _.defaultTo(stats[k], {
+            category: cat,
+            rule: re.source,
+            items: [],
+            conflicts: [],
+          });
+          if (item.category !== undefined && item.category != cat)
+            ruleStat.conflicts.push(item.category);
+          else {
+            item.category = cat;
+            ruleStat.items.push(item);
+          }
+
+          stats[k] = ruleStat;
+        }
+      });
+    });
+  }
+
+  items.forEach(categoriseUsingRules);
+
+  _.sortBy(Object.values(stats), 'category').forEach((s) =>
+    console.log(
+      `${_.padEnd(s.category, 10)} ${_.padEnd(s.rule, 30)} ${_.padStart(
+        String(s.items.length),
+        4
+      )}${s.conflicts.length == 0 ? '' : '  !!!CONFLICT!!!'}`
+    )
+  );
 }

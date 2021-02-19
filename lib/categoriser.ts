@@ -36,10 +36,11 @@ function overriddenCategory(overrides: Item[], item: Item): string {
 }
 
 function categoriseUsingRules(item: Item): void {
-  Object.keys(rules).forEach((category) => {
-    rules[category].forEach((regExp: RegExp) => {
-      if (item.category === undefined && regExp.test(item.description))
-        item.category = category;
+  Object.entries(rules).forEach((rule) => {
+    const [cat, res] = rule;
+    res.forEach((re: RegExp) => {
+      if (item.category === undefined && re.test(item.description))
+        item.category = cat;
     });
   });
 }
