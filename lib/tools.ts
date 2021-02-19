@@ -3,7 +3,7 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { parse } from './csv';
 import { itemRepo } from './wiring.js';
-import { Item } from './items.js';
+import { asString, Item } from './items.js';
 import _ from 'lodash';
 
 const ENCODING = 'latin1';
@@ -112,13 +112,15 @@ function rulestats(data: string) {
 
   items.forEach(categoriseUsingRules);
 
-  _.sortBy(Object.values(stats), 'category').forEach((s) =>
+  _.sortBy(Object.values(stats), 'category').forEach((s) => {
+    console.log('------------------------------------------------------------');
     console.log(
-      `${_.padEnd(s.category, 10)} ${_.padEnd(s.rule, 30)} ${_.padStart(
+      `${_.padEnd(s.category, 15)} ${_.padEnd(s.rule, 40)} ${_.padStart(
         String(s.items.length),
         3,
         '0'
       )}${s.conflicts.length == 0 ? '' : '  !!!CONFLICT!!!'}`
-    )
-  );
+    );
+    s.items.forEach((it) => console.log(asString(it)));
+  });
 }

@@ -31,6 +31,7 @@ function parseRow(row: string): Item {
 function parseCard(item: Item): Card {
   if (item.description.endsWith('7837')) return Card.Partner;
   if (item.description.endsWith('5885')) return Card.Partner;
+  if (item.description.endsWith('1426')) return Card.Partner;
   if (item.description.endsWith('6107')) return Card.Self;
 
   return Card.Unknown;
