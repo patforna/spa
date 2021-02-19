@@ -116,7 +116,8 @@ function rulestats(data: string) {
     console.log(
       `${_.padEnd(s.category, 10)} ${_.padEnd(s.rule, 30)} ${_.padStart(
         String(s.items.length),
-        4
+        3,
+        '0'
       )}${s.conflicts.length == 0 ? '' : '  !!!CONFLICT!!!'}`
     )
   );
