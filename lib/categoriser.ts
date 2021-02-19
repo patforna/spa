@@ -37,7 +37,7 @@ function overriddenCategory(overrides: Item[], item: Item): string {
 
 function categoriseUsingRules(item: Item): void {
   Object.keys(rules).forEach((category) => {
-    rules[category].forEach((regExp) => {
+    rules[category].forEach((regExp: RegExp) => {
       if (item.category === undefined && regExp.test(item.description))
         item.category = category;
     });
