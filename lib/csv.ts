@@ -1,6 +1,6 @@
 import autoParse from 'auto-parse';
 import moment from 'moment';
-import { Card, Item } from './items';
+import { asString, Card, Item } from './items';
 
 const FIRST_ROW_NUMBER = 12;
 const COLS = ['statement_date', 'description', 'amount', 'date'];
@@ -29,10 +29,10 @@ function parseRow(row: string): Item {
 }
 
 function parseCard(item: Item): Card {
-  if (item.description.endsWith('7837')) return Card.Partner;
-  if (item.description.endsWith('5885')) return Card.Partner;
-  if (item.description.endsWith('1426')) return Card.Partner;
-  if (item.description.endsWith('6107')) return Card.Self;
+  if (item.description.includes('7837')) return Card.Partner;
+  if (item.description.includes('5885')) return Card.Partner;
+  if (item.description.includes('1426')) return Card.Partner;
+  if (item.description.includes('6107')) return Card.Self;
 
   return Card.Unknown;
 }
