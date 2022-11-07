@@ -1,0 +1,19 @@
+# category listings
+* display comment
+* ability to split amounts
+* prettier formatting
+* sort by amount
+* sort by levenstein distance
+* format amounts
+* option to hide transactions
+* do not coverage current or future month for averages
+
+# data cleanup
+* some data is in the wrong categories
+* introduce more categories to split up (others)
+
+# documentation
+* how to install, how to run tests, etc.
+
+low prio:
+* remove data from overrides for which we have rules
