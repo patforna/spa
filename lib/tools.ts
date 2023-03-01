@@ -1,16 +1,16 @@
 import { readFileSync } from 'fs';
+import _ from 'lodash';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
+import { Categoriser, NO_CATEGORY } from './categoriser';
 import { parse } from './csv';
-import { itemRepo } from './wiring.js';
 import { asString, Item } from './items.js';
-import _ from 'lodash';
+import { itemRepo } from './wiring.js';
 
 const ENCODING = 'latin1';
 
 export interface Args {
   file: string;
-  // one of: regen, rulestats
   action: string;
 }
 
@@ -26,7 +26,8 @@ const args: Args = yargs(hideBin(process.argv))
     action: {
       alias: 'a',
       type: 'string',
-      describe: 'the action to execute (one of: regen, rulestats)',
+      describe:
+        'the action to execute (one of: regen, remove_unnecessary_overrides, rule_stats)',
     },
   })
   .parseSync();
@@ -37,27 +38,28 @@ export default (): void => {
     case 'regen':
       regen(data);
       break;
-    case 'rulestats':
-      rulestats(data);
+    case 'remove_unnecessary_overrides':
+      removeUnnecessaryOverrides(data);
+      break;
+    case 'rules_tats':
+      ruleStats(data);
       break;
     default:
-      console.error(
-        `Unknown action: "${args.action}". Chose one of: { regen, rulestats }.`
-      );
+      console.error(`Unknown action: "${args.action}". See usage.`);
   }
 };
 
-function regen(data: string) {
-  function key(it: Item): string {
-    return `${it.date.utc()}:${it.description}:${it.amount}`;
-  }
+function key(it: Item): string {
+  return `${it.date.utc()}:${it.description}:${it.amount}`;
+}
 
+function regen(data: string) {
   const overrides = itemRepo.load();
-  const items = _.keyBy(parse(data), (it) => key(it));
+  const itemsByKey = _.keyBy(parse(data), (it) => key(it));
 
   const updated = [];
   overrides.forEach((o) => {
-    const it = items[key(o)];
+    const it = itemsByKey[key(o)];
     if (it) {
       it.category = o.category;
       it.comment = o.comment;
@@ -70,6 +72,30 @@ function regen(data: string) {
   itemRepo.saveAll(updated);
 }
 
+function removeUnnecessaryOverrides(data: string) {
+  // categorise items (without taking overrides into account)
+  const categoriser = new Categoriser([]);
+  let items = parse(data);
+  items.forEach((item) => categoriser.categorise(item));
+  items = items.filter((item) => item.category !== NO_CATEGORY);
+
+  const overrides = itemRepo.load();
+  const itemsByKey = _.keyBy(items, (it) => key(it));
+
+  const updated = [];
+  overrides.forEach((o) => {
+    if (o.comment || o.category !== itemsByKey[key(o)]?.category) {
+      updated.push(o);
+    }
+  });
+
+  itemRepo.saveAll(updated);
+
+  console.log(
+    `Removed ${overrides.length - updated.length} unnecessary overrides.`
+  );
+}
+
 import rules from './rules';
 interface RuleStat {
   category: string;
@@ -77,7 +103,7 @@ interface RuleStat {
   items: Item[];
   conflicts: string[];
 }
-function rulestats(data: string) {
+function ruleStats(data: string) {
   const items = parse(data);
   console.log('items length: ' + items.length);
   const stats: { [k: string]: RuleStat } = {};
