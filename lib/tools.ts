@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import _, { mapKeys } from 'lodash';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { Categoriser, NO_CATEGORY } from './categoriser';
+import { Categoriser, IGNORE, NO_CATEGORY } from './categoriser';
 import { parse } from './csv';
 import { asString, Item, shortDescription } from './items.js';
 import { itemRepo } from './wiring.js';
@@ -76,7 +76,6 @@ function regen(data: string) {
 }
 
 function removeUnnecessaryOverrides(data: string) {
-  // categorise items (without taking overrides into account)
   const categoriser = new Categoriser([]);
   let items = parse(data);
   items.forEach((item) => categoriser.categorise(item));
@@ -87,8 +86,15 @@ function removeUnnecessaryOverrides(data: string) {
 
   const updated = [];
   overrides.forEach((o) => {
-    if (o.comment || o.category !== itemsByKey[key(o)]?.category) {
+    const item = itemsByKey[key(o)];
+    if (!item || o.category === IGNORE || o.comment) {
       updated.push(o);
+    } else if (item.category !== o.category) {
+      console.log(
+        `Warning: removing override with different category: ${shortDescription(
+          item
+        )}; C: ${item.category}; O: ${o.category}`
+      );
     }
   });
 

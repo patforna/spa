@@ -3,15 +3,12 @@
 
 # table summary
 * ability to split amounts
-* do not coverage current or future month for averages
-* option to hide transactions
+* do not display (future) months with 0 totals
+* do not include zero/future months when calculating averages
+(* option to hide transactions)
 
 # data cleanup
 * some data is in the wrong categories
-* introduce more categories to split up (others)
 
 # documentation
 * how to install, how to run tests, etc.
-
-low prio:
-* remove data from overrides for which we have rules
