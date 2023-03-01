@@ -56,11 +56,15 @@ export function itemsForCategory(items: Item[], category: string): Item[] {
   return items.filter((item) => item.category === category);
 }
 
+export function shortDescription(item: Item): string {
+  return item.description.replace('Zahlung - ', '').replace(afterDesc, '');
+}
+
 export function asString(item: Item): string {
   const parts = [];
   parts.push(item.statement_date.format('DD.MM.YY'));
   parts.push(_.padStart(_.round(item.amount).toLocaleString(), 6));
-  parts.push(item.description.replace('Zahlung - ', '').replace(afterDesc, ''));
+  parts.push(shortDescription(item));
   if (item.comment) parts.push(`Comment: ${item.comment}`);
   if (item.card != Card.Unknown) parts.push(`Card: ${Card[item.card]}`);
 

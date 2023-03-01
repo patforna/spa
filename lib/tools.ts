@@ -1,10 +1,10 @@
 import { readFileSync } from 'fs';
-import _ from 'lodash';
+import _, { mapKeys } from 'lodash';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { Categoriser, NO_CATEGORY } from './categoriser';
 import { parse } from './csv';
-import { asString, Item } from './items.js';
+import { asString, Item, shortDescription } from './items.js';
 import { itemRepo } from './wiring.js';
 
 const ENCODING = 'latin1';
@@ -27,7 +27,7 @@ const args: Args = yargs(hideBin(process.argv))
       alias: 'a',
       type: 'string',
       describe:
-        'the action to execute (one of: regen, remove_unnecessary_overrides, rule_stats)',
+        'the action to execute (one of: regen, remove_unnecessary_overrides, rule_stats, overrides_stats)',
     },
   })
   .parseSync();
@@ -43,6 +43,9 @@ export default (): void => {
       break;
     case 'rules_tats':
       ruleStats(data);
+      break;
+    case 'overrides_stats':
+      overridesStats();
       break;
     default:
       console.error(`Unknown action: "${args.action}". See usage.`);
@@ -97,12 +100,14 @@ function removeUnnecessaryOverrides(data: string) {
 }
 
 import rules from './rules';
+
 interface RuleStat {
   category: string;
   rule: string;
   items: Item[];
   conflicts: string[];
 }
+
 function ruleStats(data: string) {
   const items = parse(data);
   console.log('items length: ' + items.length);
@@ -150,4 +155,25 @@ function ruleStats(data: string) {
     );
     s.items.forEach((it) => console.log(asString(it)));
   });
+}
+
+function overridesStats() {
+  const overrides = itemRepo.load();
+  const map = {};
+  overrides.forEach((o) => {
+    const key = shortDescription(o);
+    if (key in map) map[key] = map[key] + 1;
+    else map[key] = 1;
+  });
+
+  const result = _.filter(Object.entries(map), ([_, v]) => v > 1);
+
+  _.orderBy(result, [([_, v]) => v], ['desc']).forEach(([k, v]) =>
+    console.log(`${_.padStart(_.toString(v), 3)}: ${k}`)
+  );
+
+  // fancier (but slower) version
+  // compute levensthein distance for every item in cluster list and o
+  // if levensthein distance is < x then increment
+  // else add item desc to cluster list
 }
