@@ -17,22 +17,29 @@ export class Categoriser {
       return item;
     }
 
-    let category = overriddenCategory(this.#overrides, item);
-    if (category) item.category = category;
+    let oItem = overriddenItem(this.#overrides, item);
+    if (oItem?.category) item.category = oItem.category;
     else categoriseUsingRules(item);
 
     if (!item.category) item.category = NO_CATEGORY;
+
+    if (oItem?.comment) item.comment = oItem.comment;
 
     return item;
   }
 }
 
 function overriddenCategory(overrides: Item[], item: Item): string {
+  const found = overriddenItem(overrides, item);
+  return found ? found.category : undefined;
+}
+
+function overriddenItem(overrides: Item[], item: Item): Item {
   const found = overrides.find(({ date, amount }) => {
     return moment(date).isSame(item.date) && amount === item.amount;
   });
 
-  return found ? found.category : undefined;
+  return found;
 }
 
 function categoriseUsingRules(item: Item): void {

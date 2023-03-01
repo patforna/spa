@@ -3,6 +3,9 @@ import stringify from 'json-stringify-pretty-compact';
 import _ from 'lodash';
 import moment from 'moment';
 
+// regex matching everything after the descriptoin (e.g. " - 29.01.2022 17:03...")
+const afterDesc = / - \d\d\.\d\d\.\d\d\d\d\ \d\d:\d\d.*/;
+
 export interface Item {
   date: moment.Moment;
   statement_date: moment.Moment;
@@ -54,10 +57,12 @@ export function itemsForCategory(items: Item[], category: string): Item[] {
 }
 
 export function asString(item: Item): string {
-  const parts = item.description.split(' - ');
-  const desc = parts.length == 4 ? parts[1] : item.description;
+  const parts = [];
+  parts.push(item.statement_date.format('DD.MM.YY'));
+  parts.push(_.padStart(_.round(item.amount).toLocaleString(), 6));
+  parts.push(item.description.replace('Zahlung - ', '').replace(afterDesc, ''));
+  if (item.comment) parts.push(`Comment: ${item.comment}`);
+  if (item.card != Card.Unknown) parts.push(`Card: ${Card[item.card]}`);
 
-  return `${item.statement_date.format('DD.MM.YYYY')} | CHF ${
-    item.amount
-  } | ${desc} | Card: ${Card[item.card]}`;
+  return parts.join(' | ');
 }

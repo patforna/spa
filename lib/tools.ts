@@ -26,9 +26,10 @@ const args: Args = yargs(hideBin(process.argv))
     action: {
       alias: 'a',
       type: 'string',
-      describe: 'the action to execute',
+      describe: 'the action to execute (one of: regen, rulestats)',
     },
-  }).argv;
+  })
+  .parseSync();
 
 export default (): void => {
   const data = readFileSync(args.file, { encoding: ENCODING });

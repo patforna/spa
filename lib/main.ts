@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import yargs from 'yargs';
+import yargs = require('yargs');
 import { hideBin } from 'yargs/helpers';
 import { Args, Command, createCommands } from './commands/index';
 import { parse } from './csv';
@@ -25,7 +25,8 @@ const args: Args = yargs(hideBin(process.argv))
       type: 'boolean',
       describe: 'display result in json instead of table format',
     },
-  }).argv;
+  })
+  .parseSync();
 
 export default (): void => {
   const data = readFileSync(args.file, { encoding: ENCODING });

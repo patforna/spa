@@ -70,5 +70,10 @@ function formatTotals(value: Total[]): string[] {
 }
 
 function format(value: Total): string {
-  return `${_.round(value.amount)} (${_.round(value.transactions)})`;
+  const parts = [];
+  parts.push(_.round(value.amount).toLocaleString());
+  parts.push(
+    _.padStart('(' + _.round(value.transactions).toLocaleString() + ')', 4)
+  );
+  return parts.join(' ');
 }
