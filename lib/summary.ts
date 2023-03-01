@@ -59,8 +59,7 @@ export class Summary {
 
   percentageForCategory(category: string): number {
     return _.round(
-      (100 / this.total().amount) * this.totalForCategory(category).amount,
-      1
+      (100 / this.total().amount) * this.totalForCategory(category).amount
     );
   }
 
