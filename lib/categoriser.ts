@@ -29,11 +29,6 @@ export class Categoriser {
   }
 }
 
-function overriddenCategory(overrides: Item[], item: Item): string {
-  const found = overriddenItem(overrides, item);
-  return found ? found.category : undefined;
-}
-
 function overriddenItem(overrides: Item[], item: Item): Item {
   const found = overrides.find(({ date, amount }) => {
     return moment(date).isSame(item.date) && amount === item.amount;
