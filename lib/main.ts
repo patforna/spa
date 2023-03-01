@@ -20,6 +20,13 @@ const args: Args = yargs(hideBin(process.argv))
       type: 'string',
       describe: 'display transactions for given category',
     },
+    sortBy: {
+      alias: 's',
+      type: 'string',
+      default: 'date',
+      describe:
+        'sort by ["date", "amount"] when using -category (default: "date")',
+    },
     json: {
       alias: 'j',
       type: 'boolean',

@@ -1,11 +1,10 @@
 # category listings
-* sort by amount
 * sort by levenstein distance
-* option to hide transactions
 
 # table summary
 * ability to split amounts
 * do not coverage current or future month for averages
+* option to hide transactions
 
 # data cleanup
 * some data is in the wrong categories
