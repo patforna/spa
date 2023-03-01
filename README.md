@@ -10,6 +10,10 @@ For example:
 
 ## How to build
 
+Install dependencies:
+
+    yarn
+
 To transpile the *.ts files to *.js, run:
 
     tsc
