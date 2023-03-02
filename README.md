@@ -21,3 +21,8 @@ To transpile the *.ts files to *.js, run:
 Run tests:
 
     yarn test
+
+Upgrade all dependencies:
+
+    yarn upgrade-interactive --latest
+    yarn upgrade
