@@ -1,7 +1,7 @@
 import { yellow } from 'chalk';
 import _ from 'lodash';
 import { getBorderCharacters, table as _table, TableUserConfig } from 'table';
-import { Summary, Total } from './summary.js';
+import { Summary, Total } from './summary';
 
 const config: TableUserConfig = {
   border: getBorderCharacters('norc'),

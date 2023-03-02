@@ -17,3 +17,7 @@ Install dependencies:
 To transpile the *.ts files to *.js, run:
 
     tsc
+
+Run tests:
+
+    yarn test

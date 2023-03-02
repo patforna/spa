@@ -1,6 +1,6 @@
 import autoParse from 'auto-parse';
 import moment from 'moment';
-import { asString, Card, Item } from './items';
+import { Card, Item } from './items';
 
 const FIRST_ROW_NUMBER = 12;
 const COLS = ['statement_date', 'description', 'amount', 'date'];

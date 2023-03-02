@@ -21,9 +21,9 @@ Datum;Buchungstext;Betrag;Valuta
 03.12.20;Zahlung - Coop-2623 City SM, Zürich - 01.12.2020 15:29 - Karten-Nr. xxxxxxxxxxxx7837;-19.35;01.12.20
 03.12.20;Zahlung - Migros ALN Kreuzplatz, Zürich - 01.12.2020 10:00 - Karten-Nr. xxxxxxxxxxxx7837;-8.05;01.12.20`;
 
-test('should pass end to end', () => {
+test('should pass end to end', async () => {
   const capture = new CaptureItemsCommand();
-  Promise.all([run(csv, [new CategoriseCommand(), capture])]);
+  await Promise.all([run(csv, [new CategoriseCommand(), capture])]);
   const { amount, transactions } = capture.summary.total();
   expect(amount).toBe(310);
   expect(transactions).toBe(4);
@@ -32,7 +32,6 @@ test('should pass end to end', () => {
 class CaptureItemsCommand implements Command {
   summary: Summary;
   async execute(items: Item[]): Promise<void> {
-    console.log('Gote items: ' + items.length);
     this.summary = new Summary(items);
   }
 }

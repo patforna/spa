@@ -1,10 +1,10 @@
 import inquirer from 'inquirer';
 import _ from 'lodash';
-import { NO_CATEGORY } from '../categoriser.js';
-import { asString, Item, itemsForCategory } from '../items.js';
-import { categoriser, itemRepo } from '../wiring.js';
-import { Command } from './index.js';
-import rules from '../rules.js';
+import { NO_CATEGORY } from '../categoriser';
+import { asString, Item, itemsForCategory } from '../items';
+import { categoriser, itemRepo } from '../wiring';
+import { Command } from './index';
+import rules from '../rules';
 
 inquirer.registerPrompt(
   'autocomplete',

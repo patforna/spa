@@ -1,7 +1,7 @@
 import stringify from 'json-stringify-pretty-compact';
 import { Item } from '../items';
 import { Summary } from '../summary';
-import { Command } from './index.js';
+import { Command } from './index';
 
 export class JsonCommand implements Command {
   async execute(items: Item[]): Promise<void> {
