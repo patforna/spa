@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-// import inquirerPrompt from 'inquirer-autocomplete-prompt';
+import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import _ from 'lodash';
 import { NO_CATEGORY } from '../categoriser.js';
 import { asString, Item, itemsForCategory } from '../items.js';
@@ -7,7 +7,7 @@ import { categoriser, itemRepo } from '../wiring.js';
 import { Command } from './index.js';
 import rules from '../rules.js';
 
-// inquirer.registerPrompt('autocomplete', inquirerPrompt);
+inquirer.registerPrompt('autocomplete', inquirerPrompt);
 
 const categories = _.concat(_.sortBy(Object.keys(rules)), 'ignore');
 
