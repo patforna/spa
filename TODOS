@@ -2,13 +2,9 @@
 * sort by levenstein distance
 
 # table summary
-* ability to split amounts
 * do not display (future) months with 0 totals
 * do not include zero/future months when calculating averages
 (* option to hide transactions)
-
-# data cleanup
-* some data is in the wrong categories
 
 # tests
 * well... write some =)
