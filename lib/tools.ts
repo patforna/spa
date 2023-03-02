@@ -48,7 +48,7 @@ export default (): void => {
       overridesStats();
       break;
     default:
-      console.error(`Unknown action: "${args.action}". See usage.`);
+      throw new Error(`Unknown action: "${args.action}". See usage.`);
   }
 };
 

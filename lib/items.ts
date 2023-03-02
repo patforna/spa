@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import stringify from 'json-stringify-pretty-compact';
 import _ from 'lodash';
 import moment from 'moment';
+import { IGNORE } from './categoriser.js';
 
 // regex matching everything after the descriptoin (e.g. " - 29.01.2022 17:03...")
 const afterDesc = / - \d\d\.\d\d\.\d\d\d\d\ \d\d:\d\d.*/;
@@ -54,6 +55,10 @@ export class ItemRepo {
 
 export function itemsForCategory(items: Item[], category: string): Item[] {
   return items.filter((item) => item.category === category);
+}
+
+export function itemsExcludingIgnored(items: Item[]): Item[] {
+  return items.filter((item) => item.category !== IGNORE);
 }
 
 export function shortDescription(item: Item): string {

@@ -27,7 +27,8 @@ export default (): void => {
         alias: 's',
         type: 'string',
         default: 'date',
-        describe: 'Sort by ["date", "amount"] when using -c. Default: "date".',
+        describe:
+          'Sort by ["amount", "card", "category", "comment", "date", "description] when using -c. Default: "date".',
       },
       json: {
         alias: 'j',

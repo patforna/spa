@@ -19,12 +19,30 @@ export function createCommands(args: Args): Command[] {
   let cmds = [new CategoriseCommand()];
 
   if (args.category) {
-    const sortBy = args.sortBy == 'amount' ? SortBy.Amount : SortBy.Date;
-    cmds.push(new CategoryCommand(args.category, sortBy));
+    cmds.push(new CategoryCommand(args.category, parseSortBy(args.sortBy)));
     return cmds;
   }
 
   cmds.push(args.json ? new JsonCommand() : new TableCommand());
 
   return cmds;
+}
+
+function parseSortBy(s: string): SortBy {
+  switch (s) {
+    case 'amount':
+      return SortBy.Amount;
+    case 'card':
+      return SortBy.Card;
+    case 'category':
+      return SortBy.Category;
+    case 'comment':
+      return SortBy.Comment;
+    case 'date':
+      return SortBy.Date;
+    case 'description':
+      return SortBy.Description;
+    default:
+      throw new Error(`Unknown value for -s: "${s}". See usage.`);
+  }
 }
