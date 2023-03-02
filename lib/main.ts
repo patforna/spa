@@ -13,25 +13,26 @@ export default (): void => {
       file: {
         alias: 'f',
         type: 'string',
-        describe: 'the csv file to process',
+        describe: 'The csv file to process.',
         demandOption: true,
       },
       category: {
         alias: 'c',
         type: 'string',
-        describe: 'display transactions for given category',
+        describe:
+          'Display transactions for given category. ' +
+          'Use "*" to list all categories.',
       },
       sortBy: {
         alias: 's',
         type: 'string',
         default: 'date',
-        describe:
-          'sort by ["date", "amount"] when using -category (default: "date")',
+        describe: 'Sort by ["date", "amount"] when using -c. Default: "date".',
       },
       json: {
         alias: 'j',
         type: 'boolean',
-        describe: 'display result in json instead of table format',
+        describe: 'Display result in json instead of table format.',
       },
     })
     .parseSync();

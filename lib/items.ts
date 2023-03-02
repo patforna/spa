@@ -60,13 +60,14 @@ export function shortDescription(item: Item): string {
   return item.description.replace('Zahlung - ', '').replace(afterDesc, '');
 }
 
-export function asString(item: Item): string {
+export function asString(item: Item, showCategory = false): string {
   const parts = [];
+  if (showCategory) parts.push(_.padStart(item.category.toUpperCase(), 10));
   parts.push(item.statement_date.format('DD.MM.YY'));
   parts.push(_.padStart(_.round(item.amount).toLocaleString(), 6));
+  parts.push(_.padStart(Card[item.card], 7));
   parts.push(shortDescription(item));
   if (item.comment) parts.push(`Comment: ${item.comment}`);
-  if (item.card != Card.Unknown) parts.push(`Card: ${Card[item.card]}`);
 
   return parts.join(' | ');
 }

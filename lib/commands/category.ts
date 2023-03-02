@@ -15,15 +15,21 @@ const map = {
 export class CategoryCommand implements Command {
   #category: string;
   #orderBy: SortBy;
+  // pass category === '*' to list all categories
   constructor(category: string, sortBy = SortBy.Date) {
     this.#category = category;
     this.#orderBy = sortBy;
   }
 
   async execute(items: Item[]): Promise<void> {
-    _.orderBy(
-      itemsForCategory(items, this.#category),
-      ...map[this.#orderBy]
-    ).forEach((item) => console.log(asString(item)));
+    let showCategory = true;
+    if (this.#category !== '*') {
+      showCategory = false;
+      items = itemsForCategory(items, this.#category);
+    }
+
+    _.orderBy(items, ...map[this.#orderBy]).forEach((item) =>
+      console.log(asString(item, showCategory))
+    );
   }
 }
