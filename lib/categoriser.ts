@@ -1,6 +1,6 @@
 import moment from 'moment';
-import { Item } from './items';
-import rules from './rules';
+import { Item } from './items.js';
+import rules from './rules.js';
 
 export const NO_CATEGORY = 'no_category';
 export const IGNORE = 'ignore';

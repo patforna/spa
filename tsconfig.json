@@ -1,11 +1,27 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "module": "commonjs",
-    "esModuleInterop": true,
+    "module": "node16",
+		"moduleResolution": "node16",
+    "moduleDetection": "force",
     "target": "ES2020",
-    "moduleResolution": "node",
-    "sourceMap": true,
+    // "sourceMap": true,
+		"declaration": true,
+		"pretty": true,
+		"newLine": "lf",
+		"stripInternal": true,
+		// "strict": true, FIXME    
+		"noImplicitReturns": true,
+		"noImplicitOverride": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedIndexedAccess": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noEmitOnError": true,
+		"useDefineForClassFields": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true    
   },
   "include": ["lib/**/*.ts", "test/**/*.ts"],
 }

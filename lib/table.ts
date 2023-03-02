@@ -1,7 +1,7 @@
-import { yellow } from 'chalk';
+import chalk from 'chalk';
 import _ from 'lodash';
 import { getBorderCharacters, table as _table, TableUserConfig } from 'table';
-import { Summary, Total } from './summary';
+import { Summary, Total } from './summary.js';
 
 const config: TableUserConfig = {
   border: getBorderCharacters('norc'),
@@ -40,17 +40,17 @@ function tableData(summary: Summary): any[] {
 }
 
 function headerOrFooterRow(values: string[]): string[] {
-  return _.concat('', values).map((x) => yellow(x));
+  return _.concat('', values).map((x) => chalk.yellow(x));
 }
 
 function categoryRows(summary: Summary): string[][] {
   return summary.categoryNames.map((c) =>
     _.concat(
-      yellow(c),
+      chalk.yellow(c),
       formatTotals(summary.totalsForCategoryByMonth(c)),
-      yellow(format(summary.avgForCategory(c))),
-      yellow(format(summary.totalForCategory(c))),
-      yellow(summary.percentageForCategory(c) + '%')
+      chalk.yellow(format(summary.avgForCategory(c))),
+      chalk.yellow(format(summary.totalForCategory(c))),
+      chalk.yellow(summary.percentageForCategory(c) + '%')
     )
   );
 }

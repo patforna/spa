@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { IGNORE } from './categoriser';
-import { Item } from './items';
+import { IGNORE } from './categoriser.js';
+import { Item } from './items.js';
 
 export interface Total {
   amount: number;

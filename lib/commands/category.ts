@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { asString, Item, itemsForCategory } from '../items';
-import { Command } from './index';
+import { asString, Item, itemsForCategory } from '../items.js';
+import { Command } from './index.js';
 
 export enum SortBy {
   Date = 1,

@@ -1,8 +1,15 @@
 import { readFileSync } from 'fs';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { Args, Command, createCommands } from './commands/index';
-import { parse } from './csv';
+import { Args, Command, createCommands } from './commands/index.js';
+import { parse } from './csv.js';
+
+// console.log('hello');
+// export const handler = async () => {
+//   console.log('hello');
+// };
+
+// export default handler;
 
 const ENCODING = 'latin1';
 

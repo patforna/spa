@@ -1,8 +1,8 @@
-import { CategoryCommand, SortBy } from './category';
-import { JsonCommand } from './json';
-import { TableCommand } from './table';
-import { CategoriseCommand } from './categorise';
-import { Item } from '../items';
+import { CategoryCommand, SortBy } from './category.js';
+import { JsonCommand } from './json.js';
+import { TableCommand } from './table.js';
+import { CategoriseCommand } from './categorise.js';
+import { Item } from '../items.js';
 
 export interface Args {
   file: string;

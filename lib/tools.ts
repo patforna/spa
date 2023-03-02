@@ -1,9 +1,9 @@
 import { readFileSync } from 'fs';
-import _, { mapKeys } from 'lodash';
+import _ from 'lodash';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { Categoriser, IGNORE, NO_CATEGORY } from './categoriser';
-import { parse } from './csv';
+import { Categoriser, IGNORE, NO_CATEGORY } from './categoriser.js';
+import { parse } from './csv.js';
 import { asString, Item, shortDescription } from './items.js';
 import { itemRepo } from './wiring.js';
 
@@ -105,7 +105,7 @@ function removeUnnecessaryOverrides(data: string) {
   );
 }
 
-import rules from './rules';
+import rules from './rules.js';
 
 interface RuleStat {
   category: string;

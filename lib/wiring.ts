@@ -1,5 +1,5 @@
-import { Categoriser } from './categoriser';
-import { ItemRepo } from './items';
+import { Categoriser } from './categoriser.js';
+import { ItemRepo } from './items.js';
 
 export const itemRepo = new ItemRepo(
   '/Users/you/code/spa/data/overrides.json' // FIXME

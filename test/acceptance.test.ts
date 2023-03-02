@@ -1,8 +1,8 @@
-import { Command } from '../lib/commands';
-import { CategoriseCommand } from '../lib/commands/categorise';
-import { Item } from '../lib/items';
-import { run } from '../lib/main';
-import { Summary } from '../lib/summary';
+import { Command } from '../lib/commands/index.js';
+import { CategoriseCommand } from '../lib/commands/categorise.js';
+import { Item } from '../lib/items.js';
+import { run } from '../lib/main.js';
+import { Summary } from '../lib/summary.js';
 
 const csv = `Kontoauszug bis: 06.12.2020 ;;;
 ;;;
