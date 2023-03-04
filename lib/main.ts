@@ -8,25 +8,6 @@ import { parse } from './csv.js';
 const ENCODING = 'latin1';
 
 export default (): void => {
-  function parseSortBy(s: string): SortBy {
-    switch (s) {
-      case 'amount':
-        return SortBy.Amount;
-      case 'card':
-        return SortBy.Card;
-      case 'category':
-        return SortBy.Category;
-      case 'comment':
-        return SortBy.Comment;
-      case 'date':
-        return SortBy.Date;
-      case 'description':
-        return SortBy.Description;
-      default:
-        throw new Error(`Unknown value for -s: "${s}". See usage.`);
-    }
-  }
-
   const args: Args = yargs(hideBin(process.argv))
     .usage('Usage: $0 -f <file>')
     .options({
@@ -68,5 +49,24 @@ export async function run(data: string, commands: Command[]) {
   let items = parse(data);
   for (const command of commands) {
     await command.execute(items);
+  }
+}
+
+function parseSortBy(s: string): SortBy {
+  switch (s) {
+    case 'amount':
+      return SortBy.Amount;
+    case 'card':
+      return SortBy.Card;
+    case 'category':
+      return SortBy.Category;
+    case 'comment':
+      return SortBy.Comment;
+    case 'date':
+      return SortBy.Date;
+    case 'description':
+      return SortBy.Description;
+    default:
+      throw new Error(`Unknown value for -s: "${s}". See usage.`);
   }
 }
