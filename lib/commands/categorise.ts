@@ -13,9 +13,17 @@ inquirer.registerPrompt('autocomplete', inquirerPrompt);
 const categories = _.concat(_.sortBy(Object.keys(rules)), 'ignore');
 
 export class CategoriseCommand implements Command {
+  #guessYear: boolean;
+  constructor(guessYear: boolean = false) {
+    this.#guessYear = guessYear;
+  }
+
   async execute(items: Item[]): Promise<void> {
-    const year = guessYear(items);
-    console.log('Guessing year: ' + year);
+    let year;
+    if (this.#guessYear) {
+      const year = guessYear(items);
+      console.log('Guessing year: ' + year);
+    }
 
     items.forEach((item) => categoriser.categorise(item, year)); // TODO inject
 

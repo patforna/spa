@@ -30,17 +30,18 @@ export class CategoryCommand implements Command {
   #category: string;
   #sortBy: SortBy;
   // pass category === '*' to list all categories (excl. ignored)
-  constructor(category: string, sortBy = SortBy.Date) {
-    this.#category = category;
+  constructor(sortBy = SortBy.Date, category: string = undefined) {
     this.#sortBy = sortBy;
+    this.#category = category;
   }
 
   async execute(items: Item[]): Promise<void> {
-    let showCategory = true;
-    if (this.#category !== '*') {
+    let showCategory: boolean;
+    if (this.#category) {
       showCategory = false;
       items = itemsForCategory(items, this.#category);
     } else {
+      showCategory = true;
       items = itemsExcludingIgnored(items);
     }
 

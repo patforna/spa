@@ -1,3 +1,7 @@
+# bugs
+* table summary wrong includes "IGNORED" items. Reproduce: 
+   bin/money summary -f ~/Drive/money/all.csv
+
 # category listings
 * sort by levenstein distance
 
