@@ -1,17 +1,17 @@
 # bugs
-* table summary wrong includes "IGNORED" items. Reproduce: 
+[ ] table summary wrong includes "IGNORED" items. Reproduce: 
    bin/money summary -f ~/Drive/money/all.csv
 
-# category listings
-* sort by levenstein distance
+# cluster
+[ ] cluster - sorty by total or size
 
 # table summary
-* do not display (future) months with 0 totals
-* do not include zero/future months when calculating averages
-(* option to hide transactions)
+[ ] do not display (future) months with 0 totals
+[ ] do not include zero/future months when calculating averages
+[ ] (* option to hide transactions)
 
 # tests
-* well... write some =)
+[ ] well... write some =)
 
 # FIXMEs
-* esp. that absolute path
+[ ] esp. that absolute path
