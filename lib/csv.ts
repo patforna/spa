@@ -34,6 +34,8 @@ function parseCard(item: Item): Card {
   if (item.description.includes('1426')) return Card.Partner;
   if (item.description.includes('6107')) return Card.Self;
   if (item.description.includes('3048')) return Card.Self;
+  if (item.description.toLowerCase().includes('self')) return Card.Self;
+  if (item.description.toLowerCase().includes('partner')) return Card.Partner;
 
   return Card.Unknown;
 }
