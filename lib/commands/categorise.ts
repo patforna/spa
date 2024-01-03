@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { IGNORE, NO_CATEGORY } from '../categoriser.js';
 import { asString, Item, itemsForCategory } from '../items.js';
 import rules from '../rules.js';
-import { categoriser, itemRepo } from '../wiring.js';
+import { categoriser, overridesRepo } from '../wiring.js';
 import { Command } from './index.js';
 
 inquirer.registerPrompt('autocomplete', inquirerPrompt);
@@ -47,12 +47,12 @@ export class CategoriseCommand implements Command {
         }
         item.category = IGNORE;
         item.comment = 'split';
-        itemRepo.save(item);
-        splitItems.forEach((it) => itemRepo.save(it)); // TODO inject
+        overridesRepo.save(item);
+        splitItems.forEach((it) => overridesRepo.save(it)); // TODO inject
       } else {
         item.category = category;
         item.comment = await promptForComment();
-        itemRepo.save(item); // TODO inject
+        overridesRepo.save(item); // TODO inject
       }
     }
 

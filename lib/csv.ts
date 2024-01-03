@@ -1,6 +1,6 @@
 import autoParse from 'auto-parse';
 import moment from 'moment';
-import { Card, Item } from './items.js';
+import { Card, Item, parseCard } from './items.js';
 
 const FIRST_ROW_NUMBER = 12;
 const COLS = ['statement_date', 'description', 'amount', 'date'];
@@ -24,18 +24,6 @@ function parseRow(row: string): Item {
 
   item.date = moment.utc(item.date, DATE_FORMAT);
   item.statement_date = moment.utc(item.statement_date, DATE_FORMAT);
-  item.card = parseCard(item);
+  item.card = parseCard(item.description);
   return item;
-}
-
-function parseCard(item: Item): Card {
-  if (item.description.includes('7837')) return Card.Partner;
-  if (item.description.includes('5885')) return Card.Partner;
-  if (item.description.includes('1426')) return Card.Partner;
-  if (item.description.includes('6107')) return Card.Self;
-  if (item.description.includes('3048')) return Card.Self;
-  if (item.description.toLowerCase().includes('self')) return Card.Self;
-  if (item.description.toLowerCase().includes('partner')) return Card.Partner;
-
-  return Card.Unknown;
 }

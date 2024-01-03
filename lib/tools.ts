@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers';
 import { Categoriser, IGNORE, NO_CATEGORY } from './categoriser.js';
 import { parse } from './csv.js';
 import { asString, Item, shortDescription } from './items.js';
-import { itemRepo } from './wiring.js';
+import { overridesRepo } from './wiring.js';
 
 const ENCODING = 'latin1';
 
@@ -57,7 +57,7 @@ function key(it: Item): string {
 }
 
 function regen(data: string) {
-  const overrides = itemRepo.load();
+  const overrides = overridesRepo.load();
   const itemsByKey = _.keyBy(parse(data), (it) => key(it));
 
   const updated = [];
@@ -72,7 +72,7 @@ function regen(data: string) {
     }
   });
 
-  itemRepo.saveAll(updated);
+  overridesRepo.saveAll(updated);
 }
 
 function removeUnnecessaryOverrides(data: string) {
@@ -81,7 +81,7 @@ function removeUnnecessaryOverrides(data: string) {
   items.forEach((item) => categoriser.categorise(item));
   items = items.filter((item) => item.category !== NO_CATEGORY);
 
-  const overrides = itemRepo.load();
+  const overrides = overridesRepo.load();
   const itemsByKey = _.keyBy(items, (it) => key(it));
 
   const updated = [];
@@ -98,7 +98,7 @@ function removeUnnecessaryOverrides(data: string) {
     }
   });
 
-  itemRepo.saveAll(updated);
+  overridesRepo.saveAll(updated);
 
   console.log(
     `Removed ${overrides.length - updated.length} unnecessary overrides.`
@@ -164,7 +164,7 @@ function ruleStats(data: string) {
 }
 
 function overridesStats() {
-  const overrides = itemRepo.load();
+  const overrides = overridesRepo.load();
   const map = {};
   overrides.forEach((o) => {
     const key = shortDescription(o);

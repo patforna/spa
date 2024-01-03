@@ -23,6 +23,18 @@ export enum Card {
   Self = 2,
 }
 
+export function parseCard(description: string): Card {
+  if (description.includes('7837')) return Card.Partner;
+  if (description.includes('5885')) return Card.Partner;
+  if (description.includes('1426')) return Card.Partner;
+  if (description.includes('6107')) return Card.Self;
+  if (description.includes('3048')) return Card.Self;
+  if (description.toLowerCase().includes('self')) return Card.Self;
+  if (description.toLowerCase().includes('partner')) return Card.Partner;
+
+  return Card.Unknown;
+}
+
 export class ItemRepo {
   #path: string;
   #items: Item[];
@@ -35,6 +47,7 @@ export class ItemRepo {
     this.#items.forEach((it) => {
       it.date = moment.utc(it.date);
       it.statement_date = moment.utc(it.statement_date);
+      it.card = parseCard(it.description);
     });
     return this.#items;
   }

@@ -7,8 +7,10 @@ export const IGNORE = 'ignore';
 
 export class Categoriser {
   #overrides: Item[];
-  constructor(overrides: Item[]) {
+  #additionals: Item[];
+  constructor(overrides: Item[], additionals: Item[] = []) {
     this.#overrides = overrides;
+    this.#additionals = additionals;
   }
 
   categorise(item: Item, year: number = undefined): Item {
