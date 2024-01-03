@@ -1,12 +1,22 @@
 # Money
 
-## How to run
+## Usage
 
-    node bin/money --help
+For usage, type:
 
-For example:
+    bin/money --help
 
-    node bin/money -f ../../money/common-2022.csv
+Or, to get help on a subcommand:
+
+    bin/money summary --help
+
+### Examples
+
+    bin/money -f ~/Drive/money/common-2023.csv summary
+
+    bin/money -f ~/Drive/money/common-2023.csv details -c other -s amount
+
+    bin/money -f ~/Drive/money/common-2023.csv cluster
 
 ## How to build
 
