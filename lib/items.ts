@@ -9,12 +9,12 @@ const afterDesc = / - \d\d\.\d\d\.\d\d\d\d\ \d\d:\d\d.*/;
 
 export interface Item {
   date: moment.Moment;
-  statement_date: moment.Moment;
   amount: number;
   description: string;
   category: string;
   comment: string;
   card: Card;
+  valuta: moment.Moment; // DO NOT use; this is here for legacy reason as some of the overrides have been wrongly saved with valuta instead of date.
 }
 
 export enum Card {
@@ -46,7 +46,6 @@ export class ItemRepo {
     this.#items = JSON.parse(readFileSync(this.#path).toString());
     this.#items.forEach((it) => {
       it.date = moment.utc(it.date);
-      it.statement_date = moment.utc(it.statement_date);
       it.card = parseCard(it.description);
     });
     return this.#items;
@@ -81,7 +80,7 @@ export function shortDescription(item: Item): string {
 export function asString(item: Item, showCategory = false): string {
   const parts = [];
   if (showCategory) parts.push(_.padStart(item.category.toUpperCase(), 10));
-  parts.push(item.statement_date.format('DD.MM.YY'));
+  parts.push(item.date.format('DD.MM.YY'));
   parts.push(_.padStart(_.round(item.amount).toLocaleString(), 6));
   parts.push(_.padStart(Card[item.card], 7));
   parts.push(shortDescription(item));

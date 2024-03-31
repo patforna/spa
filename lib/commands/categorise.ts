@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import _ from 'lodash';
 import { IGNORE, NO_CATEGORY } from '../categoriser.js';
-import { asString, Item, itemsForCategory } from '../items.js';
+import { Item, asString, itemsForCategory } from '../items.js';
 import rules from '../rules.js';
 import { categoriser, overridesRepo } from '../wiring.js';
 import { Command } from './index.js';
@@ -19,11 +19,8 @@ export class CategoriseCommand implements Command {
   }
 
   async execute(items: Item[]): Promise<void> {
-    let year;
-    if (this.#guessYear) {
-      const year = guessYear(items);
-      console.log('Guessing year: ' + year);
-    }
+    let year: number;
+    if (this.#guessYear) year = guessYear(items);
 
     items.forEach((item) => categoriser.categorise(item, year)); // TODO inject
 

@@ -1,9 +1,9 @@
 import autoParse from 'auto-parse';
 import moment from 'moment';
-import { Card, Item, parseCard } from './items.js';
+import { Item, parseCard } from './items.js';
 
 const FIRST_ROW_NUMBER = 12;
-const COLS = ['statement_date', 'description', 'amount', 'date'];
+const COLS = ['date', 'description', 'amount', 'valuta'];
 export const DATE_FORMAT = 'DD.MM.YY';
 
 export function parse(data: string): Item[] {
@@ -23,7 +23,7 @@ function parseRow(row: string): Item {
     ) as Item;
 
   item.date = moment.utc(item.date, DATE_FORMAT);
-  item.statement_date = moment.utc(item.statement_date, DATE_FORMAT);
   item.card = parseCard(item.description);
+  item.valuta = moment.utc(item.valuta, DATE_FORMAT);
   return item;
 }

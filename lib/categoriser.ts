@@ -7,10 +7,8 @@ export const IGNORE = 'ignore';
 
 export class Categoriser {
   #overrides: Item[];
-  #additionals: Item[];
-  constructor(overrides: Item[], additionals: Item[] = []) {
+  constructor(overrides: Item[]) {
     this.#overrides = overrides;
-    this.#additionals = additionals;
   }
 
   categorise(item: Item, year: number = undefined): Item {
@@ -33,7 +31,11 @@ export class Categoriser {
 
 function overriddenItem(overrides: Item[], item: Item): Item {
   const found = overrides.find(({ date, amount }) => {
-    return moment(date).isSame(item.date) && amount === item.amount;
+    // date is same as valuta is a legacy hack, because in overrides.json some items have been saved with date as valuta
+    return (
+      (moment(date).isSame(item.date) || moment(date).isSame(item.valuta)) &&
+      amount === item.amount
+    );
   });
 
   return found;
