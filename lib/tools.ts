@@ -9,47 +9,72 @@ import { overridesRepo } from './wiring.js';
 
 const ENCODING = 'latin1';
 
-export interface Args {
-  file: string;
-  action: string;
-}
-
-const args: Args = yargs(hideBin(process.argv))
-  .usage('Usage: $0 -f <file>')
-  .options({
-    file: {
-      alias: 'f',
-      type: 'string',
-      describe: 'the csv file to process',
-      demandOption: true,
-    },
-    action: {
-      alias: 'a',
-      type: 'string',
-      describe:
-        'the action to execute (one of: regen, remove_unnecessary_overrides, rule_stats, overrides_stats)',
-    },
-  })
-  .parseSync();
-
 export default (): void => {
-  const data = readFileSync(args.file, { encoding: ENCODING });
-  switch (args.action) {
-    case 'regen':
-      regen(data);
-      break;
-    case 'remove_unnecessary_overrides':
-      removeUnnecessaryOverrides(data);
-      break;
-    case 'rule_stats':
-      ruleStats(data);
-      break;
-    case 'overrides_stats':
-      overridesStats();
-      break;
-    default:
-      throw new Error(`Unknown action: "${args.action}". See usage.`);
-  }
+  yargs(hideBin(process.argv))
+    .scriptName('tools')
+    .usage('Usage: $0 <command>')
+    .command({
+      command: 'regen',
+      describe: 'Regenerate overrides files.',
+      builder: (yargs) => {
+        return yargs.options({
+          file: {
+            alias: 'f',
+            type: 'string',
+            describe: 'The csv file containing the transactions.',
+            demandOption: true,
+          },
+        });
+      },
+      handler: (args) => {
+        const data = readFileSync(args['file'], { encoding: ENCODING });
+        regen(data);
+      },
+    })
+    .command({
+      command: 'remove_unnecessary_overrides',
+      describe: 'Removes unnecessary overrides.',
+      builder: (yargs) => {
+        return yargs.options({
+          file: {
+            alias: 'f',
+            type: 'string',
+            describe: 'The csv file containing the transactions.',
+            demandOption: true,
+          },
+        });
+      },
+      handler: (args) => {
+        const data = readFileSync(args['file'], { encoding: ENCODING });
+        removeUnnecessaryOverrides(data);
+      },
+    })
+    .command({
+      command: 'rule_stats',
+      describe: 'Show rule stats',
+      builder: (yargs) => {
+        return yargs.options({
+          file: {
+            alias: 'f',
+            type: 'string',
+            describe: 'The csv file containing the transactions.',
+            demandOption: true,
+          },
+        });
+      },
+      handler: (args) => {
+        const data = readFileSync(args['file'], { encoding: ENCODING });
+        ruleStats(data);
+      },
+    })
+    .command({
+      command: 'overrides_stats',
+      describe: 'Show overrides stats',
+      handler: () => {
+        overridesStats();
+      },
+    })
+    .parseSync();
 };
 
 function key(it: Item): string {
