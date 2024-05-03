@@ -41,7 +41,7 @@ export default (): void => {
     case 'remove_unnecessary_overrides':
       removeUnnecessaryOverrides(data);
       break;
-    case 'rules_tats':
+    case 'rule_stats':
       ruleStats(data);
       break;
     case 'overrides_stats':
