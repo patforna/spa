@@ -47,24 +47,18 @@ Upgrade all dependencies:
 
 ## Extras
 
-### Prompt for ChatGPT to convert CSV (from wise card) to JSON
+### Adding transactions from wise
 
-    I've got the following CSV data. It's got three fields per row (date, amount, description) and the first row is the header row.
+1. Download transactions from wise for the given month(s).
 
-    """
-    date,amount,description
-    2024-03-29T00:00:00.000Z,-34,West Harris Trust
-    ...
-    """
+2. Potentially adjust conversion rate in tools.ts
 
-    I'd like you to:
-    * convert the amount from GBP to CHF for the given date
-    * map each row to the following json object (replace ${placeholders} with actual values from above):
+    const GBP_CHF = 1.15;
 
-    {
-        "date": "${date}",
-        "amount": ${amount},
-        "description": "${description} | Partner #wise"
-    }
+3. Run
+    
+    bin/tools wise -f <path to wise csv> | pbcopy
 
-    Please generate the entire data set in json.
+4. Append the transactions to `additionals.json`
+
+5. Run `/bin/money ...`

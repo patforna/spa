@@ -1,18 +1,38 @@
 import { readFileSync } from 'fs';
 import _ from 'lodash';
+import currency from 'currency.js';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { Categoriser, IGNORE, NO_CATEGORY } from './categoriser.js';
-import { parse } from './csv.js';
+import { parse, parseItems } from './csv.js';
 import { asString, Item, shortDescription } from './items.js';
 import { overridesRepo } from './wiring.js';
 
 const ENCODING = 'latin1';
+const GBP_CHF = 1.15; // adjust if necessary before running bin/tools wise ...
 
 export default (): void => {
   yargs(hideBin(process.argv))
     .scriptName('tools')
     .usage('Usage: $0 <command>')
+    .command({
+      command: 'wise',
+      describe: 'Parses wise transactions.',
+      builder: (yargs) => {
+        return yargs.options({
+          file: {
+            alias: 'f',
+            type: 'string',
+            describe: 'The csv file containing the wise transactions.',
+            demandOption: true,
+          },
+        });
+      },
+      handler: (args) => {
+        const data = readFileSync(args['file'], { encoding: ENCODING });
+        parseWise(data);
+      },
+    })
     .command({
       command: 'regen',
       describe: 'Regenerate overrides files.',
@@ -81,9 +101,44 @@ function key(it: Item): string {
   return `${it.date.utc()}:${it.description}:${it.amount}`;
 }
 
+export interface WiseItem {
+  id: string;
+  status: string;
+  direction: string;
+  createdOn: moment.Moment;
+  sourceAmountAfterFees: number;
+  sourceCurrency: string;
+  targetName: string;
+}
+
+function parseWise(data: string) {
+  const parsed = parse(data)
+    .map((x) => x as WiseItem)
+    .filter(
+      (x) =>
+        x.direction == 'OUT' &&
+        x.status == 'COMPLETED' &&
+        x.sourceAmountAfterFees > 0
+    );
+
+  const additionalItems = parsed.map((item) => {
+    return {
+      date: item.createdOn,
+      amount: -convertGBPToCHF(item.sourceAmountAfterFees),
+      description: `${item.targetName} | #wise`,
+    };
+  });
+
+  console.log(JSON.stringify(_.sortBy(additionalItems, 'date'), null, 2));
+}
+
+function convertGBPToCHF(amountInGBP: number) {
+  return currency(amountInGBP).multiply(GBP_CHF);
+}
+
 function regen(data: string) {
   const overrides = overridesRepo.load();
-  const itemsByKey = _.keyBy(parse(data), (it) => key(it));
+  const itemsByKey = _.keyBy(parseItems(data), (it) => key(it));
 
   const updated = [];
   overrides.forEach((o) => {
@@ -102,7 +157,7 @@ function regen(data: string) {
 
 function removeUnnecessaryOverrides(data: string) {
   const categoriser = new Categoriser([]);
-  let items = parse(data);
+  let items = parseItems(data);
   items.forEach((item) => categoriser.categorise(item));
   items = items.filter((item) => item.category !== NO_CATEGORY);
 
@@ -131,6 +186,7 @@ function removeUnnecessaryOverrides(data: string) {
 }
 
 import rules from './rules.js';
+import moment from 'moment';
 
 interface RuleStat {
   category: string;
@@ -140,7 +196,7 @@ interface RuleStat {
 }
 
 function ruleStats(data: string) {
-  const items = parse(data);
+  const items = parseItems(data);
   console.log('items length: ' + items.length);
   const stats: { [k: string]: RuleStat } = {};
 

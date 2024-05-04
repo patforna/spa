@@ -11,7 +11,7 @@ import { Command } from './commands/index.js';
 import { JsonCommand } from './commands/json.js';
 import { TableCommand } from './commands/table.js';
 
-import { parse } from './csv.js';
+import { parseItems } from './csv.js';
 import { additionalsRepo } from './wiring.js';
 
 const ENCODING = 'latin1';
@@ -101,7 +101,7 @@ export default (): void => {
 };
 
 export async function run(file: string, commands: Command[]) {
-  let items = parse(readFileSync(file, { encoding: ENCODING }));
+  let items = parseItems(readFileSync(file, { encoding: ENCODING }));
   items.push(...additionalsRepo.load());
   for (const command of commands) {
     await command.execute(items);
