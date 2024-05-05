@@ -1,6 +1,6 @@
-import stringify from 'json-stringify-pretty-compact';
-import _ from 'lodash';
 import { parse } from '../csv.js';
+import { Item } from '../items.js';
+import { additionalsRepo } from '../wiring.js';
 import { fxRateService } from './wiring.js';
 
 export interface WiseItem {
@@ -23,7 +23,7 @@ export async function processWise(data: string) {
         x.sourceAmountAfterFees > 0
     );
 
-  const additionalItems = [];
+  const additionalItems = additionalsRepo.load();
   for (const it of items) {
     const amountInCHF = await fxRateService.convert(
       it.sourceCurrency,
@@ -31,12 +31,13 @@ export async function processWise(data: string) {
       it.sourceAmountAfterFees,
       it.createdOn
     );
+
     additionalItems.push({
       date: it.createdOn,
       amount: -amountInCHF,
       description: `${it.targetName} | #wise`,
-    });
+    } as Item);
   }
 
-  console.log(stringify(_.sortBy(additionalItems, 'date')));
+  additionalsRepo.saveAll(additionalItems);
 }

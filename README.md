@@ -55,14 +55,10 @@ Upgrade all dependencies:
 
 1. Download transactions from wise for the given month(s).
 
-2. Potentially adjust conversion rate in tools.ts
-
-    const GBP_CHF = 1.15;
-
-3. Run
+2. Run
     
-    bin/tools wise -f <path to wise csv> | pbcopy
+    bin/tools wise -f <path to wise csv>
 
-4. Append the transactions to `additionals.json`
+4. Check and commit `additionals.json`
 
 5. Run `/bin/money ...`

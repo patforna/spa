@@ -31,7 +31,7 @@ export class FxRateService {
     to: string,
     date = moment.utc()
   ): Promise<number> {
-    const truncatedDate = date.utc().startOf('day');
+    const truncatedDate = date.clone().utc().startOf('day');
     const pair = createFxRatePair(from, to);
     const item = this.#cache.get(this.cacheKey(truncatedDate, pair));
     if (item) {

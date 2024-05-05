@@ -1,5 +1,5 @@
-import _ from 'lodash';
 import autoParse from 'auto-parse';
+import _ from 'lodash';
 import Papa from 'papaparse';
 
 export function parse(input: string): object[] {
@@ -43,7 +43,7 @@ export function parseItems(data: string): Item[] {
 
 function parseRowItem(row: string): Item {
   const item = row
-    .split(';') // FIXME parameterize
+    .split(';')
     .reduce(
       (res, val, i) => ({ ...res, ...{ [COLS[i]]: autoParse(val) } }),
       {}

@@ -57,7 +57,7 @@ export class ItemRepo {
   }
 
   saveAll(items: Item[]): void {
-    const toSave = _.sortBy(items, ['date']).map((it) =>
+    const toSave = _.sortBy(items, 'date').map((it) =>
       _.pick(it, ['date', 'amount', 'description', 'category', 'comment'])
     );
     writeFileSync(this.#path, stringify(toSave));
