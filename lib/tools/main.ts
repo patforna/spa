@@ -11,6 +11,8 @@ import { processWise } from './wise.js';
 const ENCODING = 'latin1';
 
 export default (): void => {
+  const commands: (() => Promise<void>)[] = [];
+
   yargs(hideBin(process.argv))
     .scriptName('tools')
     .usage('Usage: $0 <command>')
@@ -28,8 +30,10 @@ export default (): void => {
         });
       },
       handler: (args) => {
-        const data = readFileSync(args['file'], { encoding: ENCODING });
-        processWise(data);
+        commands.push(async (): Promise<void> => {
+          const data = readFileSync(args['file'], { encoding: ENCODING });
+          return processWise(data);
+        });
       },
     })
     .command({
@@ -46,8 +50,10 @@ export default (): void => {
         });
       },
       handler: (args) => {
-        const data = readFileSync(args['file'], { encoding: ENCODING });
-        regen(data);
+        commands.push(async (): Promise<void> => {
+          const data = readFileSync(args['file'], { encoding: ENCODING });
+          regen(data);
+        });
       },
     })
     .command({
@@ -64,8 +70,10 @@ export default (): void => {
         });
       },
       handler: (args) => {
-        const data = readFileSync(args['file'], { encoding: ENCODING });
-        removeUnnecessaryOverrides(data);
+        commands.push(async (): Promise<void> => {
+          const data = readFileSync(args['file'], { encoding: ENCODING });
+          removeUnnecessaryOverrides(data);
+        });
       },
     })
     .command({
@@ -82,18 +90,24 @@ export default (): void => {
         });
       },
       handler: (args) => {
-        const data = readFileSync(args['file'], { encoding: ENCODING });
-        ruleStats(data);
+        commands.push(async (): Promise<void> => {
+          const data = readFileSync(args['file'], { encoding: ENCODING });
+          ruleStats(data);
+        });
       },
     })
     .command({
       command: 'overrides_stats',
       describe: 'Show overrides stats',
       handler: () => {
-        overridesStats();
+        commands.push(async (): Promise<void> => {
+          overridesStats();
+        });
       },
     })
-    .parseSync();
+    .parse();
+
+  Promise.all(commands.map((f) => f()));
 };
 
 function key(it: Item): string {

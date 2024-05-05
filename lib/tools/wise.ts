@@ -1,8 +1,7 @@
+import stringify from 'json-stringify-pretty-compact';
 import _ from 'lodash';
-import currency from 'currency.js';
 import { parse } from '../csv.js';
-
-const GBP_CHF = 1.15; // adjust if necessary before running bin/tools wise ...
+import { fxRateService } from './wiring.js';
 
 export interface WiseItem {
   id: string;
@@ -14,9 +13,8 @@ export interface WiseItem {
   targetName: string;
 }
 
-// FIXME append directly to additional items
-export function processWise(data: string) {
-  const parsed = parse(data)
+export async function processWise(data: string) {
+  const items = parse(data)
     .map((x) => x as WiseItem)
     .filter(
       (x) =>
@@ -25,17 +23,20 @@ export function processWise(data: string) {
         x.sourceAmountAfterFees > 0
     );
 
-  const additionalItems = parsed.map((item) => {
-    return {
-      date: item.createdOn,
-      amount: -convertGBPToCHF(item.sourceAmountAfterFees),
-      description: `${item.targetName} | #wise`,
-    };
-  });
+  const additionalItems = [];
+  for (const it of items) {
+    const amountInCHF = await fxRateService.convert(
+      it.sourceCurrency,
+      'CHF',
+      it.sourceAmountAfterFees,
+      it.createdOn
+    );
+    additionalItems.push({
+      date: it.createdOn,
+      amount: -amountInCHF,
+      description: `${it.targetName} | #wise`,
+    });
+  }
 
-  console.log(JSON.stringify(_.sortBy(additionalItems, 'date'), null, 2));
-}
-
-function convertGBPToCHF(amountInGBP: number) {
-  return currency(amountInGBP).multiply(GBP_CHF);
+  console.log(stringify(_.sortBy(additionalItems, 'date')));
 }
