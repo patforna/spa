@@ -1,15 +1,14 @@
 import { readFileSync } from 'fs';
 import _ from 'lodash';
-import currency from 'currency.js';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { Categoriser, IGNORE, NO_CATEGORY } from '../categoriser.js';
-import { parse, parseItems } from '../csv.js';
-import { asString, Item, shortDescription } from '../items.js';
+import { parseItems } from '../csv.js';
+import { Item, asString, shortDescription } from '../items.js';
 import { overridesRepo } from '../wiring.js';
+import { processWise } from './wise.js';
 
 const ENCODING = 'latin1';
-const GBP_CHF = 1.15; // adjust if necessary before running bin/tools wise ...
 
 export default (): void => {
   yargs(hideBin(process.argv))
@@ -30,7 +29,7 @@ export default (): void => {
       },
       handler: (args) => {
         const data = readFileSync(args['file'], { encoding: ENCODING });
-        parseWise(data);
+        processWise(data);
       },
     })
     .command({
@@ -101,41 +100,6 @@ function key(it: Item): string {
   return `${it.date.utc()}:${it.description}:${it.amount}`;
 }
 
-export interface WiseItem {
-  id: string;
-  status: string;
-  direction: string;
-  createdOn: moment.Moment;
-  sourceAmountAfterFees: number;
-  sourceCurrency: string;
-  targetName: string;
-}
-
-function parseWise(data: string) {
-  const parsed = parse(data)
-    .map((x) => x as WiseItem)
-    .filter(
-      (x) =>
-        x.direction == 'OUT' &&
-        x.status == 'COMPLETED' &&
-        x.sourceAmountAfterFees > 0
-    );
-
-  const additionalItems = parsed.map((item) => {
-    return {
-      date: item.createdOn,
-      amount: -convertGBPToCHF(item.sourceAmountAfterFees),
-      description: `${item.targetName} | #wise`,
-    };
-  });
-
-  console.log(JSON.stringify(_.sortBy(additionalItems, 'date'), null, 2));
-}
-
-function convertGBPToCHF(amountInGBP: number) {
-  return currency(amountInGBP).multiply(GBP_CHF);
-}
-
 function regen(data: string) {
   const overrides = overridesRepo.load();
   const itemsByKey = _.keyBy(parseItems(data), (it) => key(it));
@@ -186,7 +150,6 @@ function removeUnnecessaryOverrides(data: string) {
 }
 
 import rules from '../rules.js';
-import moment from 'moment';
 
 interface RuleStat {
   category: string;
@@ -258,9 +221,4 @@ function overridesStats() {
   _.orderBy(result, [([_, v]) => v], ['desc']).forEach(([k, v]) =>
     console.log(`${_.padStart(_.toString(v), 3)}: ${k}`)
   );
-
-  // fancier (but slower) version
-  // compute levensthein distance for every item in cluster list and o
-  // if levensthein distance is < x then increment
-  // else add item desc to cluster list
 }
