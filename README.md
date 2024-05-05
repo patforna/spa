@@ -1,5 +1,9 @@
 # Money
 
+## Prerequisite
+
+Node >= 20.6.0
+
 ## TODO
 [ ] Only compute averages for months that actually have values
 [ ] Re-write overrides without valuta and get rid of valuta code
