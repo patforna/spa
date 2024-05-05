@@ -3,10 +3,10 @@ import _ from 'lodash';
 import currency from 'currency.js';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { Categoriser, IGNORE, NO_CATEGORY } from './categoriser.js';
-import { parse, parseItems } from './csv.js';
-import { asString, Item, shortDescription } from './items.js';
-import { overridesRepo } from './wiring.js';
+import { Categoriser, IGNORE, NO_CATEGORY } from '../categoriser.js';
+import { parse, parseItems } from '../csv.js';
+import { asString, Item, shortDescription } from '../items.js';
+import { overridesRepo } from '../wiring.js';
 
 const ENCODING = 'latin1';
 const GBP_CHF = 1.15; // adjust if necessary before running bin/tools wise ...
@@ -185,7 +185,7 @@ function removeUnnecessaryOverrides(data: string) {
   );
 }
 
-import rules from './rules.js';
+import rules from '../rules.js';
 import moment from 'moment';
 
 interface RuleStat {
