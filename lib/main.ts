@@ -37,7 +37,7 @@ export default (): void => {
       },
       handler: (args) => {
         commands.push(
-          new CategoriseCommand(true),
+          new CategoriseCommand(),
           args['json'] ? new JsonCommand() : new TableCommand()
         );
       },
@@ -53,7 +53,7 @@ export default (): void => {
               type: 'string',
               default: 'date',
               describe:
-                'Sort by ["amount", "card", "category", "comment", "date", "description]. Default: "date".',
+                'Sort by ["amount", "card", "category", "comment", "date", "description"]. Default: "date".',
             },
             category: {
               alias: 'c',
@@ -100,9 +100,16 @@ export default (): void => {
   Promise.all([run(args.file, commands)]);
 };
 
-export async function run(file: string, commands: Command[]) {
+export async function run(
+  file: string,
+  commands: Command[],
+  options: { ignoreAdditionals?: boolean } = { ignoreAdditionals: false }
+) {
   let items = parseItems(readFileSync(file, { encoding: ENCODING }));
-  items.push(...additionalsRepo.load());
+  // FIXME: this is hack to make acceptance tests work; fix by using dependency injection
+  if (!options.ignoreAdditionals) {
+    items.push(...additionalsRepo.load());
+  }
   for (const command of commands) {
     await command.execute(items);
   }

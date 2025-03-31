@@ -19,11 +19,9 @@ export class CategoriseCommand implements Command {
   }
 
   async execute(items: Item[]): Promise<void> {
-    let year: number;
-    // if (this.#guessYear) year = guessYear(items);
-    year = 2025; // FIXME don't hardcode
-
-    items.forEach((item) => categoriser.categorise(item, year)); // TODO inject
+    const year = guessYear(items);
+    console.log('Guessed year:', year);
+    items.forEach((item) => categoriser.categorise(item, year));
 
     const uncategorised = itemsForCategory(items, NO_CATEGORY);
 
@@ -110,11 +108,13 @@ async function promptForComment(): Promise<string> {
   return answer.comment !== '' ? answer.comment : undefined;
 }
 
-function guessYear(items: Item[]) {
+function guessYear(items: Item[]): number {
+  if (!items?.length) {
+    return new Date().getFullYear();
+  }
   const m = _.groupBy(items, (it) => it.date.year());
   return Number(_.sortBy(Object.entries(m), ([_, v]) => -v.length)[0][0]);
 }
-
 // narrow down list of categories or return input when no results found
 function autocompleteCategory(input: string) {
   const filtered = _.filter(
