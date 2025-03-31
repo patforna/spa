@@ -20,7 +20,8 @@ export class CategoriseCommand implements Command {
 
   async execute(items: Item[]): Promise<void> {
     let year: number;
-    if (this.#guessYear) year = guessYear(items);
+    // if (this.#guessYear) year = guessYear(items);
+    year = 2025; // FIXME don't hardcode
 
     items.forEach((item) => categoriser.categorise(item, year)); // TODO inject
 
@@ -54,6 +55,7 @@ export class CategoriseCommand implements Command {
     }
 
     // re-run categoriser
+    // FIXME shouldn't this be outside of loop?
     uncategorised.forEach((item) => categoriser.categorise(item, year));
   }
 }
