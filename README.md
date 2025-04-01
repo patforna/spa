@@ -44,6 +44,14 @@ Run tests:
 
     yarn test
 
+Run linter:
+
+    yarn lint
+
+Run formatter:
+
+    yarn format
+
 Upgrade all dependencies:
 
     yarn upgrade-interactive --latest

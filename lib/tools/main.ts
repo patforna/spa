@@ -184,7 +184,7 @@ async function ruleStats(data: string, inputParserFactory: InputParserFactory) {
       res.forEach((re: RegExp) => {
         const k = key([cat, re]);
         if (re.test(item.description)) {
-          let ruleStat: RuleStat = _.defaultTo(stats[k], {
+          const ruleStat: RuleStat = _.defaultTo(stats[k], {
             category: cat,
             rule: re.source,
             items: [],

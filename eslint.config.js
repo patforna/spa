@@ -5,6 +5,9 @@ import prettier from 'eslint-plugin-prettier';
 import importPlugin from 'eslint-plugin-import';
 
 export default [
+  {
+    ignores: ['dist/**'],
+  },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -17,6 +20,13 @@ export default [
         es6: true,
         jest: true,
         node: true,
+        process: true,
+        console: true,
+        describe: true,
+        expect: true,
+        afterAll: true,
+        test: true,
+        module: true,
       },
       parserOptions: {
         ecmaFeatures: {
@@ -32,6 +42,16 @@ export default [
       },
     },
     rules: {
+      'prettier/prettier': 'off',
+      'import/extensions': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
       'consistent-return': 'off',
       'max-len': [
         'warn',
@@ -50,21 +70,23 @@ export default [
       'no-console': 'off',
       'no-use-before-define': 'off',
       'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
-      'prettier/prettier': 'error',
-      'import/extensions': [
-        'error',
-        'ignorePackages',
-        {
-          js: 'never',
-          jsx: 'never',
-          ts: 'never',
-          tsx: 'never',
-        },
-      ],
+      'no-useless-escape': 'error',
+      'prefer-const': 'warn',
+      '@typescript-eslint/ban-types': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
     plugins: {
       prettier,
       import: importPlugin,
+    },
+  },
+  {
+    files: ['**/*.cjs'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        module: true,
+      },
     },
   },
   eslintConfigPrettier,

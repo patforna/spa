@@ -28,7 +28,7 @@ export function tableFrom(summary: Summary): string {
   return _table(tableData(summary), config);
 }
 
-function tableData(summary: Summary): any[] {
+function tableData(summary: Summary): string[][] {
   let rows = [];
   rows = _.concat(rows, [
     headerOrFooterRow(_.concat(summary.monthNames, 'Avg', 'Total', '%')),

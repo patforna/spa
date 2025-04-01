@@ -17,7 +17,7 @@ export class Categoriser {
       return item;
     }
 
-    let oItem = overriddenItem(this.#overrides, item);
+    const oItem = overriddenItem(this.#overrides, item);
     if (oItem?.category) item.category = oItem.category;
     else categoriseUsingRules(item);
 

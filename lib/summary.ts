@@ -101,7 +101,7 @@ function mean(totals: Total[]): Total {
   return { amount, transactions };
 }
 
-function add(data: any, field: string, item: Item): void {
+function add(data: SummaryData, field: string, item: Item): void {
   const month = item.date.month();
 
   let obj = _.get(data.months[month], field);

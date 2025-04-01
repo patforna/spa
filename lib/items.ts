@@ -6,6 +6,7 @@ import { IGNORE } from './categoriser.js';
 
 // FIXME meh... FKB specific - not sure it should be here
 // regex matching everything after the descriptoin (e.g. " - 29.01.2022 17:03...")
+// eslint-disable-next-line no-useless-escape
 const afterDesc = / - \d\d\.\d\d\.\d\d\d\d\ \d\d:\d\d.*/;
 
 export interface Item {

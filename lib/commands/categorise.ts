@@ -29,7 +29,7 @@ export class CategoriseCommand implements Command {
 
     // ask user to categorise the ones we couldn't categorise automatically
     for (const item of uncategorised) {
-      let category = await promptForCategory(item);
+      const category = await promptForCategory(item);
       if (category === 'split') {
         console.log('*** SPLIT MODE ***');
         const splitItems = [];

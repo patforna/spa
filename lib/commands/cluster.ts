@@ -59,8 +59,8 @@ function findBestCluster(clusters: Item[][], item: Item): Item[] {
   // find best cluster to put item in
   clusters.forEach((cluster) => {
     // stricter membership rule for short items
-    let max = Math.max(Math.min(canon(item).length - n, n), 0);
-    let ls = levenshtein(cluster[0], item);
+    const max = Math.max(Math.min(canon(item).length - n, n), 0);
+    const ls = levenshtein(cluster[0], item);
     if (ls <= max && (bestDistance === -1 || ls < bestDistance)) {
       bestDistance = ls;
       bestCluster = cluster;
@@ -107,6 +107,6 @@ function computeTotal(cluster: Item[]): number {
   return _.reduce(cluster, (total, item) => (total += item.amount), 0);
 }
 
-function computeCategories(cluster: Item[]): String[] {
+function computeCategories(cluster: Item[]): string[] {
   return _.uniq(cluster.map((i) => i.category).sort());
 }
