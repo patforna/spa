@@ -18,7 +18,7 @@ const testDir = path.join(process.cwd(), 'test');
 function createTempFile(content: string): string {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'money-test-'));
   const filePath = path.join(tempDir, 'test.csv');
-  fs.writeFileSync(filePath, content, { encoding: 'latin1' }); // Match the ENCODING from main.ts
+  fs.writeFileSync(filePath, content, 'utf8');
   tempFiles.push(filePath);
   return filePath;
 }
@@ -66,12 +66,24 @@ describe('Acceptance tests', () => {
   test('should process Wise transactions', async () => {
     const input = fs.readFileSync(
       path.join(testDir, 'wise-transactions.csv'),
-      'utf-8'
+      'utf8'
     );
     await run(createTempFile(input), inputParserFactory, commands);
 
     const { amount, transactions } = capture.summary.total();
     expect(transactions).toBe(3);
     expect(amount).toBe(94);
+  });
+
+  test('should process ZKB transactions', async () => {
+    const input = fs.readFileSync(
+      path.join(testDir, 'zkb-transactions.csv'),
+      'utf8'
+    );
+    await run(createTempFile(input), inputParserFactory, commands);
+
+    const { amount, transactions } = capture.summary.total();
+    expect(transactions).toBe(4);
+    expect(amount).toBe(183);
   });
 });

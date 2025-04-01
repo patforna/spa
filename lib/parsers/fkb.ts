@@ -8,14 +8,12 @@ export class FKBInputParser implements InputParser {
   private static readonly COLS = ['date', 'description', 'amount', 'valuta'];
   private static readonly DATE_FORMAT = 'DD.MM.YY';
 
-  parse(input: string): Promise<Item[]> {
-    return Promise.resolve(
-      input
-        .split(/\r?\n/)
-        .splice(FKBInputParser.FIRST_ROW_NUMBER)
-        .filter((x) => x.length > 0)
-        .map((r) => this.parseRowItem(r))
-    );
+  async parse(input: string): Promise<Item[]> {
+    return input
+      .split(/\r?\n/)
+      .splice(FKBInputParser.FIRST_ROW_NUMBER)
+      .filter((x) => x.length > 0)
+      .map((r) => this.parseRowItem(r));
   }
 
   private parseRowItem(row: string): Item {

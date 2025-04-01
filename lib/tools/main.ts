@@ -7,8 +7,6 @@ import { Item, ItemRepo, asString, shortDescription } from '../items.js';
 import { InputParserFactory } from '../parsers/index.js';
 import { Wiring } from '../wiring.js';
 
-const ENCODING = 'latin1';
-
 export default (): void => {
   const commands: (() => Promise<void>)[] = [];
   const wiring = new Wiring();
@@ -33,7 +31,7 @@ export default (): void => {
       },
       handler: (args) => {
         commands.push(async (): Promise<void> => {
-          const data = readFileSync(args['file'], { encoding: ENCODING });
+          const data = readFileSync(args['file'], 'utf8');
           await regen(data, overridesRepo, inputParserFactory);
         });
       },
@@ -53,7 +51,7 @@ export default (): void => {
       },
       handler: (args) => {
         commands.push(async (): Promise<void> => {
-          const data = readFileSync(args['file'], { encoding: ENCODING });
+          const data = readFileSync(args['file'], 'utf8');
           await removeUnnecessaryOverrides(
             data,
             overridesRepo,
@@ -77,7 +75,7 @@ export default (): void => {
       },
       handler: (args) => {
         commands.push(async (): Promise<void> => {
-          const data = readFileSync(args['file'], { encoding: ENCODING });
+          const data = readFileSync(args['file'], 'utf8');
           await ruleStats(data, inputParserFactory);
         });
       },

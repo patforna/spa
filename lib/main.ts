@@ -10,9 +10,6 @@ import { TableCommand } from './commands/table.js';
 import { InputParserFactory } from './parsers/index.js';
 import { Wiring } from './wiring.js';
 
-// FIXME FKB specific - push into FKB parser
-const ENCODING = 'latin1';
-
 export default (): void => {
   const commands = [];
   const wiring = new Wiring();
@@ -109,7 +106,7 @@ export async function run(
   inputParserFactory: InputParserFactory,
   commands: Command[]
 ) {
-  const input = readFileSync(file, { encoding: ENCODING });
+  const input = readFileSync(file, 'utf8');
   const parser = inputParserFactory.createParser(input);
   const items = await parser.parse(input);
 

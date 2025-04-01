@@ -5,6 +5,7 @@ import { Item } from '../items.js';
 import { FxRateService } from '../fxRates.js';
 import { FKBInputParser } from './fkb.js';
 import { WiseInputParser } from './wise.js';
+import { ZKBInputParser } from './zkb.js';
 
 export interface InputParser {
   parse(input: string): Promise<Item[]>;
@@ -14,15 +15,22 @@ export class InputParserFactory {
   constructor(private readonly fxRateService: FxRateService) {}
 
   createParser(input: string): InputParser {
-    const firstLine = input.split('\n')[0].trim();
+    const firstLine = input.trimStart().split('\n')[0];
 
-    if (firstLine.startsWith('Kontoauszug bis:')) {
-      return new FKBInputParser();
-    }
+    if (firstLine.startsWith('Kontoauszug bis:')) return new FKBInputParser();
 
-    if (firstLine.startsWith('ID,Status,Direction')) {
+    if (firstLine.startsWith('ID,Status,Direction'))
       return new WiseInputParser(this.fxRateService);
-    }
+
+    if (firstLine.startsWith('"Date";"Booking text";'))
+      return new ZKBInputParser();
+
+    // FIXME: refactor FKB code to use papa parser
+    // FIXME: refactor to use positive amounts (since we don't consider refunds yet)
+
+    // TODO viseca
+
+    // TODO additionals.json
 
     throw new Error('Unknown Input format');
   }
@@ -45,9 +53,9 @@ export function parseCSV(input: string): object[] {
       const parsedDate = moment(
         value,
         [
-          'YYYY-MM-DD HH:mm:ss', // wise
-          'YYYY-MM-DD', // ?
           'DD.MM.YY', // fkb
+          'YYYY-MM-DD HH:mm:ss', // wise
+          'DD.MM.YYYY', // zkb
           'DD/MM/YYYY HH:mm:ss', // viseca
         ],
         true

@@ -34,9 +34,8 @@ export class FxRateService {
     const truncatedDate = date.clone().utc().startOf('day');
     const pair = createFxRatePair(from, to);
     const item = this.#cache.get(this.cacheKey(truncatedDate, pair));
-    if (item) {
-      return Promise.resolve(item.rate);
-    }
+
+    if (item) return item.rate;
 
     const rate = await this.fetchRate(from, to, date);
     this.#repo.save(createFxRateItem(truncatedDate, pair, rate));
