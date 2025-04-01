@@ -1,10 +1,23 @@
+import { FxRateRepo, FxRateService } from './tools/fxRates.js';
 import { Categoriser } from './categoriser.js';
 import { ItemRepo } from './items.js';
+import { join } from 'path';
 
-export const overridesRepo = new ItemRepo(
-  '/Users/you/code/spa/data/overrides.json' // FIXME
-);
-export const additionalsRepo = new ItemRepo(
-  '/Users/you/code/spa/data/additionals.json' // FIXME
-);
-export const categoriser = new Categoriser(overridesRepo.load());
+const projectRoot = process.cwd();
+const overridesPath = join(projectRoot, 'data/overrides.json');
+const additionalsPath = join(projectRoot, 'data/additionals.json');
+const fxRatesPath = join(projectRoot, 'data/tools/fxRates.json');
+
+export class Wiring {
+  readonly overridesRepo: ItemRepo;
+  readonly additionalsRepo: ItemRepo;
+  readonly categoriser: Categoriser;
+  readonly fxRateService: FxRateService;
+
+  constructor() {
+    this.overridesRepo = new ItemRepo(overridesPath);
+    this.additionalsRepo = new ItemRepo(additionalsPath);
+    this.fxRateService = new FxRateService(new FxRateRepo(fxRatesPath));
+    this.categoriser = new Categoriser(this.overridesRepo.load());
+  }
+}

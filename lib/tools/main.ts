@@ -4,14 +4,17 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { Categoriser, IGNORE, NO_CATEGORY } from '../categoriser.js';
 import { parseItems } from '../csv.js';
-import { Item, asString, shortDescription } from '../items.js';
-import { overridesRepo } from '../wiring.js';
+import { Item, ItemRepo, asString, shortDescription } from '../items.js';
+import { Wiring } from '../wiring.js';
 import { processWise } from './wise.js';
 
 const ENCODING = 'latin1';
 
 export default (): void => {
   const commands: (() => Promise<void>)[] = [];
+  const wiring = new Wiring();
+  const overridesRepo = wiring.overridesRepo;
+  const additionalsRepo = wiring.additionalsRepo;
 
   yargs(hideBin(process.argv))
     .scriptName('tools')
@@ -32,7 +35,7 @@ export default (): void => {
       handler: (args) => {
         commands.push(async (): Promise<void> => {
           const data = readFileSync(args['file'], { encoding: ENCODING });
-          return processWise(data);
+          return processWise(additionalsRepo, data);
         });
       },
     })
@@ -52,7 +55,7 @@ export default (): void => {
       handler: (args) => {
         commands.push(async (): Promise<void> => {
           const data = readFileSync(args['file'], { encoding: ENCODING });
-          regen(data);
+          regen(data, overridesRepo);
         });
       },
     })
@@ -72,7 +75,7 @@ export default (): void => {
       handler: (args) => {
         commands.push(async (): Promise<void> => {
           const data = readFileSync(args['file'], { encoding: ENCODING });
-          removeUnnecessaryOverrides(data);
+          removeUnnecessaryOverrides(data, overridesRepo);
         });
       },
     })
@@ -101,7 +104,7 @@ export default (): void => {
       describe: 'Show overrides stats',
       handler: () => {
         commands.push(async (): Promise<void> => {
-          overridesStats();
+          overridesStats(overridesRepo.load());
         });
       },
     })
@@ -114,7 +117,7 @@ function key(it: Item): string {
   return `${it.date.utc()}:${it.description}:${it.amount}`;
 }
 
-function regen(data: string) {
+function regen(data: string, overridesRepo: ItemRepo) {
   const overrides = overridesRepo.load();
   const itemsByKey = _.keyBy(parseItems(data), (it) => key(it));
 
@@ -133,7 +136,7 @@ function regen(data: string) {
   overridesRepo.saveAll(updated);
 }
 
-function removeUnnecessaryOverrides(data: string) {
+function removeUnnecessaryOverrides(data: string, overridesRepo: ItemRepo) {
   const categoriser = new Categoriser([]);
   let items = parseItems(data);
   items.forEach((item) => categoriser.categorise(item));
@@ -221,9 +224,8 @@ function ruleStats(data: string) {
   });
 }
 
-function overridesStats() {
-  const overrides = overridesRepo.load();
-  const map = {};
+function overridesStats(overrides: Item[]) {
+  const map: Record<string, number> = {};
   overrides.forEach((o) => {
     const key = shortDescription(o);
     if (key in map) map[key] = map[key] + 1;

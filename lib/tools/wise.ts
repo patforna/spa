@@ -1,6 +1,5 @@
 import { parse } from '../csv.js';
-import { Item } from '../items.js';
-import { additionalsRepo } from '../wiring.js';
+import { Item, ItemRepo } from '../items.js';
 import { fxRateService } from './wiring.js';
 
 export interface WiseItem {
@@ -13,7 +12,7 @@ export interface WiseItem {
   targetName: string;
 }
 
-export async function processWise(data: string) {
+export async function processWise(additionalsRepo: ItemRepo, data: string) {
   const items = parse(data)
     .map((x) => x as WiseItem)
     .filter(

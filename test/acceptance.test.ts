@@ -1,41 +1,26 @@
-import { Command } from '../lib/commands/index.js';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import { Categoriser } from '../lib/categoriser.js';
 import { CategoriseCommand } from '../lib/commands/categorise.js';
-import { Item } from '../lib/items.js';
+import { Command } from '../lib/commands/index.js';
+import { Item, ItemRepo } from '../lib/items.js';
 import { run } from '../lib/main.js';
 import { Summary } from '../lib/summary.js';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
+
+// Keep track of temp files created
+const tempFiles: string[] = [];
+const testDir = path.join(process.cwd(), 'test');
 
 // Helper to create a temporary file with content
 function createTempFile(content: string): string {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'money-test-'));
   const filePath = path.join(tempDir, 'test.csv');
   fs.writeFileSync(filePath, content, { encoding: 'latin1' }); // Match the ENCODING from main.ts
+  tempFiles.push(filePath);
   return filePath;
 }
 
-const csv = `Kontoauszug bis: 06.12.2020 ;;;
-;;;
-Kontonummer: 30 01 511.262-00;;;
-Bezeichnung: Lohnkonto;;;
-Saldo: CHF 6120.12;;;
-;;;
-Muster Hans & Muster Anna;;;
-Seefeldstrasse 12;;;
-8008 Zürich;;;
-;;;
-;;;
-Datum;Buchungstext;Betrag;Valuta
-04.12.20;E-Banking-Auftrag Muster Anna;-281.65;03.12.20
-04.12.20;Zahlung - Coop-5178 ZH Seefeldst, Zürich - 02.12.2020 18:40 - Karten-Nr. xxxxxxxxxxxx6107;-1.25;02.12.20
-03.12.20;Zahlung - Coop-2623 City SM, Zürich - 01.12.2020 15:29 - Karten-Nr. xxxxxxxxxxxx7837;-19.35;01.12.20
-03.12.20;Zahlung - Migros ALN Kreuzplatz, Zürich - 01.12.2020 10:00 - Karten-Nr. xxxxxxxxxxxx7837;-8.05;01.12.20`;
-
-// FIXME note this test is super brittle, because it:
-// - relies on rules.ts
-// - pulls in data from additionals.json
-// - potentially interferes with overrides.json
 class CaptureItemsCommand implements Command {
   summary: Summary;
 
@@ -45,24 +30,22 @@ class CaptureItemsCommand implements Command {
 }
 
 describe('Acceptance tests', () => {
-  let tempFile: string;
-  let tempDir: string;
-
-  beforeAll(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'money-test-'));
-    tempFile = path.join(tempDir, 'test.csv');
-    fs.writeFileSync(tempFile, csv, { encoding: 'latin1' });
-  });
+  const additionalsRepo = new ItemRepo(createTempFile(JSON.stringify([])));
+  const overridesRepo = new ItemRepo(createTempFile(JSON.stringify([])));
+  const categoriser = new Categoriser(overridesRepo.load());
+  const capture = new CaptureItemsCommand();
+  const commands = [new CategoriseCommand(overridesRepo, categoriser), capture];
 
   afterAll(() => {
-    fs.rmSync(tempDir, { recursive: true, force: true });
+    tempFiles.forEach((file) => fs.rmSync(file, { force: true }));
   });
 
-  test('should process basic transactions', async () => {
-    const capture = new CaptureItemsCommand();
-    await run(tempFile, [new CategoriseCommand(), capture], {
-      ignoreAdditionals: true,
-    });
+  test('should process FKB transactions', async () => {
+    const input = fs.readFileSync(
+      path.join(testDir, 'fkb-transactions.csv'),
+      'latin1'
+    );
+    await run(createTempFile(input), additionalsRepo, commands);
 
     const { amount, transactions } = capture.summary.total();
     expect(transactions).toBe(4);

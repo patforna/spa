@@ -2,10 +2,9 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import _ from 'lodash';
-import { IGNORE, NO_CATEGORY } from '../categoriser.js';
-import { Item, asString, itemsForCategory } from '../items.js';
+import { Categoriser, IGNORE, NO_CATEGORY } from '../categoriser.js';
+import { Item, ItemRepo, asString, itemsForCategory } from '../items.js';
 import rules from '../rules.js';
-import { categoriser, overridesRepo } from '../wiring.js';
 import { Command } from './index.js';
 
 inquirer.registerPrompt('autocomplete', inquirerPrompt);
@@ -13,15 +12,18 @@ inquirer.registerPrompt('autocomplete', inquirerPrompt);
 const categories = _.concat(_.sortBy(Object.keys(rules)), 'ignore');
 
 export class CategoriseCommand implements Command {
-  #guessYear: boolean;
-  constructor(guessYear: boolean = false) {
-    this.#guessYear = guessYear;
+  #overridesRepo: ItemRepo;
+  #categoriser: Categoriser;
+
+  constructor(overridesRepo: ItemRepo, categoriser: Categoriser) {
+    this.#overridesRepo = overridesRepo;
+    this.#categoriser = categoriser;
   }
 
   async execute(items: Item[]): Promise<void> {
     const year = guessYear(items);
     console.log('Guessed year:', year);
-    items.forEach((item) => categoriser.categorise(item, year));
+    items.forEach((item) => this.#categoriser.categorise(item, year));
 
     const uncategorised = itemsForCategory(items, NO_CATEGORY);
 
@@ -43,18 +45,18 @@ export class CategoriseCommand implements Command {
         }
         item.category = IGNORE;
         item.comment = 'split';
-        overridesRepo.save(item);
-        splitItems.forEach((it) => overridesRepo.save(it)); // TODO inject
+        this.#overridesRepo.save(item);
+        splitItems.forEach((it) => this.#overridesRepo.save(it));
       } else {
         item.category = category;
         item.comment = await promptForComment();
-        overridesRepo.save(item); // TODO inject
+        this.#overridesRepo.save(item);
       }
     }
 
     // re-run categoriser
     // FIXME shouldn't this be outside of loop?
-    uncategorised.forEach((item) => categoriser.categorise(item, year));
+    uncategorised.forEach((item) => this.#categoriser.categorise(item, year));
   }
 }
 
@@ -115,6 +117,7 @@ function guessYear(items: Item[]): number {
   const m = _.groupBy(items, (it) => it.date.year());
   return Number(_.sortBy(Object.entries(m), ([_, v]) => -v.length)[0][0]);
 }
+
 // narrow down list of categories or return input when no results found
 function autocompleteCategory(input: string) {
   const filtered = _.filter(

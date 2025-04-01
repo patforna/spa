@@ -3,21 +3,22 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { CategoriseCommand } from './commands/categorise.js';
 import { ClusterCommand } from './commands/cluster.js';
-import {
-  CategoryCommand as DetailsCommand,
-  SortBy,
-} from './commands/details.js';
+import { CategoryCommand, SortBy } from './commands/details.js';
 import { Command } from './commands/index.js';
 import { JsonCommand } from './commands/json.js';
 import { TableCommand } from './commands/table.js';
-
+import { ItemRepo } from './items.js';
 import { parseItems } from './csv.js';
-import { additionalsRepo } from './wiring.js';
+import { Wiring } from './wiring.js';
 
 const ENCODING = 'latin1';
 
 export default (): void => {
   const commands = [];
+  const wiring = new Wiring();
+  const overridesRepo = wiring.overridesRepo;
+  const additionalsRepo = wiring.additionalsRepo;
+  const categoriser = wiring.categoriser;
 
   const args = yargs(hideBin(process.argv))
     .scriptName('money')
@@ -37,7 +38,7 @@ export default (): void => {
       },
       handler: (args) => {
         commands.push(
-          new CategoriseCommand(),
+          new CategoriseCommand(overridesRepo, categoriser),
           args['json'] ? new JsonCommand() : new TableCommand()
         );
       },
@@ -65,8 +66,8 @@ export default (): void => {
       },
       handler: (args) => {
         commands.push(
-          new CategoriseCommand(),
-          new DetailsCommand(args['sortBy'], args['category'])
+          new CategoriseCommand(overridesRepo, categoriser),
+          new CategoryCommand(args['sortBy'], args['category'])
         );
       },
     })
@@ -84,7 +85,10 @@ export default (): void => {
         });
       },
       handler: () => {
-        commands.push(new CategoriseCommand(), new ClusterCommand());
+        commands.push(
+          new CategoriseCommand(overridesRepo, categoriser),
+          new ClusterCommand()
+        );
       },
     })
     .options({
@@ -97,19 +101,16 @@ export default (): void => {
     })
     .parseSync();
 
-  Promise.all([run(args.file, commands)]);
+  Promise.all([run(args.file, additionalsRepo, commands)]);
 };
 
 export async function run(
   file: string,
-  commands: Command[],
-  options: { ignoreAdditionals?: boolean } = { ignoreAdditionals: false }
+  additionalsRepo: ItemRepo,
+  commands: Command[]
 ) {
   let items = parseItems(readFileSync(file, { encoding: ENCODING }));
-  // FIXME: this is hack to make acceptance tests work; fix by using dependency injection
-  if (!options.ignoreAdditionals) {
-    items.push(...additionalsRepo.load());
-  }
+  items.push(...additionalsRepo.load()); // FIXME: kill this by migrating additionals to a regular input file
   for (const command of commands) {
     await command.execute(items);
   }

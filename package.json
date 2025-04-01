@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "npx eslint .",
     "format": "npx prettier --write '**/*.ts'",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "mkdir -p dist/test && cp test/*.csv dist/test/ && node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "bin": {
     "money": "bin/money"
