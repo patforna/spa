@@ -48,17 +48,3 @@ Upgrade all dependencies:
 
     yarn upgrade-interactive --latest
     yarn upgrade
-
-## Extras
-
-### Adding transactions from wise
-
-1. Download transactions from wise for the given month(s).
-
-2. Run
-
-    bin/tools wise -f <path to wise csv>
-
-4. Check and commit `additionals.json`
-
-5. Run `/bin/money ...`

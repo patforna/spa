@@ -3,10 +3,9 @@ import _ from 'lodash';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { Categoriser, IGNORE, NO_CATEGORY } from '../categoriser.js';
-import { parseItems } from '../csv.js';
 import { Item, ItemRepo, asString, shortDescription } from '../items.js';
+import { InputParserFactory } from '../parsers/index.js';
 import { Wiring } from '../wiring.js';
-import { processWise } from './wise.js';
 
 const ENCODING = 'latin1';
 
@@ -14,31 +13,11 @@ export default (): void => {
   const commands: (() => Promise<void>)[] = [];
   const wiring = new Wiring();
   const overridesRepo = wiring.overridesRepo;
-  const additionalsRepo = wiring.additionalsRepo;
+  const inputParserFactory = wiring.inputParserFactory;
 
   yargs(hideBin(process.argv))
     .scriptName('tools')
     .usage('Usage: $0 <command>')
-    .command({
-      command: 'wise',
-      describe: 'Parses wise transactions.',
-      builder: (yargs) => {
-        return yargs.options({
-          file: {
-            alias: 'f',
-            type: 'string',
-            describe: 'The csv file containing the wise transactions.',
-            demandOption: true,
-          },
-        });
-      },
-      handler: (args) => {
-        commands.push(async (): Promise<void> => {
-          const data = readFileSync(args['file'], { encoding: ENCODING });
-          return processWise(additionalsRepo, data);
-        });
-      },
-    })
     .command({
       command: 'regen',
       describe: 'Regenerate overrides files.',
@@ -55,7 +34,7 @@ export default (): void => {
       handler: (args) => {
         commands.push(async (): Promise<void> => {
           const data = readFileSync(args['file'], { encoding: ENCODING });
-          regen(data, overridesRepo);
+          await regen(data, overridesRepo, inputParserFactory);
         });
       },
     })
@@ -75,7 +54,11 @@ export default (): void => {
       handler: (args) => {
         commands.push(async (): Promise<void> => {
           const data = readFileSync(args['file'], { encoding: ENCODING });
-          removeUnnecessaryOverrides(data, overridesRepo);
+          await removeUnnecessaryOverrides(
+            data,
+            overridesRepo,
+            inputParserFactory
+          );
         });
       },
     })
@@ -95,7 +78,7 @@ export default (): void => {
       handler: (args) => {
         commands.push(async (): Promise<void> => {
           const data = readFileSync(args['file'], { encoding: ENCODING });
-          ruleStats(data);
+          await ruleStats(data, inputParserFactory);
         });
       },
     })
@@ -117,9 +100,16 @@ function key(it: Item): string {
   return `${it.date.utc()}:${it.description}:${it.amount}`;
 }
 
-function regen(data: string, overridesRepo: ItemRepo) {
+async function regen(
+  data: string,
+  overridesRepo: ItemRepo,
+  inputParserFactory: InputParserFactory
+) {
   const overrides = overridesRepo.load();
-  const itemsByKey = _.keyBy(parseItems(data), (it) => key(it));
+  const itemsByKey = _.keyBy(
+    await inputParserFactory.createParser(data).parse(data),
+    (it) => key(it)
+  );
 
   const updated = [];
   overrides.forEach((o) => {
@@ -136,9 +126,13 @@ function regen(data: string, overridesRepo: ItemRepo) {
   overridesRepo.saveAll(updated);
 }
 
-function removeUnnecessaryOverrides(data: string, overridesRepo: ItemRepo) {
+async function removeUnnecessaryOverrides(
+  data: string,
+  overridesRepo: ItemRepo,
+  inputParserFactory: InputParserFactory
+) {
   const categoriser = new Categoriser([]);
-  let items = parseItems(data);
+  let items = await inputParserFactory.createParser(data).parse(data);
   items.forEach((item) => categoriser.categorise(item));
   items = items.filter((item) => item.category !== NO_CATEGORY);
 
@@ -175,8 +169,8 @@ interface RuleStat {
   conflicts: string[];
 }
 
-function ruleStats(data: string) {
-  const items = parseItems(data);
+async function ruleStats(data: string, inputParserFactory: InputParserFactory) {
+  const items = await inputParserFactory.createParser(data).parse(data);
   console.log('items length: ' + items.length);
   const stats: { [k: string]: RuleStat } = {};
 

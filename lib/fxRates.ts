@@ -5,10 +5,10 @@ import stringify from 'json-stringify-pretty-compact';
 import _ from 'lodash';
 import moment from 'moment';
 
-export class FxRateService {
-  apiKey = process.env['FIXER_API_KEY'];
-  apiUrl = 'http://data.fixer.io/api/';
+const API_KEY = process.env['FIXER_API_KEY'];
+const API_URL = 'http://data.fixer.io/api/';
 
+export class FxRateService {
   #repo: FxRateRepo;
   #cache: Map<string, FxRateItem>;
   constructor(repo: FxRateRepo) {
@@ -68,7 +68,7 @@ export class FxRateService {
 
   private endpointUrl(from: string, to: string, date: moment.Moment): string {
     const d = date.format('YYYY-MM-DD');
-    return `${this.apiUrl}${d}?access_key=${this.apiKey}&base=EUR&symbols=${from},${to}`;
+    return `${API_URL}${d}?access_key=${API_KEY}&base=EUR&symbols=${from},${to}`;
   }
 
   private cacheKey(date: moment.Moment, pair: string): string {

@@ -7,6 +7,8 @@ import { Command } from '../lib/commands/index.js';
 import { Item, ItemRepo } from '../lib/items.js';
 import { run } from '../lib/main.js';
 import { Summary } from '../lib/summary.js';
+import { InputParserFactory } from '../lib/parsers/index.js';
+import { FxRateService } from '../lib/fxRates.js';
 
 // Keep track of temp files created
 const tempFiles: string[] = [];
@@ -29,11 +31,20 @@ class CaptureItemsCommand implements Command {
   }
 }
 
+// Fake FX rate service for testing
+const fakeFxRateService = {
+  convert: async (from: string, to: string, amount: number) => {
+    if (from === 'GBP' && to === 'CHF') return amount * 1.1; // Example GBP to CHF rate
+    if (from === 'EUR' && to === 'CHF') return amount * 0.9; // Example EUR to CHF rate
+    throw new Error(`Unsupported currency conversion from ${from} to ${to}`);
+  },
+} as unknown as FxRateService;
+
 describe('Acceptance tests', () => {
-  const additionalsRepo = new ItemRepo(createTempFile(JSON.stringify([])));
   const overridesRepo = new ItemRepo(createTempFile(JSON.stringify([])));
   const categoriser = new Categoriser(overridesRepo.load());
   const capture = new CaptureItemsCommand();
+  const inputParserFactory = new InputParserFactory(fakeFxRateService);
   const commands = [new CategoriseCommand(overridesRepo, categoriser), capture];
 
   afterAll(() => {
@@ -45,10 +56,22 @@ describe('Acceptance tests', () => {
       path.join(testDir, 'fkb-transactions.csv'),
       'latin1'
     );
-    await run(createTempFile(input), additionalsRepo, commands);
+    await run(createTempFile(input), inputParserFactory, commands);
 
     const { amount, transactions } = capture.summary.total();
     expect(transactions).toBe(4);
-    expect(amount).toBe(310); // Sum of absolute values
+    expect(amount).toBe(310);
+  });
+
+  test('should process Wise transactions', async () => {
+    const input = fs.readFileSync(
+      path.join(testDir, 'wise-transactions.csv'),
+      'utf-8'
+    );
+    await run(createTempFile(input), inputParserFactory, commands);
+
+    const { amount, transactions } = capture.summary.total();
+    expect(transactions).toBe(3);
+    expect(amount).toBe(94);
   });
 });

@@ -1,23 +1,27 @@
-import { FxRateRepo, FxRateService } from './tools/fxRates.js';
+import { FxRateRepo, FxRateService } from './fxRates.js';
 import { Categoriser } from './categoriser.js';
 import { ItemRepo } from './items.js';
 import { join } from 'path';
+import { InputParserFactory } from './parsers/index.js';
 
-const projectRoot = process.cwd();
-const overridesPath = join(projectRoot, 'data/overrides.json');
-const additionalsPath = join(projectRoot, 'data/additionals.json');
-const fxRatesPath = join(projectRoot, 'data/tools/fxRates.json');
+const PROJECT_ROOT = process.cwd();
+
+const OVERRIDES_PATH = join(PROJECT_ROOT, 'data/overrides.json');
+const FX_RATES_PATH = join(PROJECT_ROOT, 'data/fxRates.json');
+
+export const FX_API_KEY = process.env['FIXER_API_KEY'];
+export const FX_API_URL = 'http://data.fixer.io/api/';
 
 export class Wiring {
   readonly overridesRepo: ItemRepo;
-  readonly additionalsRepo: ItemRepo;
   readonly categoriser: Categoriser;
   readonly fxRateService: FxRateService;
+  readonly inputParserFactory: InputParserFactory;
 
   constructor() {
-    this.overridesRepo = new ItemRepo(overridesPath);
-    this.additionalsRepo = new ItemRepo(additionalsPath);
-    this.fxRateService = new FxRateService(new FxRateRepo(fxRatesPath));
+    this.overridesRepo = new ItemRepo(OVERRIDES_PATH);
+    this.fxRateService = new FxRateService(new FxRateRepo(FX_RATES_PATH));
     this.categoriser = new Categoriser(this.overridesRepo.load());
+    this.inputParserFactory = new InputParserFactory(this.fxRateService);
   }
 }

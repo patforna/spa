@@ -4,6 +4,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { IGNORE } from './categoriser.js';
 
+// FIXME meh... FKB specific - not sure it should be here
 // regex matching everything after the descriptoin (e.g. " - 29.01.2022 17:03...")
 const afterDesc = / - \d\d\.\d\d\.\d\d\d\d\ \d\d:\d\d.*/;
 
@@ -23,6 +24,7 @@ export enum Card {
   Self = 2,
 }
 
+// FIXME this would probably be better done when parsing input (also: FKB specific logic)
 export function parseCard(description: string): Card {
   if (description.includes('7837')) return Card.Partner;
   if (description.includes('5885')) return Card.Partner;
@@ -35,6 +37,7 @@ export function parseCard(description: string): Card {
   return Card.Unknown;
 }
 
+// FIXME this should maybe be called OverridesRepo once additionals.json is gone...
 export class ItemRepo {
   #path: string;
   #items: Item[];
@@ -46,7 +49,7 @@ export class ItemRepo {
     this.#items = JSON.parse(readFileSync(this.#path).toString());
     this.#items.forEach((it) => {
       it.date = moment.utc(it.date);
-      it.card = parseCard(it.description);
+      it.card = parseCard(it.description); // FIXME this should be done when parsing input (it actually is - remove once description is removed from overrides and additionals.json is gone)
     });
     return this.#items;
   }
@@ -57,8 +60,11 @@ export class ItemRepo {
   }
 
   saveAll(items: Item[]): void {
-    const toSave = _.sortBy(items, 'date').map((it) =>
-      _.pick(it, ['date', 'amount', 'description', 'category', 'comment'])
+    const toSave = _.sortBy(items, 'date').map(
+      (it) =>
+        // date, amount are used as primary keys
+        // category and comment are user-generated content we want to hold on to
+        _.pick(it, ['date', 'amount', 'description', 'category', 'comment']) // FIXME do not store description as it's not needed (double check!)
     );
     writeFileSync(this.#path, stringify(toSave));
     this.load();
@@ -74,13 +80,13 @@ export function itemsExcludingIgnored(items: Item[]): Item[] {
 }
 
 export function shortDescription(item: Item): string {
-  return item.description.replace('Zahlung - ', '').replace(afterDesc, '');
+  return item.description.replace('Zahlung - ', '').replace(afterDesc, ''); // FIXME meh... FKB specific - not sure it should be here
 }
 
 export function asString(item: Item, showCategory = false): string {
   const parts = [];
   if (showCategory) parts.push(_.padStart(item.category.toUpperCase(), 10));
-  parts.push(item.date.format('DD.MM.YY'));
+  parts.push(item.date.format('DD.MM.YY')); // FIXME use ISO format
   parts.push(_.padStart(_.round(item.amount).toLocaleString(), 6));
   parts.push(_.padStart(Card[item.card], 7));
   parts.push(shortDescription(item));

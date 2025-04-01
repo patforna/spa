@@ -7,18 +7,18 @@ import { CategoryCommand, SortBy } from './commands/details.js';
 import { Command } from './commands/index.js';
 import { JsonCommand } from './commands/json.js';
 import { TableCommand } from './commands/table.js';
-import { ItemRepo } from './items.js';
-import { parseItems } from './csv.js';
+import { InputParserFactory } from './parsers/index.js';
 import { Wiring } from './wiring.js';
 
+// FIXME FKB specific - push into FKB parser
 const ENCODING = 'latin1';
 
 export default (): void => {
   const commands = [];
   const wiring = new Wiring();
   const overridesRepo = wiring.overridesRepo;
-  const additionalsRepo = wiring.additionalsRepo;
   const categoriser = wiring.categoriser;
+  const inputParserFactory = wiring.inputParserFactory;
 
   const args = yargs(hideBin(process.argv))
     .scriptName('money')
@@ -101,16 +101,18 @@ export default (): void => {
     })
     .parseSync();
 
-  Promise.all([run(args.file, additionalsRepo, commands)]);
+  Promise.all([run(args.file, inputParserFactory, commands)]);
 };
 
 export async function run(
   file: string,
-  additionalsRepo: ItemRepo,
+  inputParserFactory: InputParserFactory,
   commands: Command[]
 ) {
-  let items = parseItems(readFileSync(file, { encoding: ENCODING }));
-  items.push(...additionalsRepo.load()); // FIXME: kill this by migrating additionals to a regular input file
+  const input = readFileSync(file, { encoding: ENCODING });
+  const parser = inputParserFactory.createParser(input);
+  const items = await parser.parse(input);
+
   for (const command of commands) {
     await command.execute(items);
   }
