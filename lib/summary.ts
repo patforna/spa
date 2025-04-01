@@ -42,7 +42,7 @@ export class Summary {
       this.data.months.flatMap((m) => Object.keys(m.categories))
     );
 
-    return _.sortBy(categories, (c) => -this.totalForCategory(c).amount);
+    return _.sortBy(categories, (c) => this.totalForCategory(c).amount);
   }
 
   totalsForCategoryByMonth(category: string): Total[] {
@@ -110,6 +110,6 @@ function add(data: SummaryData, field: string, item: Item): void {
     obj = _.get(data.months[month], field);
   }
 
-  obj.amount += Math.round(-item.amount);
+  obj.amount += Math.round(item.amount);
   obj.transactions += 1;
 }

@@ -12,7 +12,7 @@ export class Categoriser {
   }
 
   categorise(item: Item, year: number = undefined): Item {
-    if (item.amount > 0 || (year && item.date.year() != year)) {
+    if (item.amount < 0 || (year && item.date.year() != year)) {
       item.category = IGNORE;
       return item;
     }

@@ -33,15 +33,14 @@ export class CategoriseCommand implements Command {
       if (category === 'split') {
         console.log('*** SPLIT MODE ***');
         const splitItems = [];
-        let remainingAmount = Math.abs(item.amount);
+        let remainingAmount = item.amount;
         while (remainingAmount > 0) {
           const itemCopy = _.cloneDeep(item);
-          itemCopy.amount =
-            Math.abs(await promptForAmount(remainingAmount)) * -1;
+          itemCopy.amount = await promptForAmount(remainingAmount);
           itemCopy.category = await promptForCategory(item);
           itemCopy.comment = await promptForComment();
           splitItems.push(itemCopy);
-          remainingAmount -= Math.abs(itemCopy.amount);
+          remainingAmount -= itemCopy.amount;
         }
         item.category = IGNORE;
         item.comment = 'split';

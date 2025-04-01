@@ -26,7 +26,7 @@ export class ZKBInputParser implements InputParser {
         parent = null; // reset parent to indicate that we are not processing details
         items.push({
           date: it.date,
-          amount: -it.debitChf,
+          amount: it.debitChf,
           description: _.join([it.bookingText, it.paymentPurpose], ' | '),
         } as Item);
       } else {
@@ -37,7 +37,7 @@ export class ZKBInputParser implements InputParser {
 
         items.push({
           date: parent.date,
-          amount: -it.amountDetails,
+          amount: it.amountDetails,
           description: _.join(
             [parent.description, it.bookingText, it.paymentPurpose],
             ' | '

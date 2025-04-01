@@ -25,9 +25,6 @@ export class InputParserFactory {
     if (firstLine.startsWith('"Date";"Booking text";'))
       return new ZKBInputParser();
 
-    // FIXME: refactor FKB code to use papa parser
-    // FIXME: refactor to use positive amounts (since we don't consider refunds yet)
-
     // TODO viseca
 
     // TODO additionals.json

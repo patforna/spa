@@ -37,7 +37,7 @@ export class WiseInputParser implements InputParser {
 
       items.push({
         date: it.createdOn,
-        amount: -amountInCHF,
+        amount: amountInCHF,
         description: `${it.targetName} | #wise`,
       } as Item);
     }
