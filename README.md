@@ -20,11 +20,11 @@ Or, to get help on a subcommand:
 
 ### Examples
 
-    bin/money -f ~/Drive/money/common-2023.csv summary
+    bin/money -f ~/Drive/money/2023/common-2023.csv summary
 
-    bin/money -f ~/Drive/money/common-2023.csv details -c other -s amount
+    bin/money -f ~/Drive/money/2023/common-2023.csv details -c other -s amount
 
-    bin/money -f ~/Drive/money/common-2023.csv cluster
+    bin/money -f ~/Drive/money/2023/common-2023.csv cluster
 
 ## How to build
 
@@ -40,15 +40,15 @@ Run tests:
 
     npm test
 
+In watch mode:
+
+    npm test -- --watch
+
 Run linter:
 
-    npm lint
+    npm run lint
 
 Run formatter:
 
-    npm format
+    npm run format
 
-Upgrade all dependencies:
-
-    npm upgrade-interactive --latest
-    npm upgrade
