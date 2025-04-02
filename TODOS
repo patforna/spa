@@ -1,4 +1,6 @@
 # clean ups
+[ ] get rid of valuta (requires regenration of overrides)
+[ ] rename overrides to 'annotations' (or something more accurate like this)
 [ ] store only what's needed in overrides (i.e. date, amount + user-generated input, i.e. category, comment)
 
 # bugs
