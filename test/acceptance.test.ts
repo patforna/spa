@@ -86,4 +86,16 @@ describe('Acceptance tests', () => {
     expect(transactions).toBe(4);
     expect(amount).toBe(183);
   });
+
+  test('should process Viseca transactions', async () => {
+    const input = fs.readFileSync(
+      path.join(testDir, 'viseca-transactions.csv'),
+      'utf8'
+    );
+    await run(createTempFile(input), inputParserFactory, commands);
+
+    const { amount, transactions } = capture.summary.total();
+    expect(transactions).toBe(5);
+    expect(amount).toBe(1643);
+  });
 });

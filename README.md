@@ -34,7 +34,7 @@ Edit `additionals.json`.
 
 Install dependencies:
 
-    yarn
+    npm install
 
 To transpile the *.ts files to *.js, run:
 
@@ -42,17 +42,17 @@ To transpile the *.ts files to *.js, run:
 
 Run tests:
 
-    yarn test
+    npm test
 
 Run linter:
 
-    yarn lint
+    npm lint
 
 Run formatter:
 
-    yarn format
+    npm format
 
 Upgrade all dependencies:
 
-    yarn upgrade-interactive --latest
-    yarn upgrade
+    npm upgrade-interactive --latest
+    npm upgrade

@@ -4,9 +4,8 @@ import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
 interface ZKBItem {
-  date?: moment.Moment;
+  date: moment.Moment;
   bookingText: string;
-  curr: string;
   amountDetails: number;
   debitChf: number;
   creditChf: number;

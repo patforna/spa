@@ -6,6 +6,7 @@ import { FxRateService } from '../fxRates.js';
 import { FKBInputParser } from './fkb.js';
 import { WiseInputParser } from './wise.js';
 import { ZKBInputParser } from './zkb.js';
+import { VisecaInputParser } from './viseca.js';
 
 export interface InputParser {
   parse(input: string): Promise<Item[]>;
@@ -25,7 +26,8 @@ export class InputParserFactory {
     if (firstLine.startsWith('"Date";"Booking text";'))
       return new ZKBInputParser();
 
-    // TODO viseca
+    if (firstLine.startsWith('TransactionId,CardId'))
+      return new VisecaInputParser();
 
     // TODO additionals.json
 
@@ -53,7 +55,7 @@ export function parseCSV(input: string): object[] {
           'DD.MM.YY', // fkb
           'YYYY-MM-DD HH:mm:ss', // wise
           'DD.MM.YYYY', // zkb
-          'DD/MM/YYYY HH:mm:ss', // viseca
+          'MM/DD/YYYY HH:mm:ss', // viseca
         ],
         true
       );
