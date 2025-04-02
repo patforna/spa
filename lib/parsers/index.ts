@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import moment from 'moment';
 import Papa from 'papaparse';
-import { Item } from '../items.js';
 import { FxRateService } from '../fxRates.js';
+import { Item } from '../items.js';
+import { AdditionalInputParser } from './additionals.js';
 import { FKBInputParser } from './fkb.js';
+import { VisecaInputParser } from './viseca.js';
 import { WiseInputParser } from './wise.js';
 import { ZKBInputParser } from './zkb.js';
-import { VisecaInputParser } from './viseca.js';
-
 export interface InputParser {
   parse(input: string): Promise<Item[]>;
 }
@@ -29,7 +29,9 @@ export class InputParserFactory {
     if (firstLine.startsWith('TransactionId,CardId'))
       return new VisecaInputParser();
 
-    // TODO additionals.json
+    if (input.trimStart().startsWith('[')) {
+      return new AdditionalInputParser();
+    }
 
     throw new Error('Unknown Input format');
   }

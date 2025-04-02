@@ -1,9 +1,8 @@
 # clean ups
-[ ] kill additionals.json
 [ ] store only what's needed in overrides (i.e. date, amount + user-generated input, i.e. category, comment)
 
 # bugs
-[ ] table summary wrong includes "IGNORED" items. Reproduce: 
+[ ] table summary wrong includes "IGNORED" items. Reproduce:
    bin/money summary -f ~/Drive/money/all.csv
 
 # cluster
