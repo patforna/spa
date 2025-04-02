@@ -9,6 +9,15 @@ import { JsonCommand } from './commands/json.js';
 import { TableCommand } from './commands/table.js';
 import { InputParserFactory } from './parsers/index.js';
 import { Wiring } from './wiring.js';
+import { expandPaths } from './utils.js';
+
+interface Arguments {
+  inputs: string[];
+  json?: boolean;
+  sortBy?: SortBy;
+  category?: string;
+  n?: number;
+}
 
 export default (): void => {
   const commands = [];
@@ -19,7 +28,15 @@ export default (): void => {
 
   const args = yargs(hideBin(process.argv))
     .scriptName('money')
-    .usage('Usage: $0 -f <file>')
+    .usage(
+      `Usage: $0 <command> -i <inputs...>
+
+Examples:
+  $0 summary -i file1.csv
+  $0 summary -i file1.csv file2.csv
+  $0 summary -i dir
+  $0 summary -i **/*.csv`
+    )
     .command({
       command: 'summary',
       describe: 'Summarises transactions for the year.',
@@ -89,26 +106,36 @@ export default (): void => {
       },
     })
     .options({
-      file: {
-        alias: 'f',
-        type: 'string',
-        describe: 'The csv file containing the transactions.',
+      inputs: {
+        alias: 'i',
+        type: 'array',
+        describe:
+          'Input files, directories, or glob patterns. Can be specified multiple times or space-separated.',
         demandOption: true,
       },
     })
-    .parseSync();
+    .parseSync() as Arguments;
 
-  Promise.all([run(args.file, inputParserFactory, commands)]);
+  Promise.all([run(args.inputs, inputParserFactory, commands)]);
 };
 
 export async function run(
-  file: string,
+  inputs: string[],
   inputParserFactory: InputParserFactory,
   commands: Command[]
 ) {
-  const input = readFileSync(file, 'utf8');
-  const parser = inputParserFactory.createParser(input);
-  const items = await parser.parse(input);
+  const filePaths = await expandPaths(...inputs);
+  console.log(
+    `Processing ${filePaths.length} files from input patterns: ${inputs.join(', ')}\n` +
+      `Files to process:\n${filePaths.map((file) => `  - ${file}`).join('\n')}`
+  );
+
+  const items = [];
+  for (const filePath of filePaths) {
+    const content = readFileSync(filePath, 'utf8');
+    const parser = inputParserFactory.createParser(content);
+    items.push(...(await parser.parse(content)));
+  }
 
   for (const command of commands) {
     await command.execute(items);

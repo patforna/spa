@@ -20,11 +20,19 @@ Or, to get help on a subcommand:
 
 ### Examples
 
-    bin/money -f ~/Drive/money/2023/common-2023.csv summary
+    # Process a single file
+    bin/money summary -i ~/Drive/money/2023/common-2023.csv
 
-    bin/money -f ~/Drive/money/2023/common-2023.csv details -c other -s amount
+    # Process entire directories or multiple files
+    bin/money summary -i ~/Drive/money/2025
+    bin/money summary -i ~/Drive/money/2025/*.csv
+    bin/money summary -i ~/Drive/money/2025/**/*
 
-    bin/money -f ~/Drive/money/2023/common-2023.csv cluster
+    # Show details for a category, sorted by amount
+    bin/money details -c other -s amount -i ~/Drive/money/2023
+
+    # Find similar transactions
+    bin/money cluster -i ~/Drive/money/2023/common-2023.csv
 
 ## How to build
 

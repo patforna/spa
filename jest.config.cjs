@@ -11,6 +11,7 @@ module.exports = {
       {
         useESM: true,
         tsconfig: 'tsconfig.json',
+        diagnostics: { ignoreCodes: ['TS151001'] },
       },
     ],
   },
