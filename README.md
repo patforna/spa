@@ -26,10 +26,6 @@ Or, to get help on a subcommand:
 
     bin/money -f ~/Drive/money/common-2023.csv cluster
 
-### Adding extra items manually
-
-Edit `additionals.json`.
-
 ## How to build
 
 Install dependencies:
