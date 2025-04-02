@@ -4,6 +4,13 @@
 
 Node >= 20.6.0
 
+For currency conversion (required for Wise transactions), you need:
+1. A Fixer.io API key (get one at https://fixer.io)
+2. Set it as an environment variable:
+```bash
+export FIXER_API_KEY=your_api_key_here
+```
+
 ## TODO
 [ ] Only compute averages for months that actually have values
 [ ] Re-write overrides without valuta and get rid of valuta code
