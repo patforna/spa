@@ -16,7 +16,9 @@ export class ZKBInputParser implements InputParser {
   async parse(input: string): Promise<Item[]> {
     const zkbItems = parseCSV(input)
       .map((x) => x as ZKBItem)
-      .filter((x) => x.debitChf > 0 || x.amountDetails > 0);
+      .filter(
+        (x) => x.debitChf > 0 || (x.amountDetails > 0 && x.creditChf <= 0)
+      );
 
     const items: Item[] = [];
     let parent: Item;
