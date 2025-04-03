@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { IGNORE } from './categoriser.js';
-import { Item } from './items.js';
+import { Item, itemsExcludingIgnored } from './items.js';
 
 export interface Total {
   amount: number;
@@ -26,7 +25,7 @@ export class Summary {
       months: _.range(12).map(() => ({ categories: {} })),
     };
 
-    this.items = items.filter((item) => item.category !== IGNORE);
+    this.items = itemsExcludingIgnored(items);
     this.items.forEach((item) =>
       add(this.data, `categories.${item.category}`, item)
     );

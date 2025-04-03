@@ -9,7 +9,7 @@ import { Command } from './index.js';
 
 inquirer.registerPrompt('autocomplete', inquirerPrompt);
 
-const categories = _.concat(_.sortBy(Object.keys(rules)), 'ignore');
+const categories = _.concat(_.sortBy(Object.keys(rules)), IGNORE);
 
 export class CategoriseCommand implements Command {
   #overridesRepo: ItemRepo;

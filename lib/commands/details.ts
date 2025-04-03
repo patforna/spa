@@ -2,7 +2,6 @@ import _ from 'lodash';
 import {
   asString,
   Item,
-  itemsExcludingIgnored,
   itemsForCategory,
   shortDescription,
 } from '../items.js';
@@ -36,17 +35,10 @@ export class CategoryCommand implements Command {
   }
 
   async execute(items: Item[]): Promise<void> {
-    let showCategory: boolean;
-    if (this.#category) {
-      showCategory = false;
-      items = itemsForCategory(items, this.#category);
-    } else {
-      showCategory = true;
-      items = itemsExcludingIgnored(items);
-    }
+    if (this.#category) items = itemsForCategory(items, this.#category);
 
     _.orderBy(items, ...map[this.#sortBy]).forEach((item) =>
-      console.log(asString(item, showCategory))
+      console.log(asString(item, true))
     );
   }
 }

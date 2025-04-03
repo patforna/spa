@@ -1,7 +1,6 @@
 import jsLevenshtein from 'js-levenshtein';
 import _ from 'lodash';
-import { IGNORE } from '../categoriser.js';
-import { Item, shortDescription } from '../items.js';
+import { Item, itemsExcludingIgnored, shortDescription } from '../items.js';
 import { Command } from './index.js';
 
 // the maximum levenshtein distance to qualify for cluster membership
@@ -9,7 +8,7 @@ const n = 5;
 
 export class ClusterCommand implements Command {
   async execute(items: Item[]): Promise<void> {
-    items = items.filter((item) => item.category !== IGNORE);
+    items = itemsExcludingIgnored(items);
 
     let clusters: Item[][] = [];
     items.forEach((item) => {
