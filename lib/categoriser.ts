@@ -13,12 +13,7 @@ export class Categoriser {
     this.#overrides = overrides;
   }
 
-  categorise(item: Item, year: number = undefined): Item {
-    if (item.amount < 0 || (year && item.date.year() != year)) {
-      item.category = IGNORE;
-      return item;
-    }
-
+  categorise(item: Item): Item {
     const oItem = overriddenItem(this.#overrides, item);
     if (oItem?.category) item.category = oItem.category;
     else categoriseUsingRules(this.#rules, item);

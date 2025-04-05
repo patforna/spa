@@ -35,7 +35,10 @@ class CaptureItemsCommand implements Command {
 // Fake FX rate service for testing
 const fakeRulesRepo = {
   load(): Rules {
-    return { other: [new RegExp('.*', 'i')] }; // match everything
+    return {
+      shopping: [new RegExp('#shopping', 'i')],
+      other: [new RegExp('.*', 'i')],
+    };
   },
 } as unknown as RulesRepo;
 
@@ -121,8 +124,8 @@ describe('Acceptance tests', () => {
     await run([createTempFile(input)], inputParserFactory, commands);
 
     const { amount, transactions } = capture.summary.total();
-    expect(transactions).toBe(2);
-    expect(amount).toBe(307);
+    expect(transactions).toBe(5);
+    expect(amount).toBe(613);
   });
 
   test('should process additional transactions', async () => {
@@ -150,5 +153,21 @@ describe('Acceptance tests', () => {
     const { amount, transactions } = capture.summary.total();
     expect(transactions).toBe(9);
     expect(amount).toBe(1826);
+  });
+
+  test('should categorise transactions', async () => {
+    const input = fs.readFileSync(
+      path.join(testDir, 'revolut-transactions.csv'),
+      'utf8'
+    );
+    await run([createTempFile(input)], inputParserFactory, commands);
+
+    const shopping = capture.summary.totalForCategory('shopping');
+    expect(shopping.transactions).toBe(2);
+    expect(shopping.amount).toBe(172);
+
+    const other = capture.summary.totalForCategory('other');
+    expect(other.transactions).toBe(3);
+    expect(other.amount).toBe(441);
   });
 });

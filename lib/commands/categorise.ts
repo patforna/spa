@@ -25,12 +25,9 @@ export class CategoriseCommand implements Command {
   }
 
   async execute(items: Item[]): Promise<void> {
-    const year = guessYear(items);
-    console.log('Guessed year:', year);
-
     const rules = this.#rulesRepo.load();
     const categories = _.concat(_.sortBy(Object.keys(rules)), IGNORE);
-    items.forEach((item) => this.#categoriser.categorise(item, year));
+    items.forEach((item) => this.#categoriser.categorise(item));
 
     const uncategorised = itemsForCategory(items, NO_CATEGORY);
 
@@ -62,7 +59,7 @@ export class CategoriseCommand implements Command {
 
     // re-run categoriser
     // FIXME shouldn't this be outside of loop?
-    uncategorised.forEach((item) => this.#categoriser.categorise(item, year));
+    uncategorised.forEach((item) => this.#categoriser.categorise(item));
   }
 }
 
@@ -119,6 +116,7 @@ async function promptForComment(): Promise<string> {
   return answer.comment !== '' ? answer.comment : undefined;
 }
 
+// FIXME maybe re-purpose for date validation
 function guessYear(items: Item[]): number {
   if (!items?.length) {
     return new Date().getFullYear();

@@ -1,21 +1,22 @@
-[ ] check for revolut transaction where curr != CHF
+[ ] check for revolut transaction where curr != CHF (probably only if non-CHF accounts are used)
 
 # features
-[ ] do not guess year / fail if summarising multiple years
 [ ] implement refunds (esp. for ZKB / Healthco)
-[ ] implement revolut parser
+[ ] fail if summarising multiple years
+---
 [ ] add option to sort by category in summary command 
 [ ] special command to create new rule directly in CLI
 [ ] implement IBKR parsing tool?
 
 # tidy ups / refactors
-[ ] convert rules.ts to rules.csv (for easier editing, sorting?)
+[ ] minor: fix item formatting (e.g. | SP Gripgrab |  |  | SP GRIPGRAB)
+[ ] rename item to transaction
 [ ] rename overrides to 'annotations' (or something more accurate like this)
+[ ] convert rules.ts to rules.csv (for easier editing, sorting?)
 [ ] get rid of valuta (requires regenration of overrides)
 [ ] store only what's needed in overrides (i.e. date, amount + user-generated input, i.e. category, comment)
 
 # bugs
-[ ] minor: fix item formatting (e.g. | SP Gripgrab |  |  | SP GRIPGRAB)
 [ ] Only compute averages for months that actually have values
 [ ] table summary wrong includes "IGNORED" items. Reproduce:
    bin/money summary -f ~/Drive/money/all.csv
