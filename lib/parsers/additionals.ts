@@ -13,7 +13,7 @@ export class AdditionalInputParser implements InputParser {
     return JSON.parse(input).map((item: AdditionalItem) => ({
       date: moment(item.date),
       amount: item.amount,
-      description: item.description,
+      description: `${item.description} #additionals`,
     }));
   }
 }

@@ -28,7 +28,10 @@ export class ZKBInputParser implements InputParser {
         items.push({
           date: it.date,
           amount: it.debitChf,
-          description: _.join([it.bookingText, it.paymentPurpose], ' | '),
+          description: _.join(
+            [it.bookingText, it.paymentPurpose, '#zkb'],
+            ' | '
+          ),
         } as Item);
       } else {
         // this happens when a transaction is followed by details on separate lines

@@ -26,7 +26,13 @@ export class VisecaInputParser implements InputParser {
         date: it.date,
         amount: it.amount,
         description: _.join(
-          [it.merchantName, it.merchantPlace, it.merchantCountry, it.details],
+          [
+            it.merchantName,
+            it.merchantPlace,
+            it.merchantCountry,
+            it.details,
+            '#viseca',
+          ],
           ' | '
         ),
       } as Item);
