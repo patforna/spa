@@ -22,6 +22,7 @@ interface Arguments {
 export default (): void => {
   const commands = [];
   const wiring = new Wiring();
+  const rulesRepo = wiring.rulesRepo;
   const overridesRepo = wiring.overridesRepo;
   const categoriser = wiring.categoriser;
   const inputParserFactory = wiring.inputParserFactory;
@@ -52,7 +53,7 @@ Examples:
       },
       handler: (args) => {
         commands.push(
-          new CategoriseCommand(overridesRepo, categoriser),
+          new CategoriseCommand(rulesRepo, overridesRepo, categoriser),
           args['json'] ? new JsonCommand() : new TableCommand()
         );
       },
@@ -80,7 +81,7 @@ Examples:
       },
       handler: (args) => {
         commands.push(
-          new CategoriseCommand(overridesRepo, categoriser),
+          new CategoriseCommand(rulesRepo, overridesRepo, categoriser),
           new CategoryCommand(args['sortBy'], args['category'])
         );
       },
@@ -100,7 +101,7 @@ Examples:
       },
       handler: () => {
         commands.push(
-          new CategoriseCommand(overridesRepo, categoriser),
+          new CategoriseCommand(rulesRepo, overridesRepo, categoriser),
           new ClusterCommand()
         );
       },

@@ -4,11 +4,12 @@ import * as path from 'path';
 import { Categoriser } from '../lib/categoriser.js';
 import { CategoriseCommand } from '../lib/commands/categorise.js';
 import { Command } from '../lib/commands/index.js';
+import { FxRateService } from '../lib/fxRates.js';
 import { Item, ItemRepo } from '../lib/items.js';
 import { run } from '../lib/main.js';
-import { Summary } from '../lib/summary.js';
 import { InputParserFactory } from '../lib/parsers/index.js';
-import { FxRateService } from '../lib/fxRates.js';
+import { Rules, RulesRepo } from '../lib/rules.js';
+import { Summary } from '../lib/summary.js';
 
 // Keep track of temp files created
 const tempFiles: string[] = [];
@@ -32,6 +33,13 @@ class CaptureItemsCommand implements Command {
 }
 
 // Fake FX rate service for testing
+const fakeRulesRepo = {
+  load(): Rules {
+    return { other: [new RegExp('.*', 'i')] }; // match everything
+  },
+} as unknown as RulesRepo;
+
+// Fake FX rate service for testing
 const fakeFxRateService = {
   convert: async (from: string, to: string, amount: number) => {
     if (from === 'GBP' && to === 'CHF') return amount * 1.1; // Example GBP to CHF rate
@@ -42,10 +50,16 @@ const fakeFxRateService = {
 
 describe('Acceptance tests', () => {
   const overridesRepo = new ItemRepo(createTempFile(JSON.stringify([])));
-  const categoriser = new Categoriser(overridesRepo.load());
+  const categoriser = new Categoriser(
+    fakeRulesRepo.load(),
+    overridesRepo.load()
+  );
   const capture = new CaptureItemsCommand();
   const inputParserFactory = new InputParserFactory(fakeFxRateService);
-  const commands = [new CategoriseCommand(overridesRepo, categoriser), capture];
+  const commands = [
+    new CategoriseCommand(fakeRulesRepo, overridesRepo, categoriser),
+    capture,
+  ];
 
   afterAll(() => {
     tempFiles.forEach((file) => fs.rmSync(file, { force: true }));

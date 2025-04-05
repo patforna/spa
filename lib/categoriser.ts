@@ -1,13 +1,15 @@
 import moment from 'moment';
 import { Item } from './items.js';
-import rules from './rules.js';
+import { Rules } from './rules.js';
 
 export const NO_CATEGORY = 'no_category';
 export const IGNORE = 'ignore';
 
 export class Categoriser {
+  #rules: Rules;
   #overrides: Item[];
-  constructor(overrides: Item[]) {
+  constructor(rules: Rules, overrides: Item[]) {
+    this.#rules = rules;
     this.#overrides = overrides;
   }
 
@@ -19,7 +21,7 @@ export class Categoriser {
 
     const oItem = overriddenItem(this.#overrides, item);
     if (oItem?.category) item.category = oItem.category;
-    else categoriseUsingRules(item);
+    else categoriseUsingRules(this.#rules, item);
 
     if (!item.category) item.category = NO_CATEGORY;
 
@@ -41,7 +43,7 @@ function overriddenItem(overrides: Item[], item: Item): Item {
   return found;
 }
 
-function categoriseUsingRules(item: Item): void {
+function categoriseUsingRules(rules: Rules, item: Item): void {
   Object.entries(rules).forEach((rule) => {
     const [cat, res] = rule;
     res.forEach((re: RegExp) => {

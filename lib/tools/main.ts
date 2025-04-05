@@ -5,11 +5,13 @@ import { hideBin } from 'yargs/helpers';
 import { Categoriser, IGNORE, NO_CATEGORY } from '../categoriser.js';
 import { Item, ItemRepo, asString, shortDescription } from '../items.js';
 import { InputParserFactory } from '../parsers/index.js';
+import { Rules } from '../rules.js';
 import { Wiring } from '../wiring.js';
 
 export default (): void => {
   const commands: (() => Promise<void>)[] = [];
   const wiring = new Wiring();
+  const rules = wiring.rulesRepo.load();
   const overridesRepo = wiring.overridesRepo;
   const inputParserFactory = wiring.inputParserFactory;
 
@@ -53,9 +55,10 @@ export default (): void => {
         commands.push(async (): Promise<void> => {
           const data = readFileSync(args['file'], 'utf8');
           await removeUnnecessaryOverrides(
-            data,
+            rules,
             overridesRepo,
-            inputParserFactory
+            inputParserFactory,
+            data
           );
         });
       },
@@ -76,7 +79,7 @@ export default (): void => {
       handler: (args) => {
         commands.push(async (): Promise<void> => {
           const data = readFileSync(args['file'], 'utf8');
-          await ruleStats(data, inputParserFactory);
+          await ruleStats(rules, inputParserFactory, data);
         });
       },
     })
@@ -125,11 +128,12 @@ async function regen(
 }
 
 async function removeUnnecessaryOverrides(
-  data: string,
+  rules: Rules,
   overridesRepo: ItemRepo,
-  inputParserFactory: InputParserFactory
+  inputParserFactory: InputParserFactory,
+  data: string
 ) {
-  const categoriser = new Categoriser([]);
+  const categoriser = new Categoriser(rules, []);
   let items = await inputParserFactory.createParser(data).parse(data);
   items.forEach((item) => categoriser.categorise(item));
   items = items.filter((item) => item.category !== NO_CATEGORY);
@@ -158,8 +162,6 @@ async function removeUnnecessaryOverrides(
   );
 }
 
-import rules from '../rules.js';
-
 interface RuleStat {
   category: string;
   rule: string;
@@ -167,7 +169,11 @@ interface RuleStat {
   conflicts: string[];
 }
 
-async function ruleStats(data: string, inputParserFactory: InputParserFactory) {
+async function ruleStats(
+  rules: Rules,
+  inputParserFactory: InputParserFactory,
+  data: string
+) {
   const items = await inputParserFactory.createParser(data).parse(data);
   console.log('items length: ' + items.length);
   const stats: { [k: string]: RuleStat } = {};

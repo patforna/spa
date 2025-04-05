@@ -4,18 +4,22 @@ import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import _ from 'lodash';
 import { Categoriser, IGNORE, NO_CATEGORY } from '../categoriser.js';
 import { Item, ItemRepo, asString, itemsForCategory } from '../items.js';
-import rules from '../rules.js';
+import { RulesRepo } from '../rules.js';
 import { Command } from './index.js';
 
 inquirer.registerPrompt('autocomplete', inquirerPrompt);
 
-const categories = _.concat(_.sortBy(Object.keys(rules)), IGNORE);
-
 export class CategoriseCommand implements Command {
+  #rulesRepo: RulesRepo;
   #overridesRepo: ItemRepo;
   #categoriser: Categoriser;
 
-  constructor(overridesRepo: ItemRepo, categoriser: Categoriser) {
+  constructor(
+    rulesRepo: RulesRepo,
+    overridesRepo: ItemRepo,
+    categoriser: Categoriser
+  ) {
+    this.#rulesRepo = rulesRepo;
     this.#overridesRepo = overridesRepo;
     this.#categoriser = categoriser;
   }
@@ -23,13 +27,16 @@ export class CategoriseCommand implements Command {
   async execute(items: Item[]): Promise<void> {
     const year = guessYear(items);
     console.log('Guessed year:', year);
+
+    const rules = this.#rulesRepo.load();
+    const categories = _.concat(_.sortBy(Object.keys(rules)), IGNORE);
     items.forEach((item) => this.#categoriser.categorise(item, year));
 
     const uncategorised = itemsForCategory(items, NO_CATEGORY);
 
     // ask user to categorise the ones we couldn't categorise automatically
     for (const item of uncategorised) {
-      const category = await promptForCategory(item);
+      const category = await promptForCategory(categories, item);
       if (category === 'split') {
         console.log('*** SPLIT MODE ***');
         const splitItems = [];
@@ -37,7 +44,7 @@ export class CategoriseCommand implements Command {
         while (remainingAmount > 0) {
           const itemCopy = _.cloneDeep(item);
           itemCopy.amount = await promptForAmount(remainingAmount);
-          itemCopy.category = await promptForCategory(item);
+          itemCopy.category = await promptForCategory(categories, item);
           itemCopy.comment = await promptForComment();
           splitItems.push(itemCopy);
           remainingAmount -= itemCopy.amount;
@@ -59,7 +66,10 @@ export class CategoriseCommand implements Command {
   }
 }
 
-async function promptForCategory(item: Item): Promise<string> {
+async function promptForCategory(
+  categories: string[],
+  item: Item
+): Promise<string> {
   const answer = await inquirer.prompt([
     {
       type: 'autocomplete',
@@ -69,7 +79,7 @@ async function promptForCategory(item: Item): Promise<string> {
         chalk.reset.yellow(asString(item)) +
         '\n',
       pageSize: 20,
-      source: (_, input: string) => autocompleteCategory(input),
+      source: (_, input: string) => autocompleteCategory(categories, input),
       validate: (input) => {
         if (_.trim(input) === '')
           throw new Error('Please provide a category name.');
@@ -118,7 +128,7 @@ function guessYear(items: Item[]): number {
 }
 
 // narrow down list of categories or return input when no results found
-function autocompleteCategory(input: string) {
+function autocompleteCategory(categories: string[], input: string) {
   const filtered = _.filter(
     categories,
     (c) => input == undefined || c.startsWith(input.toLowerCase())
