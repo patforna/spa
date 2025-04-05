@@ -10,6 +10,7 @@ import { run } from '../lib/main.js';
 import { InputParserFactory } from '../lib/parsers/index.js';
 import { Rules, RulesRepo } from '../lib/rules.js';
 import { Summary } from '../lib/summary.js';
+import { Wiring } from '../lib/wiring.js';
 
 // Keep track of temp files created
 const tempFiles: string[] = [];
@@ -36,6 +37,7 @@ class CaptureItemsCommand implements Command {
 const fakeRulesRepo = {
   load(): Rules {
     return {
+      activities: [new RegExp('#activities', 'i')],
       shopping: [new RegExp('#shopping', 'i')],
       ignore: [new RegExp('#ignore', 'i')],
       other: [new RegExp('.*', 'i')],
@@ -109,8 +111,20 @@ describe('Acceptance tests', () => {
     await run([createTempFile(input)], inputParserFactory, commands);
 
     const { amount, transactions } = capture.summary.total();
-    expect(transactions).toBe(4);
-    expect(amount).toBe(183);
+    expect(transactions).toBe(5);
+    expect(amount).toBe(230);
+
+    const shopping = capture.summary.totalForCategory('shopping');
+    expect(shopping.transactions).toBe(3);
+    expect(shopping.amount).toBe(90);
+
+    const activities = capture.summary.totalForCategory('activities');
+    expect(activities.transactions).toBe(1);
+    expect(activities.amount).toBe(110);
+
+    const other = capture.summary.totalForCategory('other');
+    expect(other.transactions).toBe(1);
+    expect(other.amount).toBe(30);
   });
 
   test('should process Viseca transactions', async () => {
@@ -135,6 +149,14 @@ describe('Acceptance tests', () => {
     const { amount, transactions } = capture.summary.total();
     expect(transactions).toBe(5);
     expect(amount).toBe(613);
+
+    const shopping = capture.summary.totalForCategory('shopping');
+    expect(shopping.transactions).toBe(2);
+    expect(shopping.amount).toBe(172);
+
+    const other = capture.summary.totalForCategory('other');
+    expect(other.transactions).toBe(3);
+    expect(other.amount).toBe(441);
   });
 
   test('should process additional transactions', async () => {
@@ -160,23 +182,31 @@ describe('Acceptance tests', () => {
     await run([file1, file2], inputParserFactory, commands);
 
     const { amount, transactions } = capture.summary.total();
-    expect(transactions).toBe(9);
-    expect(amount).toBe(1826);
+    expect(transactions).toBe(10);
+    expect(amount).toBe(1873);
   });
 
-  test('should categorise transactions', async () => {
-    const input = fs.readFileSync(
-      path.join(testDir, 'revolut-transactions.csv'),
-      'utf8'
-    );
-    await run([createTempFile(input)], inputParserFactory, commands);
+  test('should test using prod-ish config', async () => {
+    // ---
+    // PRIMARILY USED FOR DEBUGGING - NOT TESTING
+    // ---
+    const csv =
+      'Type,Product,Started Date,Completed Date,Description,Amount,Fee,Currency,State,Balance\nCARD_PAYMENT,Current,2025-02-28 14:48:46,2025-03-01 20:36:27,AMAZON,-73.70,0.00,CHF,COMPLETED,2950.30';
+    const file = createTempFile(csv);
 
-    const shopping = capture.summary.totalForCategory('shopping');
-    expect(shopping.transactions).toBe(2);
-    expect(shopping.amount).toBe(172);
+    const wiring = new Wiring();
+    const commands = [
+      new CategoriseCommand(
+        wiring.rulesRepo,
+        wiring.overridesRepo,
+        wiring.categoriser
+      ),
+      capture,
+    ];
 
-    const other = capture.summary.totalForCategory('other');
-    expect(other.transactions).toBe(3);
-    expect(other.amount).toBe(441);
+    await run([file], inputParserFactory, commands);
+
+    expect(capture.summary.items.length).toBe(1);
+    expect(capture.summary.items[0].category).toEqual('shopping');
   });
 });

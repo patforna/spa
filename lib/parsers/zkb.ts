@@ -4,7 +4,7 @@ import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
 interface ZKBItem {
-  date: moment.Moment;
+  date?: moment.Moment;
   bookingText: string;
   amountDetails: number;
   debitChf: number;
@@ -14,20 +14,18 @@ interface ZKBItem {
 
 export class ZKBInputParser implements InputParser {
   async parse(input: string): Promise<Item[]> {
-    const zkbItems = parseCSV(input)
-      .map((x) => x as ZKBItem)
-      .filter(
-        (x) => x.debitChf > 0 || (x.amountDetails > 0 && x.creditChf <= 0)
-      );
+    const xxx = parseCSV(input);
+    const zkbItems = xxx.map((x) => x as ZKBItem);
 
     const items: Item[] = [];
     let parent: Item;
     for (const it of zkbItems) {
       if (it.date) {
+        const amount = it.debitChf > 0 ? it.debitChf : -it.creditChf;
         parent = null; // reset parent to indicate that we are not processing details
         items.push({
           date: it.date,
-          amount: it.debitChf,
+          amount: amount,
           description: _.join(
             [it.bookingText, it.paymentPurpose, '#zkb'],
             ' | '
@@ -43,7 +41,12 @@ export class ZKBInputParser implements InputParser {
           date: parent.date,
           amount: it.amountDetails,
           description: _.join(
-            [parent.description, it.bookingText, it.paymentPurpose],
+            [
+              _.replace(parent.description, '#zkb', ''),
+              it.bookingText,
+              it.paymentPurpose,
+              '#zkb',
+            ],
             ' | '
           ),
         } as Item);
