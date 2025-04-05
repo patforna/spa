@@ -8,6 +8,7 @@ import { FKBInputParser } from './fkb.js';
 import { VisecaInputParser } from './viseca.js';
 import { WiseInputParser } from './wise.js';
 import { ZKBInputParser } from './zkb.js';
+import { RevolutInputParser } from './revolut.js';
 export interface InputParser {
   parse(input: string): Promise<Item[]>;
 }
@@ -22,6 +23,8 @@ export class InputParserFactory {
 
     if (firstLine.startsWith('ID,Status,Direction'))
       return new WiseInputParser(this.fxRateService);
+
+    if (firstLine.startsWith('Type,Product')) return new RevolutInputParser();
 
     if (firstLine.startsWith('"Date";"Booking text";'))
       return new ZKBInputParser();

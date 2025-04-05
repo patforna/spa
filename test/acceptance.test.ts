@@ -99,6 +99,18 @@ describe('Acceptance tests', () => {
     expect(amount).toBe(1643);
   });
 
+  test('should process Revolut transactions', async () => {
+    const input = fs.readFileSync(
+      path.join(testDir, 'revolut-transactions.csv'),
+      'utf8'
+    );
+    await run([createTempFile(input)], inputParserFactory, commands);
+
+    const { amount, transactions } = capture.summary.total();
+    expect(transactions).toBe(2);
+    expect(amount).toBe(307);
+  });
+
   test('should process additional transactions', async () => {
     const input = fs.readFileSync(
       path.join(testDir, 'additional-transactions.json'),

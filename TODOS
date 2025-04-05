@@ -1,3 +1,5 @@
+[ ] check for revolut transaction where curr != CHF
+
 # features
 [ ] do not guess year / fail if summarising multiple years
 [ ] implement refunds (esp. for ZKB / Healthco)
