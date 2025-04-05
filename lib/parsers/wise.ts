@@ -2,6 +2,7 @@ import moment from 'moment';
 import { FxRateService } from '../fxRates.js';
 import { Item } from '../items.js';
 import { InputParser, parseCSV } from './index.js';
+import _ from 'lodash';
 
 interface WiseItem {
   id: string;
@@ -10,7 +11,9 @@ interface WiseItem {
   createdOn: moment.Moment;
   sourceAmountAfterFees: number;
   sourceCurrency: string;
+  sourceName: string;
   targetName: string;
+  reference: string;
 }
 
 export class WiseInputParser implements InputParser {
@@ -19,12 +22,7 @@ export class WiseInputParser implements InputParser {
   async parse(input: string): Promise<Item[]> {
     const wiseItems = parseCSV(input)
       .map((x) => x as WiseItem)
-      .filter(
-        (x) =>
-          x.direction == 'OUT' &&
-          x.status == 'COMPLETED' &&
-          x.sourceAmountAfterFees > 0
-      );
+      .filter((x) => x.sourceAmountAfterFees != 0);
 
     const items: Item[] = [];
     for (const it of wiseItems) {
@@ -35,10 +33,15 @@ export class WiseInputParser implements InputParser {
         it.createdOn
       );
 
+      const merchant = it.status === 'REFUNDED' ? it.sourceName : it.targetName;
+
       items.push({
         date: it.createdOn,
-        amount: amountInCHF,
-        description: `${it.targetName} | #wise`,
+        amount: it.direction === 'OUT' ? amountInCHF : -amountInCHF,
+        description: _.join(
+          [it.id, it.direction, merchant, it.reference, 'wise'],
+          ' | '
+        ),
       } as Item);
     }
 

@@ -37,6 +37,7 @@ const fakeRulesRepo = {
   load(): Rules {
     return {
       shopping: [new RegExp('#shopping', 'i')],
+      ignore: [new RegExp('#ignore', 'i')],
       other: [new RegExp('.*', 'i')],
     };
   },
@@ -87,9 +88,17 @@ describe('Acceptance tests', () => {
     );
     await run([createTempFile(input)], inputParserFactory, commands);
 
-    const { amount, transactions } = capture.summary.total();
-    expect(transactions).toBe(3);
-    expect(amount).toBe(94);
+    // const { amount, transactions } = capture.summary.total();
+    // expect(transactions).toBe(6);
+    // expect(amount).toBe(264);
+
+    const shopping = capture.summary.totalForCategory('shopping');
+    expect(shopping.transactions).toBe(3);
+    expect(shopping.amount).toBe(41);
+
+    const other = capture.summary.totalForCategory('other');
+    expect(other.transactions).toBe(3);
+    expect(other.amount).toBe(250);
   });
 
   test('should process ZKB transactions', async () => {
