@@ -5,7 +5,7 @@ import _ from 'lodash';
 
 interface RevolutItem {
   type: string;
-  completedDate: moment.Moment;
+  startedDate: moment.Moment;
   amount: number;
   fee: number;
   currency: string;
@@ -22,7 +22,7 @@ export class RevolutInputParser implements InputParser {
     const items: Item[] = [];
     for (const it of revolutItems) {
       items.push({
-        date: it.completedDate,
+        date: it.startedDate,
         amount: -it.amount,
         description: _.join([it.type, it.description, '#revolut'], ' | '),
       } as Item);

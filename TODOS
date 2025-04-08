@@ -3,7 +3,7 @@
 [ ] check for revolut transaction where curr != CHF (probably only if non-CHF accounts are used)
 [ ] fail if summarising multiple years
 ---
-[ ] add option to sort by category in summary command 
+[ ] add option to sort by category in summary command
 [ ] special command to create new rule directly in CLI
 [ ] implement IBKR parsing tool?
 
@@ -16,6 +16,8 @@
 [ ] store only what's needed in overrides (i.e. date, amount + user-generated input, i.e. category, comment)
 
 # bugs
+[ ] make "SPLIT" work with credits (positive amounts)
+[ ] split items don't show up in details
 [ ] Only compute averages for months that actually have values
 [ ] table summary wrong includes "IGNORED" items. Reproduce:
    bin/money summary -f ~/Drive/money/all.csv
