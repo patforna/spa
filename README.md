@@ -87,3 +87,6 @@ Run formatter:
 
     npm run format
 
+## Debugging
+
+    node --inspect-brk bin/money.mjs <other args>

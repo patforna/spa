@@ -39,7 +39,7 @@ export class WiseInputParser implements InputParser {
         date: it.createdOn,
         amount: it.direction === 'OUT' ? amountInCHF : -amountInCHF,
         description: _.join(
-          [it.id, it.direction, merchant, it.reference, 'wise'],
+          [it.id, it.direction, merchant, it.reference, '#wise'],
           ' | '
         ),
       } as Item);

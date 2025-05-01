@@ -1,5 +1,7 @@
 # features
 [ ] implement refunds for Viseca (need an example first)
+    See 
+    39 TRX2025041700000140991,40470327O1OX1250,04/16/2025 09:30:24,03/25/2025 00:00:00,-12.000,CHF,-12.000,CHF,H&M,,,BOOKED,H  M Hennes  Mauritz AG,merchant
 [ ] check for revolut transaction where curr != CHF (probably only if non-CHF accounts are used)
 [ ] fail if summarising multiple years
 ---
@@ -8,6 +10,7 @@
 [ ] implement IBKR parsing tool?
 
 # tidy ups / refactors
+[ ] 🚨 Invert +/- so that debits are minus and credits are plus
 [ ] minor: fix item formatting (e.g. | SP Gripgrab |  |  | SP GRIPGRAB)
 [ ] rename item to transaction
 [ ] rename overrides to 'annotations' (or something more accurate like this)

@@ -16,7 +16,7 @@ export const FX_API_URL = 'http://data.fixer.io/api/';
 export class Wiring {
   readonly rulesRepo: RulesRepo;
   readonly overridesRepo: ItemRepo;
-  readonly categoriser: Categoriser;
+  readonly categoriser: Categoriser; // TODO replace with categoriserFor(rules, overrides)
   readonly fxRateService: FxRateService;
   readonly inputParserFactory: InputParserFactory;
 
