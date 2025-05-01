@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import Papa from 'papaparse';
 import { FxRateService } from '../fxRates.js';
 import { Item } from '../items.js';
@@ -9,6 +9,7 @@ import { VisecaInputParser } from './viseca.js';
 import { WiseInputParser } from './wise.js';
 import { ZKBInputParser } from './zkb.js';
 import { RevolutInputParser } from './revolut.js';
+
 export interface InputParser {
   parse(input: string): Promise<Item[]>;
 }
@@ -54,7 +55,7 @@ export function parseCSV(input: string): object[] {
     transformHeader: _.camelCase,
     transform: (value: string) => {
       // attempt to parse the value as a date using multiple formats and return as moment object
-      const parsedDate = moment(
+      const parsedDate = moment.tz(
         value,
         [
           'DD.MM.YY', // fkb
@@ -62,7 +63,8 @@ export function parseCSV(input: string): object[] {
           'DD.MM.YYYY', // zkb
           'MM/DD/YYYY HH:mm:ss', // viseca
         ],
-        true
+        true,
+        'Europe/Zurich' // since we don't know the input TZ, we assume date/times are in Zurich
       );
       if (parsedDate.isValid()) {
         return parsedDate;
