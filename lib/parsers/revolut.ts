@@ -3,9 +3,11 @@ import { Item } from '../items.js';
 import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
+// using completedDate here as opposed to startedDate because monthly
+// statements from revolut are sliced by completedDate ¯\_(ツ)_/¯
 interface RevolutItem {
   type: string;
-  startedDate: moment.Moment;
+  completedDate: moment.Moment;
   amount: number;
   fee: number;
   currency: string;
@@ -22,7 +24,7 @@ export class RevolutInputParser implements InputParser {
     const items: Item[] = [];
     for (const it of revolutItems) {
       items.push({
-        date: it.startedDate,
+        date: it.completedDate,
         amount: -it.amount,
         description: _.join([it.type, it.description, '#revolut'], ' | '),
       } as Item);
