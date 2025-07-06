@@ -7,10 +7,12 @@ import moment from 'moment';
 
 const API_KEY = process.env['FIXER_API_KEY'];
 const API_URL = 'http://data.fixer.io/api/';
+const RATE_LIMIT_DELAY_MS = 1000; // 1 second delay between API calls to avoid rate limiting errors
 
 export class FxRateService {
   #repo: FxRateRepo;
   #cache: Map<string, FxRateItem>;
+
   constructor(repo: FxRateRepo) {
     this.#repo = repo;
     this.#cache = this.createCacheFrom(repo.load());
@@ -50,7 +52,27 @@ export class FxRateService {
     date: moment.Moment
   ): Promise<number> {
     try {
+      // Rate limiting: wait 1 second between API calls to avoid rate limiting errors
+      console.log(
+        `Rate limiting: waiting ${RATE_LIMIT_DELAY_MS}ms before API call`
+      );
+      await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY_MS));
+
       const response = await axios.get(this.endpointUrl(from, to, date));
+
+      // Check if the API call was successful
+      if (!response.data || response.data.success === false) {
+        throw new Error(`API request failed: ${response}`);
+      }
+
+      // Check if the required currencies are in the response
+      const rates = response.data.rates;
+      if (!rates || !rates[from] || !rates[to]) {
+        throw new Error(
+          `Currency ${from} or ${to} not found in API response: ${response}`
+        );
+      }
+
       // this is a hack/workaround because the free version of fixer.io only
       // allows EUR as a base currency. Therefore we request the EUR exchange
       // for both `to` and `from` and approximate the exchange rate for the
