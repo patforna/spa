@@ -42,8 +42,14 @@ function categoriseUsingRules(rules: Rules, item: Item): void {
   Object.entries(rules).forEach((rule) => {
     const [cat, res] = rule;
     res.forEach((re: RegExp) => {
-      if (item.category === undefined && re.test(item.description))
+      if (re.test(item.description)) {
+        if (item.category && item.category !== cat && cat !== IGNORE)
+          throw new Error(
+            `Multiple categories found for item: "${item.description}" - [${item.category}, ${cat}]`
+          );
         item.category = cat;
+        if (cat === IGNORE) return;
+      }
     });
   });
 }
