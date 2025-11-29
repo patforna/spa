@@ -117,13 +117,13 @@ async function promptForComment(): Promise<string> {
 }
 
 // FIXME maybe re-purpose for date validation
-function guessYear(items: Item[]): number {
-  if (!items?.length) {
-    return new Date().getFullYear();
-  }
-  const m = _.groupBy(items, (it) => it.date.year());
-  return Number(_.sortBy(Object.entries(m), ([_, v]) => -v.length)[0][0]);
-}
+// function guessYear(items: Item[]): number {
+//   if (!items?.length) {
+//     return new Date().getFullYear();
+//   }
+//   const m = _.groupBy(items, (it) => it.date.year());
+//   return Number(_.sortBy(Object.entries(m), ([_, v]) => -v.length)[0][0]);
+// }
 
 // narrow down list of categories or return input when no results found
 function autocompleteCategory(categories: string[], input: string) {
