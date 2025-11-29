@@ -1,5 +1,4 @@
 # features
-[ ] check for revolut transaction where curr != CHF (probably only if non-CHF accounts are used)
 [ ] fail if summarising multiple years
 ---
 [ ] add option to sort by category in summary command

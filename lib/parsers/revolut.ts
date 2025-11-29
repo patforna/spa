@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { FxRateService } from '../fxRates.js';
 import { Item } from '../items.js';
 import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
@@ -16,6 +17,8 @@ interface RevolutItem {
 }
 
 export class RevolutInputParser implements InputParser {
+  constructor(private readonly fxRateService: FxRateService) {}
+
   async parse(input: string): Promise<Item[]> {
     const revolutItems = parseCSV(input)
       .map((x) => x as RevolutItem)
@@ -23,9 +26,18 @@ export class RevolutInputParser implements InputParser {
 
     const items: Item[] = [];
     for (const it of revolutItems) {
+      let amount = -it.amount;
+      if (it.currency !== 'CHF') {
+        amount = await this.fxRateService.convert(
+          it.currency,
+          'CHF',
+          amount,
+          it.completedDate
+        );
+      }
       items.push({
         date: it.completedDate,
-        amount: -it.amount,
+        amount: amount,
         description: _.join([it.type, it.description, '#revolut'], ' | '),
       } as Item);
     }

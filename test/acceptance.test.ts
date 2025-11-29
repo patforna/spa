@@ -52,6 +52,7 @@ const fakeFxRateService = {
   convert: async (from: string, to: string, amount: number) => {
     if (from === 'GBP' && to === 'CHF') return amount * 1.1; // Example GBP to CHF rate
     if (from === 'EUR' && to === 'CHF') return amount * 0.9; // Example EUR to CHF rate
+    if (from === 'USD' && to === 'CHF') return amount * 0.8; // Example USD to CHF rate
     throw new Error(`Unsupported currency conversion from ${from} to ${to}`);
   },
 } as unknown as FxRateService;
@@ -149,12 +150,12 @@ describe('Acceptance tests', () => {
     await run([createTempFile(input)], inputParserFactory, commands);
 
     const { amount, transactions } = capture.summary.total();
-    expect(transactions).toBe(5);
-    expect(amount).toBe(613);
+    expect(transactions).toBe(7);
+    expect(amount).toBe(677);
 
     const shopping = capture.summary.totalForCategory('shopping');
-    expect(shopping.transactions).toBe(2);
-    expect(shopping.amount).toBe(172);
+    expect(shopping.transactions).toBe(4);
+    expect(shopping.amount).toBe(236);
 
     const other = capture.summary.totalForCategory('other');
     expect(other.transactions).toBe(3);
