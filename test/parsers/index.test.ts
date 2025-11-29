@@ -13,25 +13,34 @@ function csvFor(date: string) {
 describe('parseCSV', () => {
   test('should parse FKB dates', () => {
     // DD.MM.YY
-    expect(parseDate('01.02.23').isSame('2023-02-01')).toBe(true);
+
+    expect(
+      parseDate('01.02.23').isSame(moment.tz('2023-02-01', 'Europe/Zurich'))
+    ).toBe(true);
   });
 
   test('should parse Wise dates', () => {
     // YYYY-MM-DD HH:mm:ss
-    expect(parseDate('2025-02-28 02:27:47').isSame('2025-02-28 02:27:47')).toBe(
-      true
-    );
+    expect(
+      parseDate('2025-02-28 02:27:47').isSame(
+        moment.tz('2025-02-28 02:27:47', 'Europe/Zurich')
+      )
+    ).toBe(true);
   });
 
   test('should parse ZKB dates', () => {
     // DD.MM.YYYY
-    expect(parseDate('31.01.2025').isSame('2025-01-31')).toBe(true);
+    expect(
+      parseDate('31.01.2025').isSame(moment.tz('2025-01-31', 'Europe/Zurich'))
+    ).toBe(true);
   });
 
   test('should parse Viseca dates', () => {
     // MM/DD/YYYY HH:mm:ss
-    expect(parseDate('03/17/2025 09:58:03').isSame('2025-03-17 09:58:03')).toBe(
-      true
-    );
+    expect(
+      parseDate('03/17/2025 09:58:03').isSame(
+        moment.tz('2025-03-17 09:58:03', 'Europe/Zurich')
+      )
+    ).toBe(true);
   });
 });
