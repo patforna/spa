@@ -4,33 +4,35 @@
 
 At the beginning of each month...
 
-* Download common transactions to: `~/Drive/money/common/2025`
+- Download common transactions to: `~/Drive/money/common/2025`
 
-  * Download Viseca transactions (viseca-common-jane, viseca-common-patric)
-  * Download ZKB transactions (zkb-common)
-  * Download Wise transactions (wise-common)
+  - Download Viseca transactions (viseca-common-jane, viseca-common-patric)
+  - Download ZKB transactions (zkb-common)
+  - Download Wise transactions (wise-common)
 
-* Download private transactions to: `~/Drive/money/patric/2025`
+- Download private transactions to: `~/Drive/money/patric/2025`
 
-  * Download Viseca transactions (viseca-patric)
-  * Download ZKB transactions (zkb-patric)
-  * Download Revolut transactions (revolut-patric)
+  - Download Viseca transactions (viseca-patric)
+  - Download ZKB transactions (zkb-patric)
+  - Download Revolut transactions (revolut-patric)
 
-* Run common analysis for entire year:
+- Run common analysis for entire year:
 
-    bin/money summary -i ~/Drive/money/common/2025
+  bin/money summary -i ~/Drive/money/common/2025
 
-* Run private analysis for last month:
+- Run private analysis for last month:
 
-    bin/money summary -i ~/Drive/money/patric/2025-03*
+  bin/money summary -i ~/Drive/money/patric/2025-03\*
 
 ## Prerequisite
 
 Node >= 20.6.0
 
 For currency conversion (required for Wise transactions), you need:
+
 1. A Fixer.io API key (get one at https://fixer.io)
 2. Set it as an environment variable:
+
 ```bash
 export FIXER_API_KEY=your_api_key_here
 ```
@@ -67,9 +69,9 @@ Install dependencies:
 
     npm install
 
-To transpile the *.ts files to *.js, run:
+To transpile the _.ts files to _.js, run:
 
-    npx tsc
+    npm run build
 
 Run tests:
 
