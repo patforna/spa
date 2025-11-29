@@ -1,5 +1,5 @@
 # features
-[ ] fail if summarising multiple years
+[x] fail if summarising multiple years
 ---
 [ ] add option to sort by category in summary command
 [ ] special command to create new rule directly in CLI

@@ -25,6 +25,9 @@ export class Summary {
       months: _.range(12).map(() => ({ categories: {} })),
     };
 
+    if (_.uniq(items.map((item) => item.date.year())).length > 1)
+      throw new Error('Cannot summarise transactions from multiple years.');
+
     this.items = itemsExcludingIgnored(items);
     this.items.forEach((item) =>
       add(this.data, `categories.${item.category}`, item)
