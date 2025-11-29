@@ -40,7 +40,9 @@ const fakeRulesRepo = {
       activities: [new RegExp('#activities', 'i')],
       shopping: [new RegExp('#shopping', 'i')],
       ignore: [new RegExp('#ignore', 'i')],
-      other: [new RegExp('.*', 'i')],
+      other: [
+        new RegExp('^(?!.*#activities)(?!.*#shopping)(?!.*#ignore).*$', 'i'),
+      ], // everything else
     };
   },
 } as unknown as RulesRepo;
