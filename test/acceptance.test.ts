@@ -137,8 +137,8 @@ describe('Acceptance tests', () => {
     await run([createTempFile(input)], inputParserFactory, commands);
 
     const { amount, transactions } = capture.summary.total();
-    expect(transactions).toBe(5);
-    expect(amount).toBe(1643);
+    expect(transactions).toBe(6);
+    expect(amount).toBe(1631);
   });
 
   test('should process Revolut transactions', async () => {
@@ -184,8 +184,8 @@ describe('Acceptance tests', () => {
     await run([file1, file2], inputParserFactory, commands);
 
     const { amount, transactions } = capture.summary.total();
-    expect(transactions).toBe(10);
-    expect(amount).toBe(1873);
+    expect(transactions).toBe(11);
+    expect(amount).toBe(1861);
   });
 
   test('should test using prod-ish config', async () => {

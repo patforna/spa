@@ -18,7 +18,7 @@ export class VisecaInputParser implements InputParser {
   async parse(input: string): Promise<Item[]> {
     const visecaItems = parseCSV(input)
       .map((x) => x as VisecaItem)
-      .filter((x) => x.amount > 0 && x.stateType === 'BOOKED');
+      .filter((x) => x.stateType === 'BOOKED');
 
     const items: Item[] = [];
     for (const it of visecaItems) {
