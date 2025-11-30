@@ -25,7 +25,8 @@ export class InputParserFactory {
     if (firstLine.startsWith('ID,Status,Direction'))
       return new WiseInputParser(this.fxRateService);
 
-    if (firstLine.startsWith('Type,Product')) return new RevolutInputParser(this.fxRateService);
+    if (firstLine.startsWith('Type,Product'))
+      return new RevolutInputParser(this.fxRateService);
 
     if (firstLine.startsWith('"Date";"Booking text";'))
       return new ZKBInputParser();
