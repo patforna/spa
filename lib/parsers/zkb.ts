@@ -21,7 +21,7 @@ export class ZKBInputParser implements InputParser {
     let parent: Item;
     for (const it of zkbItems) {
       if (it.date) {
-        const amount = it.debitChf > 0 ? it.debitChf : -it.creditChf;
+        const amount = it.debitChf > 0 ? -it.debitChf : it.creditChf;
         parent = null; // reset parent to indicate that we are not processing details
         items.push({
           date: it.date,
@@ -39,7 +39,7 @@ export class ZKBInputParser implements InputParser {
 
         items.push({
           date: parent.date,
-          amount: it.amountDetails,
+          amount: -it.amountDetails,
           description: _.join(
             [
               _.replace(parent.description, '#zkb', ''),

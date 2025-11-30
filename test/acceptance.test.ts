@@ -83,7 +83,7 @@ describe('Acceptance tests', () => {
 
     const { amount, transactions } = capture.summary.total();
     expect(transactions).toBe(4);
-    expect(amount).toBe(310);
+    expect(amount).toBe(-310);
   });
 
   test('should process Wise transactions', async () => {
@@ -99,11 +99,11 @@ describe('Acceptance tests', () => {
 
     const shopping = capture.summary.totalForCategory('shopping');
     expect(shopping.transactions).toBe(3);
-    expect(shopping.amount).toBe(41);
+    expect(shopping.amount).toBe(-40);
 
     const other = capture.summary.totalForCategory('other');
     expect(other.transactions).toBe(3);
-    expect(other.amount).toBe(250);
+    expect(other.amount).toBe(-250);
   });
 
   test('should process ZKB transactions', async () => {
@@ -115,19 +115,19 @@ describe('Acceptance tests', () => {
 
     const { amount, transactions } = capture.summary.total();
     expect(transactions).toBe(5);
-    expect(amount).toBe(230);
+    expect(amount).toBe(-230);
 
     const shopping = capture.summary.totalForCategory('shopping');
     expect(shopping.transactions).toBe(3);
-    expect(shopping.amount).toBe(90);
+    expect(shopping.amount).toBe(-90);
 
     const activities = capture.summary.totalForCategory('activities');
     expect(activities.transactions).toBe(1);
-    expect(activities.amount).toBe(110);
+    expect(activities.amount).toBe(-110);
 
     const other = capture.summary.totalForCategory('other');
     expect(other.transactions).toBe(1);
-    expect(other.amount).toBe(30);
+    expect(other.amount).toBe(-30);
   });
 
   test('should process Viseca transactions', async () => {
@@ -139,7 +139,7 @@ describe('Acceptance tests', () => {
 
     const { amount, transactions } = capture.summary.total();
     expect(transactions).toBe(6);
-    expect(amount).toBe(1631);
+    expect(amount).toBe(-1631);
   });
 
   test('should process Revolut transactions', async () => {
@@ -151,15 +151,15 @@ describe('Acceptance tests', () => {
 
     const { amount, transactions } = capture.summary.total();
     expect(transactions).toBe(7);
-    expect(amount).toBe(677);
+    expect(amount).toBe(-677);
 
     const shopping = capture.summary.totalForCategory('shopping');
     expect(shopping.transactions).toBe(4);
-    expect(shopping.amount).toBe(236);
+    expect(shopping.amount).toBe(-236);
 
     const other = capture.summary.totalForCategory('other');
     expect(other.transactions).toBe(3);
-    expect(other.amount).toBe(441);
+    expect(other.amount).toBe(-441);
   });
 
   test('should process additional transactions', async () => {
@@ -171,7 +171,7 @@ describe('Acceptance tests', () => {
 
     const { amount, transactions } = capture.summary.total();
     expect(transactions).toBe(3);
-    expect(amount).toBe(2982);
+    expect(amount).toBe(-2982);
   });
 
   test('should process multiple files', async () => {
@@ -186,7 +186,7 @@ describe('Acceptance tests', () => {
 
     const { amount, transactions } = capture.summary.total();
     expect(transactions).toBe(11);
-    expect(amount).toBe(1861);
+    expect(amount).toBe(-1861);
   });
 
   test('should test using prod-ish config', async () => {

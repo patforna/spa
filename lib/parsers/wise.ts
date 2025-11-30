@@ -37,7 +37,7 @@ export class WiseInputParser implements InputParser {
 
       items.push({
         date: it.createdOn,
-        amount: it.direction === 'OUT' ? amountInCHF : -amountInCHF,
+        amount: it.direction === 'OUT' ? -amountInCHF : amountInCHF,
         description: _.join(
           [it.id, it.direction, merchant, it.reference, '#wise'],
           ' | '

@@ -24,7 +24,7 @@ export class VisecaInputParser implements InputParser {
     for (const it of visecaItems) {
       items.push({
         date: it.date,
-        amount: it.amount,
+        amount: -it.amount,
         description: _.join(
           [
             it.merchantName,

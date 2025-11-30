@@ -63,9 +63,9 @@ export class Summary {
   }
 
   percentageForCategory(category: string): number {
-    return _.round(
-      (100 / this.total().amount) * this.totalForCategory(category).amount
-    );
+    const val =
+      (100 / this.total().amount) * this.totalForCategory(category).amount;
+    return Math.sign(val) * Math.round(Math.abs(val));
   }
 
   totalsByMonth(): Total[] {
@@ -116,6 +116,6 @@ function add(data: SummaryData, field: string, item: Item): void {
     obj = _.get(data.months[month], field);
   }
 
-  obj.amount += Math.round(item.amount);
+  obj.amount += Math.sign(item.amount) * Math.round(Math.abs(item.amount));
   obj.transactions += 1;
 }

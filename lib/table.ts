@@ -77,7 +77,11 @@ function formatTotals(value: Total[]): string[] {
 
 function format(value: Total): string {
   const parts = [];
-  parts.push(_.round(value.amount).toLocaleString());
+  parts.push(
+    (
+      Math.sign(value.amount) * Math.round(Math.abs(value.amount))
+    ).toLocaleString()
+  );
   parts.push(
     _.padStart('(' + _.round(value.transactions).toLocaleString() + ')', 4)
   );

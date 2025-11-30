@@ -25,7 +25,7 @@ export class FKBInputParser implements InputParser {
       {}
     ) as Item;
 
-    item.amount = item.amount * -1; // flip the FKB logic (i.e. amounts always positive)
+    // item.amount = item.amount * -1; // flip the FKB logic (i.e. amounts always positive)
     item.date = moment.utc(item.date, FKBInputParser.DATE_FORMAT);
     item.card = parseCard(item.description);
     item.valuta = moment.utc(item.valuta, FKBInputParser.DATE_FORMAT);

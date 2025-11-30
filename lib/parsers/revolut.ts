@@ -26,7 +26,7 @@ export class RevolutInputParser implements InputParser {
 
     const items: Item[] = [];
     for (const it of revolutItems) {
-      let amount = -it.amount;
+      let amount = it.amount;
       if (it.currency !== 'CHF') {
         amount = await this.fxRateService.convert(
           it.currency,

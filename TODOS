@@ -4,7 +4,7 @@
 
 # tidy ups / refactors
 
-[ ] 🚨 Invert +/- so that debits are minus and credits are plus
+[ ] delete additionals code - it's noise and no longer needed.
 [ ] minor: fix item formatting (e.g. | SP Gripgrab | | | SP GRIPGRAB)
 [ ] rename item to transaction
 [ ] rename overrides to 'annotations' (or something more accurate like this)
