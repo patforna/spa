@@ -5,13 +5,11 @@
 At the beginning of each month...
 
 - Download common transactions to: `~/Drive/money/common/2025`
-
   - Download Viseca transactions (viseca-common-jane, viseca-common-patric)
   - Download ZKB transactions (zkb-common)
   - Download Wise transactions (wise-common)
 
 - Download private transactions to: `~/Drive/money/patric/2025`
-
   - Download Viseca transactions (viseca-patric)
   - Download ZKB transactions (zkb-patric)
   - Download Revolut transactions (revolut-patric)
@@ -63,31 +61,36 @@ Or, to get help on a subcommand:
     # Find similar transactions
     bin/money cluster -i ~/Drive/money/common/2023/common-2023.csv
 
-## How to build
+## Development
 
 Install dependencies:
 
     npm install
 
-To transpile the _.ts files to _.js, run:
+Transpile TypeScript:
 
     npm run build
+
+Type-check only:
+
+    npm run typecheck
 
 Run tests:
 
     npm test
+    npm test -- --watch # watch mode
 
-In watch mode:
-
-    npm test -- --watch
-
-Run linter:
+Lint:
 
     npm run lint
 
-Run formatter:
+Format:
 
     npm run format
+
+🚨🚨🚨 Before committing (test, lint, format check, typecheck):
+
+    npm run check
 
 ## Debugging
 
