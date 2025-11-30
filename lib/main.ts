@@ -49,12 +49,19 @@ Examples:
             default: false,
             describe: 'Display result in json instead of table format.',
           },
+          sortBy: {
+            alias: 's',
+            type: 'string',
+            default: 'category',
+            choices: ['category', 'amount'],
+            describe: 'Sort by "category" or "amount". Default: "category".',
+          },
         });
       },
       handler: (args) => {
         commands.push(
           new CategoriseCommand(rulesRepo, overridesRepo, categoriser),
-          args['json'] ? new JsonCommand() : new TableCommand()
+          args['json'] ? new JsonCommand() : new TableCommand(args['sortBy'])
         );
       },
     })

@@ -38,13 +38,13 @@ export class Summary {
     return _.take(moment.monthsShort(), this.data.months.length);
   }
 
-  // all category names - sorted by category total
+  // all category names - sorted alphabetically
   get categoryNames(): string[] {
     const categories = _.union<string>(
       this.data.months.flatMap((m) => Object.keys(m.categories))
     );
 
-    return _.sortBy(categories, (c) => this.totalForCategory(c).amount);
+    return _.sortBy(categories);
   }
 
   totalsForCategoryByMonth(category: string): Total[] {

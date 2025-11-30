@@ -24,16 +24,16 @@ const config: TableUserConfig = {
   },
 };
 
-export function tableFrom(summary: Summary): string {
-  return _table(tableData(summary), config);
+export function tableFrom(summary: Summary, sortBy: string): string {
+  return _table(tableData(summary, sortBy), config);
 }
 
-function tableData(summary: Summary): string[][] {
+export function tableData(summary: Summary, sortBy: string): string[][] {
   let rows = [];
   rows = _.concat(rows, [
     headerOrFooterRow(_.concat(summary.monthNames, 'Avg', 'Total', '%')),
   ]);
-  rows = _.concat(rows, categoryRows(summary));
+  rows = _.concat(rows, categoryRows(summary, sortBy));
   rows = _.concat(rows, [headerOrFooterRow(totalsRow(summary))]);
 
   return rows;
@@ -43,8 +43,16 @@ function headerOrFooterRow(values: string[]): string[] {
   return _.concat('', values).map((x) => chalk.yellow(x));
 }
 
-function categoryRows(summary: Summary): string[][] {
-  return summary.categoryNames.map((c) =>
+function categoryRows(summary: Summary, sortBy: string): string[][] {
+  let categories = summary.categoryNames;
+
+  if (sortBy === 'amount')
+    categories = _.sortBy(
+      categories,
+      (c) => -summary.totalForCategory(c).amount
+    );
+
+  return categories.map((c) =>
     _.concat(
       chalk.yellow(c),
       formatTotals(summary.totalsForCategoryByMonth(c)),

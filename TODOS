@@ -1,12 +1,12 @@
 # features
 
-[ ] add option to sort by category in summary command
 [ ] special command to create new rule directly in CLI
-[ ] implement IBKR parsing tool?
 
 # tidy ups / refactors
 
 [ ] 🚨 Invert +/- so that debits are minus and credits are plus
+[ ] Rename TableCommand to SummaryCommand
+[ ] Rename CategoryCommand to DetailsCommand
 [ ] minor: fix item formatting (e.g. | SP Gripgrab | | | SP GRIPGRAB)
 [ ] rename item to transaction
 [ ] rename overrides to 'annotations' (or something more accurate like this)
