@@ -3,7 +3,7 @@ import { Card, Item } from '../lib/items.js';
 import { Summary } from '../lib/summary.js';
 import { tableData } from '../lib/table.js';
 
-describe('tableData', () => {
+describe('Table', () => {
   const createItem = (
     date: string,
     category: string,

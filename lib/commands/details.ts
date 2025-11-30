@@ -25,7 +25,7 @@ const map = {
   [SortBy.Description]: [[(i: Item) => shortDescription(i)]],
 };
 
-export class CategoryCommand implements Command {
+export class DetailsCommand implements Command {
   #category: string;
   #sortBy: SortBy;
   // pass category === '*' to list all categories (excl. ignored)

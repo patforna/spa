@@ -3,10 +3,10 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { CategoriseCommand } from './commands/categorise.js';
 import { ClusterCommand } from './commands/cluster.js';
-import { CategoryCommand, SortBy } from './commands/details.js';
+import { DetailsCommand, SortBy } from './commands/details.js';
 import { Command } from './commands/index.js';
 import { JsonCommand } from './commands/json.js';
-import { TableCommand } from './commands/table.js';
+import { SummaryCommand } from './commands/summary.js';
 import { InputParserFactory } from './parsers/index.js';
 import { Wiring } from './wiring.js';
 import { expandPaths } from './utils.js';
@@ -61,7 +61,7 @@ Examples:
       handler: (args) => {
         commands.push(
           new CategoriseCommand(rulesRepo, overridesRepo, categoriser),
-          args['json'] ? new JsonCommand() : new TableCommand(args['sortBy'])
+          args['json'] ? new JsonCommand() : new SummaryCommand(args['sortBy'])
         );
       },
     })
@@ -89,7 +89,7 @@ Examples:
       handler: (args) => {
         commands.push(
           new CategoriseCommand(rulesRepo, overridesRepo, categoriser),
-          new CategoryCommand(args['sortBy'], args['category'])
+          new DetailsCommand(args['sortBy'], args['category'])
         );
       },
     })
