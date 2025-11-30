@@ -52,7 +52,10 @@ export class Summary {
   }
 
   avgForCategory(category: string): Total {
-    return mean(this.totalsForCategoryByMonth(category));
+    const totals = this.totalsForCategoryByMonth(category).filter(
+      (t) => t.amount !== 0
+    );
+    return totals.length === 0 ? ZERO_TOTAL : mean(totals);
   }
 
   totalForCategory(category: string): Total {
@@ -83,7 +86,8 @@ export class Summary {
   }
 
   avg(): Total {
-    return mean(this.totalsByMonth());
+    const totals = this.totalsByMonth().filter((t) => t.amount !== 0);
+    return totals.length === 0 ? ZERO_TOTAL : mean(totals);
   }
 
   total(): Total {
