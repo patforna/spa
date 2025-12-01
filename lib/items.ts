@@ -80,18 +80,43 @@ export function itemsExcludingIgnored(items: Item[]): Item[] {
   return items.filter((item) => item.category !== IGNORE);
 }
 
+const REPLACEMENTS = [
+  /^Purchase ZKB Visa Debit card no\. xxxx \d+,? /,
+  /^Online purchase ZKB Visa Debit card no\. xxxx \d+,? /,
+  /^Refund ZKB Visa Debit card no\. xxxx \d+,? /,
+  /^Debit eBanking Mobile.*: /,
+  /^Debit Account transfer: /,
+  /^Credit originator: /,
+];
+
+const IGNORED_PATTERNS = [
+  /^CARD_TRANSACTION-\d+$/,
+  /^Debit eBanking Mobile.*$/,
+];
+
+const IGNORED_STRINGS = new Set(['OUT', 'IN', 'NEUTRAL', 'CHE']);
+
 export function shortDescription(item: Item): string {
-  return item.description.replace('Zahlung - ', '').replace(afterDesc, ''); // FIXME meh... FKB specific - not sure it should be here
+  return item.description
+    .replace('Zahlung - ', '')
+    .replace(afterDesc, '')
+    .split('|')
+    .map((s) => s.trim())
+    .map((s) => REPLACEMENTS.reduce((acc, regex) => acc.replace(regex, ''), s))
+    .filter((s) => !!s)
+    .filter((s) => !IGNORED_PATTERNS.some((regex) => s.match(regex)))
+    .filter((s) => !IGNORED_STRINGS.has(s))
+    .join(' | ');
 }
 
 export function asString(item: Item, showCategory = false): string {
   const parts = [];
-  if (showCategory) parts.push(_.padStart(item.category.toUpperCase(), 10));
-  parts.push(item.date.format('DD.MM.YY')); // FIXME use ISO format
-  parts.push(_.padStart(_.round(item.amount).toLocaleString(), 6));
-  parts.push(_.padStart(Card[item.card], 7));
+  if (showCategory) parts.push(_.padStart(item.category.toUpperCase(), 12));
+  parts.push(item.date.format('YYYY-MM-DD'));
+  parts.push(_.padStart(_.round(item.amount).toLocaleString(), 10));
+  parts.push(_.padStart(Card[item.card] || '-', 8));
   parts.push(shortDescription(item));
-  if (item.comment) parts.push(`Comment: ${item.comment}`);
+  if (item.comment) parts.push(`| Comment: ${item.comment}`);
 
   return parts.join(' | ');
 }

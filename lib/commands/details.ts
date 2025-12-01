@@ -37,6 +37,16 @@ export class DetailsCommand implements Command {
   async execute(items: Item[]): Promise<void> {
     if (this.#category) items = itemsForCategory(items, this.#category);
 
+    console.log(
+      [
+        _.padStart('CATEGORY', 12),
+        _.padStart('DATE', 10),
+        _.padStart('AMOUNT', 10),
+        _.padStart('CARD', 8),
+        'DESCRIPTION',
+      ].join(' | ')
+    );
+
     _.orderBy(items, ...map[this.#sortBy]).forEach((item) =>
       console.log(asString(item, true))
     );
