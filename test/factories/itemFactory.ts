@@ -8,6 +8,5 @@ export const makeItem = (overrides: Partial<Item> = {}): Item => ({
   category: '',
   comment: '',
   card: Card.Unknown,
-  valuta: moment(),
   ...overrides,
 });

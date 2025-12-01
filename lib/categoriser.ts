@@ -28,11 +28,7 @@ export class Categoriser {
 
 function overriddenItem(overrides: Item[], item: Item): Item {
   const found = overrides.find(({ date, amount }) => {
-    // date is same as valuta is a legacy hack, because in overrides.json some items have been saved with date as valuta
-    return (
-      (moment(date).isSame(item.date) || moment(date).isSame(item.valuta)) &&
-      amount === item.amount
-    );
+    return moment(date).isSame(item.date) && amount === item.amount;
   });
 
   return found;

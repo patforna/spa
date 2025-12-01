@@ -4,11 +4,10 @@
 
 # tidy ups / refactors
 
-[ ] update card details
+[ ] delete additionals code - it's noise and no longer needed.
 [ ] rename item to transaction
 [ ] tidy up item / transaction creation code (incl. shortDescription, card handling, etc.)
-[ ] delete additionals code - it's noise and no longer needed.
-[ ] get rid of valuta (requires regenration of overrides)
+[ ] update card details
 
 # bugs
 

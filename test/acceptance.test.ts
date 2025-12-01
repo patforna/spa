@@ -74,18 +74,6 @@ describe('Acceptance tests', () => {
     tempFiles.forEach((file) => fs.rmSync(file, { force: true }));
   });
 
-  test('should process FKB transactions', async () => {
-    const input = fs.readFileSync(
-      path.join(testDir, 'fkb-transactions.csv'),
-      'latin1'
-    );
-    await run([createTempFile(input)], inputParserFactory, commands);
-
-    const { amount, transactions } = capture.summary.total();
-    expect(transactions).toBe(4);
-    expect(amount).toBe(-310);
-  });
-
   test('should process Wise transactions', async () => {
     const input = fs.readFileSync(
       path.join(testDir, 'wise-transactions.csv'),

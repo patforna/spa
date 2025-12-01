@@ -4,11 +4,6 @@ import _ from 'lodash';
 import moment from 'moment';
 import { IGNORE } from './categoriser.js';
 
-// FIXME meh... FKB specific - not sure it should be here
-// regex matching everything after the descriptoin (e.g. " - 29.01.2022 17:03...")
-// eslint-disable-next-line no-useless-escape
-const afterDesc = / - \d\d\.\d\d\.\d\d\d\d\ \d\d:\d\d.*/;
-
 export interface Item {
   date: moment.Moment;
   amount: number;
@@ -16,7 +11,6 @@ export interface Item {
   category: string;
   comment: string;
   card: Card;
-  valuta: moment.Moment; // DO NOT use; this is here for legacy reason as some of the overrides have been wrongly saved with valuta instead of date.
 }
 
 export enum Card {
@@ -25,7 +19,7 @@ export enum Card {
   Self = 2,
 }
 
-// FIXME this would probably be better done when parsing input (also: FKB specific logic)
+// FIXME this would probably be better done when parsing input
 export function parseCard(description: string): Card {
   if (description.includes('7837')) return Card.Partner;
   if (description.includes('5885')) return Card.Partner;
@@ -99,7 +93,6 @@ const IGNORED_STRINGS = new Set(['OUT', 'IN', 'NEUTRAL', 'CHE']);
 export function shortDescription(item: Item): string {
   return item.description
     .replace('Zahlung - ', '')
-    .replace(afterDesc, '')
     .split('|')
     .map((s) => s.trim())
     .map((s) => REPLACEMENTS.reduce((acc, regex) => acc.replace(regex, ''), s))

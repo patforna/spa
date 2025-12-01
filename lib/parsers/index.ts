@@ -4,7 +4,6 @@ import Papa from 'papaparse';
 import { FxRateService } from '../fxRates.js';
 import { Item } from '../items.js';
 import { AdditionalInputParser } from './additionals.js';
-import { FKBInputParser } from './fkb.js';
 import { VisecaInputParser } from './viseca.js';
 import { WiseInputParser } from './wise.js';
 import { ZKBInputParser } from './zkb.js';
@@ -19,8 +18,6 @@ export class InputParserFactory {
 
   createParser(input: string): InputParser {
     const firstLine = input.trimStart().split('\n')[0];
-
-    if (firstLine.startsWith('Kontoauszug bis:')) return new FKBInputParser();
 
     if (firstLine.startsWith('ID,Status,Direction'))
       return new WiseInputParser(this.fxRateService);
@@ -59,7 +56,6 @@ export function parseCSV(input: string): object[] {
       const parsedDate = moment.tz(
         value,
         [
-          'DD.MM.YY', // fkb
           'YYYY-MM-DD HH:mm:ss', // wise
           'DD.MM.YYYY', // zkb
           'MM/DD/YYYY HH:mm:ss', // viseca

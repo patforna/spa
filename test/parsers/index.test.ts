@@ -11,14 +11,6 @@ function csvFor(date: string) {
 }
 
 describe('parseCSV', () => {
-  test('should parse FKB dates', () => {
-    // DD.MM.YY
-
-    expect(
-      parseDate('01.02.23').isSame(moment.tz('2023-02-01', 'Europe/Zurich'))
-    ).toBe(true);
-  });
-
   test('should parse Wise dates', () => {
     // YYYY-MM-DD HH:mm:ss
     expect(
