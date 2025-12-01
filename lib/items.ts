@@ -32,7 +32,6 @@ export function parseCard(description: string): Card {
   return Card.Unknown;
 }
 
-// FIXME this should maybe be called OverridesRepo once additionals.json is gone...
 export class ItemRepo {
   #path: string;
   #items: Item[];
@@ -44,7 +43,7 @@ export class ItemRepo {
     this.#items = JSON.parse(readFileSync(this.#path).toString());
     this.#items.forEach((it) => {
       it.date = moment.utc(it.date);
-      it.card = parseCard(it.description); // FIXME this should be done when parsing input (it actually is - remove once description is removed from overrides and additionals.json is gone)
+      it.card = parseCard(it.description); // FIXME this should be done when parsing input (it actually is - remove once description is removed from overrides)
     });
     return this.#items;
   }

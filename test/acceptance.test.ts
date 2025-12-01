@@ -150,18 +150,6 @@ describe('Acceptance tests', () => {
     expect(other.amount).toBe(-441);
   });
 
-  test('should process additional transactions', async () => {
-    const input = fs.readFileSync(
-      path.join(testDir, 'additional-transactions.json'),
-      'utf8'
-    );
-    await run([createTempFile(input)], inputParserFactory, commands);
-
-    const { amount, transactions } = capture.summary.total();
-    expect(transactions).toBe(3);
-    expect(amount).toBe(-2982);
-  });
-
   test('should process multiple files', async () => {
     const file1 = createTempFile(
       fs.readFileSync(path.join(testDir, 'zkb-transactions.csv'), 'utf8')

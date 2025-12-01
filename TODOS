@@ -4,7 +4,6 @@
 
 # tidy ups / refactors
 
-[ ] delete additionals code - it's noise and no longer needed.
 [ ] rename item to transaction
 [ ] tidy up item / transaction creation code (incl. shortDescription, card handling, etc.)
 [ ] update card details
