@@ -19,7 +19,6 @@ export class Categoriser {
     else categoriseUsingRules(this.#rules, tx);
 
     if (!tx.category) tx.category = NO_CATEGORY;
-
     if (override?.comment) tx.comment = override.comment;
 
     return tx;
