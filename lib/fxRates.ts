@@ -62,14 +62,14 @@ export class FxRateService {
 
       // Check if the API call was successful
       if (!response.data || response.data.success === false) {
-        throw new Error(`API request failed: ${response}`);
+        throw new Error(`API request failed: ${JSON.stringify(response.data)}`);
       }
 
       // Check if the required currencies are in the response
       const rates = response.data.rates;
       if (!rates || !rates[from] || !rates[to]) {
         throw new Error(
-          `Currency ${from} or ${to} not found in API response: ${response}`
+          `Currency ${from} or ${to} not found in API response: ${JSON.stringify(response.data)}`
         );
       }
 
