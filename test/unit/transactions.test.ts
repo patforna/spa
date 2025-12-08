@@ -15,7 +15,7 @@ describe('shortDescription', () => {
   test('should remove noise from description', () => {
     const txs = [
       makeTx({
-        description: 'CARD_TRANSACTION-1234 | OUT | Amazon | CHE | #wise',
+        description: 'OUT | Amazon | CHE | #wise',
       }),
       makeTx({
         description:

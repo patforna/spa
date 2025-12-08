@@ -85,8 +85,8 @@ const REPLACEMENTS = [
 ];
 
 const IGNORED_PATTERNS = [
-  /^CARD_TRANSACTION-\d+$/,
   /^Debit eBanking Mobile.*$/,
+  /^CARD_TRANSACTION-\d+$/,
 ];
 
 const IGNORED_STRINGS = new Set(['OUT', 'IN', 'NEUTRAL', 'CHE']);

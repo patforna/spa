@@ -5,7 +5,6 @@ import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
 interface WiseRow {
-  id: string;
   status: string;
   direction: string;
   createdOn: moment.Moment;
@@ -40,7 +39,7 @@ export class WiseInputParser implements InputParser {
         date: row.createdOn,
         amount: row.direction === 'OUT' ? -amountInCHF : amountInCHF,
         description: _.join(
-          [row.id, row.direction, merchant, row.reference, '#wise'],
+          [row.direction, merchant, row.reference, '#wise'],
           ' | '
         ),
       } as Transaction);
