@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import moment from 'moment-timezone';
 import * as os from 'os';
 import * as path from 'path';
 import { Categoriser } from '../../lib/categoriser.js';
@@ -11,17 +12,12 @@ import { InputParserFactory } from '../../lib/parsers/index.js';
 import { Rules, RulesRepo } from '../../lib/rules.js';
 import { Summary } from '../../lib/summary.js';
 
-// Keep track of temp files created
-const tempFiles: string[] = [];
-const acceptanceDir = path.join(process.cwd(), 'test', 'acceptance');
-const dataDir = path.join(acceptanceDir, 'data');
+const dataDir = path.join(process.cwd(), 'test', 'acceptance', 'data');
 
-// Helper to create a temporary file with content
 function createTempFile(content: string): string {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'money-test-'));
   const filePath = path.join(tempDir, 'test.csv');
   fs.writeFileSync(filePath, content, 'utf8');
-  tempFiles.push(filePath);
   return filePath;
 }
 
@@ -37,6 +33,7 @@ const fakeOverridesRepo = {
   load(): Transaction[] {
     return [];
   },
+  saveAll(): void {},
 } as unknown as OverridesRepo;
 
 // Fake rules repo for testing
@@ -68,105 +65,135 @@ describe('Acceptance tests', () => {
     fakeRulesRepo.load(),
     fakeOverridesRepo.load()
   );
-  const capture = new CaptureTxsCommand();
+  const captureCommand = new CaptureTxsCommand();
   const inputParserFactory = new InputParserFactory(fakeFxRateService);
   const commands = [
     new CategoriseCommand(fakeRulesRepo, fakeOverridesRepo, categoriser),
-    capture,
+    captureCommand,
   ];
 
-  afterAll(() => {
-    tempFiles.forEach((file) => fs.rmSync(file, { force: true }));
-  });
-
   test('should process Wise transactions', async () => {
-    const input = fs.readFileSync(
-      path.join(dataDir, 'wise-transactions.csv'),
-      'utf8'
+    await run(
+      [path.join(dataDir, 'wise-transactions.csv')],
+      inputParserFactory,
+      commands
     );
-    await run([createTempFile(input)], inputParserFactory, commands);
 
-    const { amount, transactions } = capture.summary.total();
+    const { amount, transactions } = captureCommand.summary.total();
     expect(transactions).toBe(6);
     expect(amount).toBe(-4);
 
-    const shopping = capture.summary.totalForCategory('shopping');
+    const shopping = captureCommand.summary.totalForCategory('shopping');
     expect(shopping.transactions).toBe(3);
     expect(shopping.amount).toBe(-1);
 
-    const other = capture.summary.totalForCategory('other');
+    const other = captureCommand.summary.totalForCategory('other');
     expect(other.transactions).toBe(3);
     expect(other.amount).toBe(-3);
   });
 
   test('should process ZKB transactions', async () => {
-    const input = fs.readFileSync(
-      path.join(dataDir, 'zkb-transactions.csv'),
-      'utf8'
+    await run(
+      [path.join(dataDir, 'zkb-transactions.csv')],
+      inputParserFactory,
+      commands
     );
-    await run([createTempFile(input)], inputParserFactory, commands);
 
-    const { amount, transactions } = capture.summary.total();
+    const { amount, transactions } = captureCommand.summary.total();
     expect(transactions).toBe(5);
     expect(amount).toBe(-3);
 
-    const shopping = capture.summary.totalForCategory('shopping');
+    const shopping = captureCommand.summary.totalForCategory('shopping');
     expect(shopping.transactions).toBe(3);
     expect(shopping.amount).toBe(-1);
 
-    const activities = capture.summary.totalForCategory('activities');
+    const activities = captureCommand.summary.totalForCategory('activities');
     expect(activities.transactions).toBe(1);
     expect(activities.amount).toBe(-1);
 
-    const other = capture.summary.totalForCategory('other');
+    const other = captureCommand.summary.totalForCategory('other');
     expect(other.transactions).toBe(1);
     expect(other.amount).toBe(-1);
   });
 
   test('should process Viseca transactions', async () => {
-    const input = fs.readFileSync(
-      path.join(dataDir, 'viseca-transactions.csv'),
-      'utf8'
+    await run(
+      [path.join(dataDir, 'viseca-transactions.csv')],
+      inputParserFactory,
+      commands
     );
-    await run([createTempFile(input)], inputParserFactory, commands);
 
-    const { amount, transactions } = capture.summary.total();
+    const { amount, transactions } = captureCommand.summary.total();
     expect(transactions).toBe(6);
     expect(amount).toBe(-4);
   });
 
   test('should process Revolut transactions', async () => {
-    const input = fs.readFileSync(
-      path.join(dataDir, 'revolut-transactions.csv'),
-      'utf8'
+    await run(
+      [path.join(dataDir, 'revolut-transactions.csv')],
+      inputParserFactory,
+      commands
     );
-    await run([createTempFile(input)], inputParserFactory, commands);
 
-    const { amount, transactions } = capture.summary.total();
+    const { amount, transactions } = captureCommand.summary.total();
     expect(transactions).toBe(4);
     expect(amount).toBe(-2);
 
-    const shopping = capture.summary.totalForCategory('shopping');
+    const shopping = captureCommand.summary.totalForCategory('shopping');
     expect(shopping.transactions).toBe(2);
     expect(shopping.amount).toBe(0);
 
-    const other = capture.summary.totalForCategory('other');
+    const other = captureCommand.summary.totalForCategory('other');
     expect(other.transactions).toBe(2);
     expect(other.amount).toBe(-2);
   });
 
   test('should process multiple files', async () => {
-    const file1 = createTempFile(
-      fs.readFileSync(path.join(dataDir, 'zkb-transactions.csv'), 'utf8')
-    );
-    const file2 = createTempFile(
-      fs.readFileSync(path.join(dataDir, 'viseca-transactions.csv'), 'utf8')
+    await run(
+      [
+        path.join(dataDir, 'zkb-transactions.csv'),
+        path.join(dataDir, 'viseca-transactions.csv'),
+      ],
+      inputParserFactory,
+      commands
     );
 
-    await run([file1, file2], inputParserFactory, commands);
-
-    const { amount, transactions } = capture.summary.total();
+    const { amount, transactions } = captureCommand.summary.total();
     expect(transactions).toBe(11);
     expect(amount).toBe(-7);
+  });
+
+  test('should expand split transactions from overrides', async () => {
+    const date = moment();
+    const amount = -100;
+    const txs = [{ date, amount }] as Transaction[];
+    const fakeParserFactory = {
+      createParser: () => ({ parse: async () => txs }),
+    } as unknown as InputParserFactory;
+
+    const overrides = [
+      {
+        date,
+        amount,
+        splits: [
+          { amount: -60, category: 'a' },
+          { amount: -40, category: 'b' },
+        ],
+      },
+    ] as unknown as Transaction[];
+
+    await run(
+      [createTempFile('')],
+      fakeParserFactory,
+      [captureCommand],
+      overrides
+    );
+
+    const splitA = captureCommand.summary.totalForCategory('a');
+    expect(splitA.transactions).toBe(1);
+    expect(splitA.amount).toBe(-60);
+    const splitB = captureCommand.summary.totalForCategory('b');
+    expect(splitB.transactions).toBe(1);
+    expect(splitB.amount).toBe(-40);
   });
 });

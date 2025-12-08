@@ -1,17 +1,10 @@
-# features
-
-[ ] special command to create new rule directly in CLI
-
-# tidy ups / refactors
-
+[ ] make "SPLIT" work with credits (positive amounts)
+[ ] load and wire overrides once! (inject repo only for saving)
+[ ] FIXME and TODOs
 [ ] tidy up item / transaction creation code (incl. shortDescription, card handling, etc.)
 [ ] update card details
+[ ] anything else you'd change on that codebase?
 
-# bugs
+# features (for another day)
 
-[ ] make "SPLIT" work with credits (positive amounts)
-[ ] split items don't show up in details
-
-# cluster
-
-[ ] cluster - sorty by total or size
+[ ] special command to create new rule directly in CLI

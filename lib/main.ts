@@ -7,6 +7,7 @@ import { DetailsCommand } from './commands/details.js';
 import { Command } from './commands/index.js';
 import { SummaryCommand } from './commands/summary.js';
 import { InputParserFactory } from './parsers/index.js';
+import { Transaction, expandSplits } from './transactions.js';
 import { Wiring } from './wiring.js';
 import { expandPaths } from './utils.js';
 
@@ -107,13 +108,17 @@ Examples:
     })
     .parseSync();
 
-  Promise.all([run(args.inputs as string[], inputParserFactory, commands)]);
+  const overrides = overridesRepo.load();
+  Promise.all([
+    run(args.inputs as string[], inputParserFactory, commands, overrides),
+  ]);
 };
 
 export async function run(
   inputs: string[],
   inputParserFactory: InputParserFactory,
-  commands: Command[]
+  commands: Command[],
+  overrides: Transaction[] = []
 ) {
   const filePaths = await expandPaths(...inputs);
   console.log(
@@ -127,6 +132,8 @@ export async function run(
     const parser = inputParserFactory.createParser(content);
     txs.push(...(await parser.parse(content)));
   }
+
+  expandSplits(txs, overrides);
 
   for (const command of commands) {
     await command.execute(txs);

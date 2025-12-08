@@ -11,6 +11,7 @@ export interface Transaction {
   category: string;
   comment: string;
   card: Card;
+  splits?: Transaction[];
 }
 
 export enum Card {
@@ -34,33 +35,27 @@ export function parseCard(description: string): Card {
 
 export class OverridesRepo {
   #path: string;
-  #txs: Transaction[];
+
   constructor(path: string) {
     this.#path = path;
   }
 
   load(): Transaction[] {
-    this.#txs = JSON.parse(readFileSync(this.#path).toString());
-    this.#txs.forEach((tx) => {
+    const txs = JSON.parse(readFileSync(this.#path).toString());
+    txs.forEach((tx) => {
       tx.date = moment.utc(tx.date);
       tx.card = parseCard(tx.description); // FIXME this should be done when parsing input (it actually is - remove once description is removed from overrides)
     });
-    return this.#txs;
-  }
-
-  save(tx: Transaction): void {
-    this.#txs.push(tx);
-    this.saveAll(this.#txs);
+    return txs;
   }
 
   saveAll(txs: Transaction[]): void {
     const toSave = _.sortBy(txs, 'date').map((tx) =>
-      // date, amount are used as primary keys
-      // category and comment are user-generated content we want to hold on to
-      _.pick(tx, ['date', 'amount', 'description', 'category', 'comment'])
+      tx.splits
+        ? _.pick(tx, ['date', 'amount', 'description', 'splits'])
+        : _.pick(tx, ['date', 'amount', 'description', 'category', 'comment'])
     );
     writeFileSync(this.#path, stringify(toSave));
-    this.load();
   }
 }
 
@@ -73,6 +68,15 @@ export function txsForCategory(
 
 export function txsExcludingIgnored(txs: Transaction[]): Transaction[] {
   return txs.filter((tx) => tx.category !== IGNORE);
+}
+
+export function findOverride(
+  overrides: Transaction[],
+  tx: Transaction
+): Transaction {
+  return overrides.find(({ date, amount }) => {
+    return moment(date).isSame(tx.date) && amount === tx.amount;
+  });
 }
 
 const REPLACEMENTS = [
@@ -113,4 +117,33 @@ export function asString(tx: Transaction, showCategory = false): string {
   if (tx.comment) parts.push(`| Comment: ${tx.comment}`);
 
   return parts.join(' | ');
+}
+
+/**
+ * Expands split transactions in place.
+ * If an input transaction matches a split override (by date + amount),
+ * it is replaced with the split children.
+ */
+export function expandSplits(
+  txs: Transaction[],
+  overrides: Transaction[]
+): void {
+  const splitOverrides = overrides.filter(
+    (o) => o.splits && o.splits.length > 0
+  );
+
+  for (let i = txs.length - 1; i >= 0; i--) {
+    const tx = txs[i];
+    const splitOverride = findOverride(splitOverrides, tx);
+
+    if (splitOverride?.splits) {
+      const childTxs = splitOverride.splits.map((split) => ({
+        ...split,
+        date: tx.date,
+        description: tx.description,
+        card: tx.card,
+      }));
+      txs.splice(i, 1, ...childTxs);
+    }
+  }
 }

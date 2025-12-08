@@ -1,5 +1,4 @@
-import moment from 'moment';
-import { Transaction } from './transactions.js';
+import { Transaction, findOverride } from './transactions.js';
 import { Rules } from './rules.js';
 
 export const NO_CATEGORY = 'no_category';
@@ -14,23 +13,18 @@ export class Categoriser {
   }
 
   categorise(tx: Transaction): Transaction {
-    const override = overriddenTx(this.#overrides, tx);
-    if (override?.category) tx.category = override.category;
-    else categoriseUsingRules(this.#rules, tx);
+    // Skip if already categorised (e.g., from split expansion)
+    if (tx.category) return tx;
+
+    const override = findOverride(this.#overrides, tx);
+    if (override) {
+      tx.category = override.category;
+      tx.comment = override.comment;
+    } else categoriseUsingRules(this.#rules, tx);
 
     if (!tx.category) tx.category = NO_CATEGORY;
-    if (override?.comment) tx.comment = override.comment;
-
     return tx;
   }
-}
-
-function overriddenTx(overrides: Transaction[], tx: Transaction): Transaction {
-  const found = overrides.find(({ date, amount }) => {
-    return moment(date).isSame(tx.date) && amount === tx.amount;
-  });
-
-  return found;
 }
 
 function categoriseUsingRules(rules: Rules, tx: Transaction): void {

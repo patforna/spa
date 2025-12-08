@@ -37,34 +37,36 @@ export class CategoriseCommand implements Command {
     const uncategorised = txsForCategory(txs, NO_CATEGORY);
 
     // ask user to categorise the ones we couldn't categorise automatically
+    const overrides = this.#overridesRepo.load();
     for (const tx of uncategorised) {
       const category = await promptForCategory(categories, tx);
       if (category === 'split') {
         console.log('*** SPLIT MODE ***');
-        const splitTxs = [];
+        const splits: Transaction[] = [];
         let remainingAmount = tx.amount;
         while (remainingAmount > 0) {
-          const txCopy = _.cloneDeep(tx);
-          txCopy.amount = await promptForAmount(remainingAmount);
-          txCopy.category = await promptForCategory(categories, tx);
-          txCopy.comment = await promptForComment();
-          splitTxs.push(txCopy);
-          remainingAmount -= txCopy.amount;
+          const split = {
+            amount: await promptForAmount(remainingAmount),
+            category: await promptForCategory(categories, tx),
+            comment: await promptForComment(),
+          } as Transaction;
+          splits.push(split);
+          remainingAmount -= split.amount;
         }
-        tx.category = IGNORE;
-        tx.comment = 'split';
-        this.#overridesRepo.save(tx);
-        splitTxs.forEach((splitTx) => this.#overridesRepo.save(splitTx));
+        overrides.push({
+          date: tx.date,
+          amount: tx.amount,
+          description: tx.description,
+          card: tx.card,
+          splits,
+        } as Transaction);
       } else {
         tx.category = category;
         tx.comment = await promptForComment();
-        this.#overridesRepo.save(tx);
+        overrides.push(tx);
       }
     }
-
-    // re-run categoriser
-    // FIXME shouldn't this be outside of loop?
-    uncategorised.forEach((tx) => this.#categoriser.categorise(tx));
+    this.#overridesRepo.saveAll(overrides);
   }
 }
 
