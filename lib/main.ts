@@ -3,19 +3,12 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { CategoriseCommand } from './commands/categorise.js';
 import { ClusterCommand } from './commands/cluster.js';
-import { DetailsCommand, SortBy } from './commands/details.js';
+import { DetailsCommand } from './commands/details.js';
 import { Command } from './commands/index.js';
 import { SummaryCommand } from './commands/summary.js';
 import { InputParserFactory } from './parsers/index.js';
 import { Wiring } from './wiring.js';
 import { expandPaths } from './utils.js';
-
-interface Arguments {
-  inputs: string[];
-  sortBy?: SortBy;
-  category?: string;
-  n?: number;
-}
 
 export default (): void => {
   const commands = [];
@@ -45,8 +38,8 @@ Examples:
             alias: 's',
             type: 'string',
             default: 'category',
-            choices: ['category', 'amount'],
-            describe: 'Sort by "category" or "amount". Default: "category".',
+            choices: ['amount', 'category'],
+            describe: 'Sort by "category" or "amount".',
           },
         });
       },
@@ -61,22 +54,20 @@ Examples:
       command: 'details',
       describe: 'Show all transactions.',
       builder: (yargs) => {
-        return yargs
-          .options({
-            sortBy: {
-              alias: 's',
-              type: 'string',
-              default: 'date',
-              describe:
-                'Sort by ["amount", "card", "category", "comment", "date", "description"]. Default: "date".',
-            },
-            category: {
-              alias: 'c',
-              type: 'string',
-              describe: 'Only show transactions for given category',
-            },
-          })
-          .coerce('sortBy', parseSortBy);
+        return yargs.options({
+          sortBy: {
+            alias: 's',
+            type: 'string',
+            default: 'category',
+            choices: ['amount', 'category', 'date'],
+            describe: 'Sort by field.',
+          },
+          category: {
+            alias: 'c',
+            type: 'string',
+            describe: 'Only show transactions for given category',
+          },
+        });
       },
       handler: (args) => {
         commands.push(
@@ -114,9 +105,9 @@ Examples:
         demandOption: true,
       },
     })
-    .parseSync() as Arguments;
+    .parseSync();
 
-  Promise.all([run(args.inputs, inputParserFactory, commands)]);
+  Promise.all([run(args.inputs as string[], inputParserFactory, commands)]);
 };
 
 export async function run(
@@ -139,24 +130,5 @@ export async function run(
 
   for (const command of commands) {
     await command.execute(txs);
-  }
-}
-
-function parseSortBy(s: string): SortBy {
-  switch (s) {
-    case 'amount':
-      return SortBy.Amount;
-    case 'card':
-      return SortBy.Card;
-    case 'category':
-      return SortBy.Category;
-    case 'comment':
-      return SortBy.Comment;
-    case 'date':
-      return SortBy.Date;
-    case 'description':
-      return SortBy.Description;
-    default:
-      throw new Error(`Unknown value for -s: "${s}". See usage.`);
   }
 }
