@@ -33,7 +33,13 @@ class CaptureTxsCommand implements Command {
   }
 }
 
-// Fake FX rate service for testing
+const fakeOverridesRepo = {
+  load(): Transaction[] {
+    return [];
+  },
+} as unknown as OverridesRepo;
+
+// Fake rules repo for testing
 const fakeRulesRepo = {
   load(): Rules {
     return {
@@ -58,15 +64,14 @@ const fakeFxRateService = {
 } as unknown as FxRateService;
 
 describe('Acceptance tests', () => {
-  const overridesRepo = new OverridesRepo(createTempFile(JSON.stringify([])));
   const categoriser = new Categoriser(
     fakeRulesRepo.load(),
-    overridesRepo.load()
+    fakeOverridesRepo.load()
   );
   const capture = new CaptureTxsCommand();
   const inputParserFactory = new InputParserFactory(fakeFxRateService);
   const commands = [
-    new CategoriseCommand(fakeRulesRepo, overridesRepo, categoriser),
+    new CategoriseCommand(fakeRulesRepo, fakeOverridesRepo, categoriser),
     capture,
   ];
 
