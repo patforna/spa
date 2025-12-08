@@ -5,7 +5,6 @@ import { CategoriseCommand } from './commands/categorise.js';
 import { ClusterCommand } from './commands/cluster.js';
 import { DetailsCommand, SortBy } from './commands/details.js';
 import { Command } from './commands/index.js';
-import { JsonCommand } from './commands/json.js';
 import { SummaryCommand } from './commands/summary.js';
 import { InputParserFactory } from './parsers/index.js';
 import { Wiring } from './wiring.js';
@@ -13,7 +12,6 @@ import { expandPaths } from './utils.js';
 
 interface Arguments {
   inputs: string[];
-  json?: boolean;
   sortBy?: SortBy;
   category?: string;
   n?: number;
@@ -43,12 +41,6 @@ Examples:
       describe: 'Summarises transactions for the year.',
       builder: (yargs) => {
         return yargs.options({
-          json: {
-            alias: 'j',
-            type: 'boolean',
-            default: false,
-            describe: 'Display result in json instead of table format.',
-          },
           sortBy: {
             alias: 's',
             type: 'string',
@@ -61,7 +53,7 @@ Examples:
       handler: (args) => {
         commands.push(
           new CategoriseCommand(rulesRepo, overridesRepo, categoriser),
-          args['json'] ? new JsonCommand() : new SummaryCommand(args['sortBy'])
+          new SummaryCommand(args['sortBy'])
         );
       },
     })

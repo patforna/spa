@@ -39,7 +39,7 @@ CSV Files → InputParserFactory → Transactions → Categoriser → Commands (
 - `lib/wiring.ts` - Dependency injection container, initializes all repos/services
 - `lib/fxRates.ts` - Currency conversion via Fixer.io API with caching
 - `lib/parsers/*.ts` - CSV parsers for each bank format, auto-detected by InputParserFactory
-- `lib/commands/*.ts` - Command implementations (summary, details, cluster, categorise, json)
+- `lib/commands/*.ts` - Command implementations (summary, details, cluster, categorise)
 
 **Card Detection:** Hardcoded card number patterns in `parseCard()` identify transactions by cardholder (Self/Partner/Unknown).
 
