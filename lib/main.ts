@@ -109,9 +109,12 @@ Examples:
     .parseSync();
 
   const overrides = overridesRepo.load();
-  Promise.all([
-    run(args.inputs as string[], inputParserFactory, commands, overrides),
-  ]);
+  run(args.inputs as string[], inputParserFactory, commands, overrides).catch(
+    (error) => {
+      console.error('Error:', error.message);
+      process.exit(1);
+    }
+  );
 };
 
 export async function run(
