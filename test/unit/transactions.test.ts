@@ -1,4 +1,4 @@
-import { shortDescription } from '../lib/transactions.js';
+import { shortDescription } from '../../lib/transactions.js';
 import { makeTx } from './factories/transactionFactory.js';
 
 describe('shortDescription', () => {

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { parseCSV } from '../../lib/parsers/index.js';
+import { parseCSV } from '../../../lib/parsers/index.js';
 
 function parseDate(dateString: string): moment.Moment {
   const parsed = parseCSV(csvFor(dateString));

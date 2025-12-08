@@ -1,20 +1,21 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { Categoriser } from '../lib/categoriser.js';
-import { CategoriseCommand } from '../lib/commands/categorise.js';
-import { Command } from '../lib/commands/index.js';
-import { FxRateService } from '../lib/fxRates.js';
-import { Transaction, OverridesRepo } from '../lib/transactions.js';
-import { run } from '../lib/main.js';
-import { InputParserFactory } from '../lib/parsers/index.js';
-import { Rules, RulesRepo } from '../lib/rules.js';
-import { Summary } from '../lib/summary.js';
-import { Wiring } from '../lib/wiring.js';
+import { Categoriser } from '../../lib/categoriser.js';
+import { CategoriseCommand } from '../../lib/commands/categorise.js';
+import { Command } from '../../lib/commands/index.js';
+import { FxRateService } from '../../lib/fxRates.js';
+import { Transaction, OverridesRepo } from '../../lib/transactions.js';
+import { run } from '../../lib/main.js';
+import { InputParserFactory } from '../../lib/parsers/index.js';
+import { Rules, RulesRepo } from '../../lib/rules.js';
+import { Summary } from '../../lib/summary.js';
+import { Wiring } from '../../lib/wiring.js';
 
 // Keep track of temp files created
 const tempFiles: string[] = [];
-const testDir = path.join(process.cwd(), 'test');
+const acceptanceDir = path.join(process.cwd(), 'test', 'acceptance');
+const dataDir = path.join(acceptanceDir, 'data');
 
 // Helper to create a temporary file with content
 function createTempFile(content: string): string {
@@ -81,7 +82,7 @@ describe('Acceptance tests', () => {
 
   test('should process Wise transactions', async () => {
     const input = fs.readFileSync(
-      path.join(testDir, 'wise-transactions.csv'),
+      path.join(dataDir, 'wise-transactions.csv'),
       'utf8'
     );
     await run([createTempFile(input)], inputParserFactory, commands);
@@ -101,7 +102,7 @@ describe('Acceptance tests', () => {
 
   test('should process ZKB transactions', async () => {
     const input = fs.readFileSync(
-      path.join(testDir, 'zkb-transactions.csv'),
+      path.join(dataDir, 'zkb-transactions.csv'),
       'utf8'
     );
     await run([createTempFile(input)], inputParserFactory, commands);
@@ -125,7 +126,7 @@ describe('Acceptance tests', () => {
 
   test('should process Viseca transactions', async () => {
     const input = fs.readFileSync(
-      path.join(testDir, 'viseca-transactions.csv'),
+      path.join(dataDir, 'viseca-transactions.csv'),
       'utf8'
     );
     await run([createTempFile(input)], inputParserFactory, commands);
@@ -137,7 +138,7 @@ describe('Acceptance tests', () => {
 
   test('should process Revolut transactions', async () => {
     const input = fs.readFileSync(
-      path.join(testDir, 'revolut-transactions.csv'),
+      path.join(dataDir, 'revolut-transactions.csv'),
       'utf8'
     );
     await run([createTempFile(input)], inputParserFactory, commands);
@@ -157,10 +158,10 @@ describe('Acceptance tests', () => {
 
   test('should process multiple files', async () => {
     const file1 = createTempFile(
-      fs.readFileSync(path.join(testDir, 'zkb-transactions.csv'), 'utf8')
+      fs.readFileSync(path.join(dataDir, 'zkb-transactions.csv'), 'utf8')
     );
     const file2 = createTempFile(
-      fs.readFileSync(path.join(testDir, 'viseca-transactions.csv'), 'utf8')
+      fs.readFileSync(path.join(dataDir, 'viseca-transactions.csv'), 'utf8')
     );
 
     await run([file1, file2], inputParserFactory, commands);

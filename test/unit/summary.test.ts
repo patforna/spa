@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { Summary } from '../lib/summary.js';
+import { Summary } from '../../lib/summary.js';
 import { makeTx } from './factories/transactionFactory.js';
 
 describe('Summary', () => {

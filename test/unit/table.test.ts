@@ -1,5 +1,5 @@
-import { Summary } from '../lib/summary.js';
-import { tableData } from '../lib/table.js';
+import { Summary } from '../../lib/summary.js';
+import { tableData } from '../../lib/table.js';
 import { makeTx } from './factories/transactionFactory.js';
 
 describe('Table', () => {

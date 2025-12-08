@@ -1,4 +1,4 @@
-import { expandPaths } from '../lib/utils.js';
+import { expandPaths } from '../../lib/utils.js';
 import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { rmSync } from 'fs';
