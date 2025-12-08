@@ -32,7 +32,7 @@ export function parseCard(description: string): Card {
   return Card.Unknown;
 }
 
-export class ItemRepo {
+export class OverridesRepo {
   #path: string;
   #items: Item[];
   constructor(path: string) {

@@ -3,7 +3,7 @@ import _ from 'lodash';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { Categoriser, IGNORE, NO_CATEGORY } from '../categoriser.js';
-import { Item, ItemRepo, asString, shortDescription } from '../items.js';
+import { Item, OverridesRepo, asString, shortDescription } from '../items.js';
 import { InputParserFactory } from '../parsers/index.js';
 import { Rules } from '../rules.js';
 import { Wiring } from '../wiring.js';
@@ -103,7 +103,7 @@ function key(it: Item): string {
 
 async function regen(
   data: string,
-  overridesRepo: ItemRepo,
+  overridesRepo: OverridesRepo,
   inputParserFactory: InputParserFactory
 ) {
   const overrides = overridesRepo.load();
@@ -129,7 +129,7 @@ async function regen(
 
 async function removeUnnecessaryOverrides(
   rules: Rules,
-  overridesRepo: ItemRepo,
+  overridesRepo: OverridesRepo,
   inputParserFactory: InputParserFactory,
   data: string
 ) {

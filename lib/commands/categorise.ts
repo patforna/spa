@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import _ from 'lodash';
 import { Categoriser, IGNORE, NO_CATEGORY } from '../categoriser.js';
-import { Item, ItemRepo, asString, itemsForCategory } from '../items.js';
+import { Item, OverridesRepo, asString, itemsForCategory } from '../items.js';
 import { RulesRepo } from '../rules.js';
 import { Command } from './index.js';
 
@@ -11,12 +11,12 @@ inquirer.registerPrompt('autocomplete', inquirerPrompt);
 
 export class CategoriseCommand implements Command {
   #rulesRepo: RulesRepo;
-  #overridesRepo: ItemRepo;
+  #overridesRepo: OverridesRepo;
   #categoriser: Categoriser;
 
   constructor(
     rulesRepo: RulesRepo,
-    overridesRepo: ItemRepo,
+    overridesRepo: OverridesRepo,
     categoriser: Categoriser
   ) {
     this.#rulesRepo = rulesRepo;

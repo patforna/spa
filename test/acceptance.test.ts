@@ -5,7 +5,7 @@ import { Categoriser } from '../lib/categoriser.js';
 import { CategoriseCommand } from '../lib/commands/categorise.js';
 import { Command } from '../lib/commands/index.js';
 import { FxRateService } from '../lib/fxRates.js';
-import { Item, ItemRepo } from '../lib/items.js';
+import { Item, OverridesRepo } from '../lib/items.js';
 import { run } from '../lib/main.js';
 import { InputParserFactory } from '../lib/parsers/index.js';
 import { Rules, RulesRepo } from '../lib/rules.js';
@@ -58,7 +58,7 @@ const fakeFxRateService = {
 } as unknown as FxRateService;
 
 describe('Acceptance tests', () => {
-  const overridesRepo = new ItemRepo(createTempFile(JSON.stringify([])));
+  const overridesRepo = new OverridesRepo(createTempFile(JSON.stringify([])));
   const categoriser = new Categoriser(
     fakeRulesRepo.load(),
     overridesRepo.load()
