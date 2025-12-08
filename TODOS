@@ -4,7 +4,6 @@
 
 # tidy ups / refactors
 
-[ ] rename item to transaction
 [ ] tidy up item / transaction creation code (incl. shortDescription, card handling, etc.)
 [ ] update card details
 
