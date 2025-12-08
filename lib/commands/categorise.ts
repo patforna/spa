@@ -43,15 +43,17 @@ export class CategoriseCommand implements Command {
       if (category === 'split') {
         console.log('*** SPLIT MODE ***');
         const splits: Transaction[] = [];
-        let remainingAmount = tx.amount;
+        const sign = tx.amount < 0 ? -1 : 1;
+        let remainingAmount = Math.abs(tx.amount);
         while (remainingAmount > 0) {
+          const splitAmount = await promptForAmount(remainingAmount);
           const split = {
-            amount: await promptForAmount(remainingAmount),
+            amount: sign * splitAmount,
             category: await promptForCategory(categories, tx),
             comment: await promptForComment(),
           } as Transaction;
           splits.push(split);
-          remainingAmount -= split.amount;
+          remainingAmount -= splitAmount;
         }
         overrides.push({
           date: tx.date,
