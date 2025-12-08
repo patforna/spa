@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { Item, itemsExcludingIgnored } from './items.js';
+import { Transaction, txsExcludingIgnored } from './transactions.js';
 
 export interface Total {
   amount: number;
@@ -18,20 +18,18 @@ export interface SummaryMonthData {
 const ZERO_TOTAL: Total = { amount: 0, transactions: 0 };
 
 export class Summary {
-  items: Item[];
+  txs: Transaction[];
   data: SummaryData;
-  constructor(items: Item[]) {
+  constructor(txs: Transaction[]) {
     this.data = {
       months: _.range(12).map(() => ({ categories: {} })),
     };
 
-    if (_.uniq(items.map((item) => item.date.year())).length > 1)
+    if (_.uniq(txs.map((tx) => tx.date.year())).length > 1)
       throw new Error('Cannot summarise transactions from multiple years.');
 
-    this.items = itemsExcludingIgnored(items);
-    this.items.forEach((item) =>
-      add(this.data, `categories.${item.category}`, item)
-    );
+    this.txs = txsExcludingIgnored(txs);
+    this.txs.forEach((tx) => add(this.data, `categories.${tx.category}`, tx));
   }
 
   get monthNames(): string[] {
@@ -107,8 +105,8 @@ function mean(totals: Total[]): Total {
   return { amount, transactions };
 }
 
-function add(data: SummaryData, field: string, item: Item): void {
-  const month = item.date.month();
+function add(data: SummaryData, field: string, tx: Transaction): void {
+  const month = tx.date.month();
 
   let obj = _.get(data.months[month], field);
   if (!obj) {
@@ -116,6 +114,6 @@ function add(data: SummaryData, field: string, item: Item): void {
     obj = _.get(data.months[month], field);
   }
 
-  obj.amount += Math.sign(item.amount) * Math.round(Math.abs(item.amount));
+  obj.amount += Math.sign(tx.amount) * Math.round(Math.abs(tx.amount));
   obj.transactions += 1;
 }

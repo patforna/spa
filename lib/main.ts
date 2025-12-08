@@ -95,7 +95,7 @@ Examples:
     })
     .command({
       command: 'cluster',
-      describe: 'Cluster items',
+      describe: 'Cluster transactions',
       builder: (yargs) => {
         return yargs.options({
           n: {
@@ -138,15 +138,15 @@ export async function run(
       `Files to process:\n${filePaths.map((file) => `  - ${file}`).join('\n')}`
   );
 
-  const items = [];
+  const txs = [];
   for (const filePath of filePaths) {
     const content = readFileSync(filePath, 'utf8');
     const parser = inputParserFactory.createParser(content);
-    items.push(...(await parser.parse(content)));
+    txs.push(...(await parser.parse(content)));
   }
 
   for (const command of commands) {
-    await command.execute(items);
+    await command.execute(txs);
   }
 }
 

@@ -25,16 +25,16 @@ Run the CLI: `bin/money <command> -i <input-files>`
 **Data Flow:**
 
 ```
-CSV Files → InputParserFactory → Items → Categoriser → Commands (summary/details/cluster)
-                                              ↓
-                                    data/overrides.json (user categorizations)
+CSV Files → InputParserFactory → Transactions → Categoriser → Commands (summary/details/cluster)
+                                                    ↓
+                                          data/overrides.json (user categorizations)
 ```
 
 **Key Components:**
 
 - `lib/main.ts` - CLI setup with yargs, entry point
 - `lib/categoriser.ts` - Rule-based + override categorization. Applies regex rules from `rules.ts`, falls back to user overrides (matched by date + amount)
-- `lib/items.ts` - Item model (date, amount, description, category, comment, card) and OverridesRepo persistence
+- `lib/transactions.ts` - Transaction model (date, amount, description, category, comment, card) and OverridesRepo persistence
 - `lib/rules.ts` - Hardcoded regex patterns for 33 categories (groceries, travel, insurance, etc.)
 - `lib/wiring.ts` - Dependency injection container, initializes all repos/services
 - `lib/fxRates.ts` - Currency conversion via Fixer.io API with caching

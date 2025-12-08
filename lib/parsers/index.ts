@@ -2,14 +2,14 @@ import _ from 'lodash';
 import moment from 'moment-timezone';
 import Papa from 'papaparse';
 import { FxRateService } from '../fxRates.js';
-import { Item } from '../items.js';
+import { Transaction } from '../transactions.js';
 import { VisecaInputParser } from './viseca.js';
 import { WiseInputParser } from './wise.js';
 import { ZKBInputParser } from './zkb.js';
 import { RevolutInputParser } from './revolut.js';
 
 export interface InputParser {
-  parse(input: string): Promise<Item[]>;
+  parse(input: string): Promise<Transaction[]>;
 }
 
 export class InputParserFactory {

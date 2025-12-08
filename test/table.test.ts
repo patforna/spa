@@ -1,14 +1,11 @@
 import { Summary } from '../lib/summary.js';
 import { tableData } from '../lib/table.js';
-import { makeItem } from './factories/itemFactory.js';
+import { makeTx } from './factories/transactionFactory.js';
 
 describe('Table', () => {
   test('should return data with categories sorted alphabetically by default', () => {
-    const items = [
-      makeItem({ category: 'CatB' }),
-      makeItem({ category: 'CatA' }),
-    ];
-    const data = tableData(new Summary(items), 'category');
+    const txs = [makeTx({ category: 'CatB' }), makeTx({ category: 'CatA' })];
+    const data = tableData(new Summary(txs), 'category');
 
     // Row 0 is header
     expect(data[1][0]).toContain('CatA');
@@ -16,11 +13,11 @@ describe('Table', () => {
   });
 
   test('should return data with categories sorted by amount descending if requested', () => {
-    const items = [
-      makeItem({ category: 'CatB', amount: 10 }),
-      makeItem({ category: 'CatA', amount: 20 }),
+    const txs = [
+      makeTx({ category: 'CatB', amount: 10 }),
+      makeTx({ category: 'CatA', amount: 20 }),
     ];
-    const data = tableData(new Summary(items), 'amount');
+    const data = tableData(new Summary(txs), 'amount');
 
     // Row 0 is header
     expect(data[1][0]).toContain('CatA');

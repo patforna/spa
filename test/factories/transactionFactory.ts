@@ -1,7 +1,7 @@
 import moment from 'moment';
-import { Card, Item } from '../../lib/items.js';
+import { Card, Transaction } from '../../lib/transactions.js';
 
-export const makeItem = (overrides: Partial<Item> = {}): Item => ({
+export const makeTx = (overrides: Partial<Transaction> = {}): Transaction => ({
   date: moment(),
   amount: 0,
   description: '',

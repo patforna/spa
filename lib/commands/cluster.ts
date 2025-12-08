@@ -1,22 +1,26 @@
 import jsLevenshtein from 'js-levenshtein';
 import _ from 'lodash';
-import { Item, itemsExcludingIgnored, shortDescription } from '../items.js';
+import {
+  Transaction,
+  txsExcludingIgnored,
+  shortDescription,
+} from '../transactions.js';
 import { Command } from './index.js';
 
 // the maximum levenshtein distance to qualify for cluster membership
 const n = 5;
 
 export class ClusterCommand implements Command {
-  async execute(items: Item[]): Promise<void> {
-    items = itemsExcludingIgnored(items);
+  async execute(txs: Transaction[]): Promise<void> {
+    txs = txsExcludingIgnored(txs);
 
-    let clusters: Item[][] = [];
-    items.forEach((item) => {
-      const cluster = findBestCluster(clusters, item);
+    let clusters: Transaction[][] = [];
+    txs.forEach((tx) => {
+      const cluster = findBestCluster(clusters, tx);
 
       // if no match found - create new cluster
-      if (!cluster) clusters.push([item]);
-      else cluster.push(item);
+      if (!cluster) clusters.push([tx]);
+      else cluster.push(tx);
     });
 
     console.log(`Found ${clusters.length} clusters.`);
@@ -51,15 +55,18 @@ export class ClusterCommand implements Command {
   }
 }
 
-function findBestCluster(clusters: Item[][], item: Item): Item[] {
+function findBestCluster(
+  clusters: Transaction[][],
+  tx: Transaction
+): Transaction[] {
   let bestDistance = -1;
-  let bestCluster: Item[];
+  let bestCluster: Transaction[];
 
-  // find best cluster to put item in
+  // find best cluster to put tx in
   clusters.forEach((cluster) => {
-    // stricter membership rule for short items
-    const max = Math.max(Math.min(canon(item).length - n, n), 0);
-    const ls = levenshtein(cluster[0], item);
+    // stricter membership rule for short txs
+    const max = Math.max(Math.min(canon(tx).length - n, n), 0);
+    const ls = levenshtein(cluster[0], tx);
     if (ls <= max && (bestDistance === -1 || ls < bestDistance)) {
       bestDistance = ls;
       bestCluster = cluster;
@@ -69,12 +76,12 @@ function findBestCluster(clusters: Item[][], item: Item): Item[] {
   return bestCluster;
 }
 
-function levenshtein(a: Item, b: Item): number {
+function levenshtein(a: Transaction, b: Transaction): number {
   return jsLevenshtein(canon(a), canon(b)); // TODO optimise - iff perf is bad
 }
 
-function canon(item: Item): string {
-  return tidyDesc(item).replace(/\s/g, '').toLowerCase();
+function canon(tx: Transaction): string {
+  return tidyDesc(tx).replace(/\s/g, '').toLowerCase();
 }
 
 const noise = [
@@ -96,16 +103,16 @@ const noise = [
   /[^a-z\säöü]/gi,
 ];
 
-function tidyDesc(item: Item): string {
-  let desc = shortDescription(item);
+function tidyDesc(tx: Transaction): string {
+  let desc = shortDescription(tx);
   noise.forEach((re) => (desc = desc.replace(re, '')));
   return desc.trim();
 }
 
-function computeTotal(cluster: Item[]): number {
-  return _.reduce(cluster, (total, item) => (total += item.amount), 0);
+function computeTotal(cluster: Transaction[]): number {
+  return _.reduce(cluster, (total, tx) => (total += tx.amount), 0);
 }
 
-function computeCategories(cluster: Item[]): string[] {
-  return _.uniq(cluster.map((i) => i.category).sort());
+function computeCategories(cluster: Transaction[]): string[] {
+  return _.uniq(cluster.map((tx) => tx.category).sort());
 }

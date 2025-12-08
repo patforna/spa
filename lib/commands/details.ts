@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import {
   asString,
-  Item,
-  itemsForCategory,
+  Transaction,
+  txsForCategory,
   shortDescription,
-} from '../items.js';
+} from '../transactions.js';
 import { Command } from './index.js';
 
 export enum SortBy {
@@ -22,7 +22,7 @@ const map = {
   [SortBy.Category]: [['category']],
   [SortBy.Comment]: [['comment']],
   [SortBy.Date]: [['date'], ['desc']],
-  [SortBy.Description]: [[(i: Item) => shortDescription(i)]],
+  [SortBy.Description]: [[(tx: Transaction) => shortDescription(tx)]],
 };
 
 export class DetailsCommand implements Command {
@@ -34,8 +34,8 @@ export class DetailsCommand implements Command {
     this.#category = category;
   }
 
-  async execute(items: Item[]): Promise<void> {
-    if (this.#category) items = itemsForCategory(items, this.#category);
+  async execute(txs: Transaction[]): Promise<void> {
+    if (this.#category) txs = txsForCategory(txs, this.#category);
 
     console.log(
       [
@@ -47,8 +47,8 @@ export class DetailsCommand implements Command {
       ].join(' | ')
     );
 
-    _.orderBy(items, ...map[this.#sortBy]).forEach((item) =>
-      console.log(asString(item, true))
+    _.orderBy(txs, ...map[this.#sortBy]).forEach((tx) =>
+      console.log(asString(tx, true))
     );
   }
 }

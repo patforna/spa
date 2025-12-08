@@ -1,10 +1,10 @@
 import moment from 'moment';
 import { FxRateService } from '../fxRates.js';
-import { Item } from '../items.js';
+import { Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
-interface WiseItem {
+interface WiseRow {
   id: string;
   status: string;
   direction: string;
@@ -19,32 +19,33 @@ interface WiseItem {
 export class WiseInputParser implements InputParser {
   constructor(private readonly fxRateService: FxRateService) {}
 
-  async parse(input: string): Promise<Item[]> {
-    const wiseItems = parseCSV(input)
-      .map((x) => x as WiseItem)
+  async parse(input: string): Promise<Transaction[]> {
+    const rows = parseCSV(input)
+      .map((x) => x as WiseRow)
       .filter((x) => x.sourceAmountAfterFees != 0);
 
-    const items: Item[] = [];
-    for (const it of wiseItems) {
+    const txs: Transaction[] = [];
+    for (const row of rows) {
       const amountInCHF = await this.fxRateService.convert(
-        it.sourceCurrency,
+        row.sourceCurrency,
         'CHF',
-        it.sourceAmountAfterFees,
-        it.createdOn
+        row.sourceAmountAfterFees,
+        row.createdOn
       );
 
-      const merchant = it.status === 'REFUNDED' ? it.sourceName : it.targetName;
+      const merchant =
+        row.status === 'REFUNDED' ? row.sourceName : row.targetName;
 
-      items.push({
-        date: it.createdOn,
-        amount: it.direction === 'OUT' ? -amountInCHF : amountInCHF,
+      txs.push({
+        date: row.createdOn,
+        amount: row.direction === 'OUT' ? -amountInCHF : amountInCHF,
         description: _.join(
-          [it.id, it.direction, merchant, it.reference, '#wise'],
+          [row.id, row.direction, merchant, row.reference, '#wise'],
           ' | '
         ),
-      } as Item);
+      } as Transaction);
     }
 
-    return items;
+    return txs;
   }
 }

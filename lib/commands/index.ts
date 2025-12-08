@@ -1,5 +1,5 @@
-import { Item } from '../items.js';
+import { Transaction } from '../transactions.js';
 
 export interface Command {
-  execute(items: Item[]): Promise<void>;
+  execute(txs: Transaction[]): Promise<void>;
 }

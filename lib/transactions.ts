@@ -4,7 +4,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { IGNORE } from './categoriser.js';
 
-export interface Item {
+export interface Transaction {
   date: moment.Moment;
   amount: number;
   description: string;
@@ -34,43 +34,45 @@ export function parseCard(description: string): Card {
 
 export class OverridesRepo {
   #path: string;
-  #items: Item[];
+  #txs: Transaction[];
   constructor(path: string) {
     this.#path = path;
   }
 
-  load(): Item[] {
-    this.#items = JSON.parse(readFileSync(this.#path).toString());
-    this.#items.forEach((it) => {
-      it.date = moment.utc(it.date);
-      it.card = parseCard(it.description); // FIXME this should be done when parsing input (it actually is - remove once description is removed from overrides)
+  load(): Transaction[] {
+    this.#txs = JSON.parse(readFileSync(this.#path).toString());
+    this.#txs.forEach((tx) => {
+      tx.date = moment.utc(tx.date);
+      tx.card = parseCard(tx.description); // FIXME this should be done when parsing input (it actually is - remove once description is removed from overrides)
     });
-    return this.#items;
+    return this.#txs;
   }
 
-  save(item: Item): void {
-    this.#items.push(item);
-    this.saveAll(this.#items);
+  save(tx: Transaction): void {
+    this.#txs.push(tx);
+    this.saveAll(this.#txs);
   }
 
-  saveAll(items: Item[]): void {
-    const toSave = _.sortBy(items, 'date').map(
-      (it) =>
-        // date, amount are used as primary keys
-        // category and comment are user-generated content we want to hold on to
-        _.pick(it, ['date', 'amount', 'description', 'category', 'comment']) // FIXME do not store description as it's not needed (double check!)
+  saveAll(txs: Transaction[]): void {
+    const toSave = _.sortBy(txs, 'date').map((tx) =>
+      // date, amount are used as primary keys
+      // category and comment are user-generated content we want to hold on to
+      _.pick(tx, ['date', 'amount', 'description', 'category', 'comment'])
     );
     writeFileSync(this.#path, stringify(toSave));
     this.load();
   }
 }
 
-export function itemsForCategory(items: Item[], category: string): Item[] {
-  return items.filter((item) => item.category === category);
+export function txsForCategory(
+  txs: Transaction[],
+  category: string
+): Transaction[] {
+  return txs.filter((tx) => tx.category === category);
 }
 
-export function itemsExcludingIgnored(items: Item[]): Item[] {
-  return items.filter((item) => item.category !== IGNORE);
+export function txsExcludingIgnored(txs: Transaction[]): Transaction[] {
+  return txs.filter((tx) => tx.category !== IGNORE);
 }
 
 const REPLACEMENTS = [
@@ -89,8 +91,8 @@ const IGNORED_PATTERNS = [
 
 const IGNORED_STRINGS = new Set(['OUT', 'IN', 'NEUTRAL', 'CHE']);
 
-export function shortDescription(item: Item): string {
-  return item.description
+export function shortDescription(tx: Transaction): string {
+  return tx.description
     .replace('Zahlung - ', '')
     .split('|')
     .map((s) => s.trim())
@@ -101,14 +103,14 @@ export function shortDescription(item: Item): string {
     .join(' | ');
 }
 
-export function asString(item: Item, showCategory = false): string {
+export function asString(tx: Transaction, showCategory = false): string {
   const parts = [];
-  if (showCategory) parts.push(_.padStart(item.category.toUpperCase(), 12));
-  parts.push(item.date.format('YYYY-MM-DD'));
-  parts.push(_.padStart(_.round(item.amount).toLocaleString(), 10));
-  parts.push(_.padStart(Card[item.card] || '-', 8));
-  parts.push(shortDescription(item));
-  if (item.comment) parts.push(`| Comment: ${item.comment}`);
+  if (showCategory) parts.push(_.padStart(tx.category.toUpperCase(), 12));
+  parts.push(tx.date.format('YYYY-MM-DD'));
+  parts.push(_.padStart(_.round(tx.amount).toLocaleString(), 10));
+  parts.push(_.padStart(Card[tx.card] || '-', 8));
+  parts.push(shortDescription(tx));
+  if (tx.comment) parts.push(`| Comment: ${tx.comment}`);
 
   return parts.join(' | ');
 }

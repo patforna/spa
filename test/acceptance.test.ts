@@ -5,7 +5,7 @@ import { Categoriser } from '../lib/categoriser.js';
 import { CategoriseCommand } from '../lib/commands/categorise.js';
 import { Command } from '../lib/commands/index.js';
 import { FxRateService } from '../lib/fxRates.js';
-import { Item, OverridesRepo } from '../lib/items.js';
+import { Transaction, OverridesRepo } from '../lib/transactions.js';
 import { run } from '../lib/main.js';
 import { InputParserFactory } from '../lib/parsers/index.js';
 import { Rules, RulesRepo } from '../lib/rules.js';
@@ -25,11 +25,11 @@ function createTempFile(content: string): string {
   return filePath;
 }
 
-class CaptureItemsCommand implements Command {
+class CaptureTxsCommand implements Command {
   summary: Summary;
 
-  async execute(items: Item[]): Promise<void> {
-    this.summary = new Summary(items);
+  async execute(txs: Transaction[]): Promise<void> {
+    this.summary = new Summary(txs);
   }
 }
 
@@ -63,7 +63,7 @@ describe('Acceptance tests', () => {
     fakeRulesRepo.load(),
     overridesRepo.load()
   );
-  const capture = new CaptureItemsCommand();
+  const capture = new CaptureTxsCommand();
   const inputParserFactory = new InputParserFactory(fakeFxRateService);
   const commands = [
     new CategoriseCommand(fakeRulesRepo, overridesRepo, categoriser),
@@ -185,7 +185,7 @@ describe('Acceptance tests', () => {
 
     await run([file], inputParserFactory, commands);
 
-    expect(capture.summary.items.length).toBe(1);
-    expect(capture.summary.items[0].category).toEqual('shopping');
+    expect(capture.summary.txs.length).toBe(1);
+    expect(capture.summary.txs[0].category).toEqual('shopping');
   });
 });

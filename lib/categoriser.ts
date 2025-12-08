@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { Item } from './items.js';
+import { Transaction } from './transactions.js';
 import { Rules } from './rules.js';
 
 export const NO_CATEGORY = 'no_category';
@@ -7,43 +7,43 @@ export const IGNORE = 'ignore';
 
 export class Categoriser {
   #rules: Rules;
-  #overrides: Item[];
-  constructor(rules: Rules, overrides: Item[]) {
+  #overrides: Transaction[];
+  constructor(rules: Rules, overrides: Transaction[]) {
     this.#rules = rules;
     this.#overrides = overrides;
   }
 
-  categorise(item: Item): Item {
-    const oItem = overriddenItem(this.#overrides, item);
-    if (oItem?.category) item.category = oItem.category;
-    else categoriseUsingRules(this.#rules, item);
+  categorise(tx: Transaction): Transaction {
+    const override = overriddenTx(this.#overrides, tx);
+    if (override?.category) tx.category = override.category;
+    else categoriseUsingRules(this.#rules, tx);
 
-    if (!item.category) item.category = NO_CATEGORY;
+    if (!tx.category) tx.category = NO_CATEGORY;
 
-    if (oItem?.comment) item.comment = oItem.comment;
+    if (override?.comment) tx.comment = override.comment;
 
-    return item;
+    return tx;
   }
 }
 
-function overriddenItem(overrides: Item[], item: Item): Item {
+function overriddenTx(overrides: Transaction[], tx: Transaction): Transaction {
   const found = overrides.find(({ date, amount }) => {
-    return moment(date).isSame(item.date) && amount === item.amount;
+    return moment(date).isSame(tx.date) && amount === tx.amount;
   });
 
   return found;
 }
 
-function categoriseUsingRules(rules: Rules, item: Item): void {
+function categoriseUsingRules(rules: Rules, tx: Transaction): void {
   Object.entries(rules).forEach((rule) => {
     const [cat, res] = rule;
     res.forEach((re: RegExp) => {
-      if (re.test(item.description)) {
-        if (item.category && item.category !== cat && cat !== IGNORE)
+      if (re.test(tx.description)) {
+        if (tx.category && tx.category !== cat && cat !== IGNORE)
           throw new Error(
-            `Multiple categories found for item: "${item.description}" - [${item.category}, ${cat}]`
+            `Multiple categories found for tx: "${tx.description}" - [${tx.category}, ${cat}]`
           );
-        item.category = cat;
+        tx.category = cat;
         if (cat === IGNORE) return;
       }
     });

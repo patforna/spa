@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { Categoriser } from './categoriser.js';
 import { FxRateRepo, FxRateService } from './fxRates.js';
-import { OverridesRepo } from './items.js';
+import { OverridesRepo } from './transactions.js';
 import { InputParserFactory } from './parsers/index.js';
 import { RulesRepo } from './rules.js';
 

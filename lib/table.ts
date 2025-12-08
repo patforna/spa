@@ -64,26 +64,26 @@ function categoryRows(summary: Summary, sortBy: string): string[][] {
 }
 
 function totalsRow(summary: Summary): string[] {
-  const items = summary.totalsByMonth();
+  const totals = summary.totalsByMonth();
   return _.concat(
-    formatTotals(_.concat(items, summary.avg(), summary.total())),
+    formatTotals(_.concat(totals, summary.avg(), summary.total())),
     ''
   );
 }
 
-function formatTotals(value: Total[]): string[] {
-  return value.map(format);
+function formatTotals(totals: Total[]): string[] {
+  return totals.map(format);
 }
 
-function format(value: Total): string {
+function format(total: Total): string {
   const parts = [];
   parts.push(
     (
-      Math.sign(value.amount) * Math.round(Math.abs(value.amount))
+      Math.sign(total.amount) * Math.round(Math.abs(total.amount))
     ).toLocaleString()
   );
   parts.push(
-    _.padStart('(' + _.round(value.transactions).toLocaleString() + ')', 4)
+    _.padStart('(' + _.round(total.transactions).toLocaleString() + ')', 4)
   );
   return parts.join(' ');
 }

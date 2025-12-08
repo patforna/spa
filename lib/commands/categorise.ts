@@ -3,7 +3,12 @@ import inquirer from 'inquirer';
 import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import _ from 'lodash';
 import { Categoriser, IGNORE, NO_CATEGORY } from '../categoriser.js';
-import { Item, OverridesRepo, asString, itemsForCategory } from '../items.js';
+import {
+  Transaction,
+  OverridesRepo,
+  asString,
+  txsForCategory,
+} from '../transactions.js';
 import { RulesRepo } from '../rules.js';
 import { Command } from './index.js';
 
@@ -24,56 +29,56 @@ export class CategoriseCommand implements Command {
     this.#categoriser = categoriser;
   }
 
-  async execute(items: Item[]): Promise<void> {
+  async execute(txs: Transaction[]): Promise<void> {
     const rules = this.#rulesRepo.load();
     const categories = _.concat(_.sortBy(Object.keys(rules)), IGNORE);
-    items.forEach((item) => this.#categoriser.categorise(item));
+    txs.forEach((tx) => this.#categoriser.categorise(tx));
 
-    const uncategorised = itemsForCategory(items, NO_CATEGORY);
+    const uncategorised = txsForCategory(txs, NO_CATEGORY);
 
     // ask user to categorise the ones we couldn't categorise automatically
-    for (const item of uncategorised) {
-      const category = await promptForCategory(categories, item);
+    for (const tx of uncategorised) {
+      const category = await promptForCategory(categories, tx);
       if (category === 'split') {
         console.log('*** SPLIT MODE ***');
-        const splitItems = [];
-        let remainingAmount = item.amount;
+        const splitTxs = [];
+        let remainingAmount = tx.amount;
         while (remainingAmount > 0) {
-          const itemCopy = _.cloneDeep(item);
-          itemCopy.amount = await promptForAmount(remainingAmount);
-          itemCopy.category = await promptForCategory(categories, item);
-          itemCopy.comment = await promptForComment();
-          splitItems.push(itemCopy);
-          remainingAmount -= itemCopy.amount;
+          const txCopy = _.cloneDeep(tx);
+          txCopy.amount = await promptForAmount(remainingAmount);
+          txCopy.category = await promptForCategory(categories, tx);
+          txCopy.comment = await promptForComment();
+          splitTxs.push(txCopy);
+          remainingAmount -= txCopy.amount;
         }
-        item.category = IGNORE;
-        item.comment = 'split';
-        this.#overridesRepo.save(item);
-        splitItems.forEach((it) => this.#overridesRepo.save(it));
+        tx.category = IGNORE;
+        tx.comment = 'split';
+        this.#overridesRepo.save(tx);
+        splitTxs.forEach((splitTx) => this.#overridesRepo.save(splitTx));
       } else {
-        item.category = category;
-        item.comment = await promptForComment();
-        this.#overridesRepo.save(item);
+        tx.category = category;
+        tx.comment = await promptForComment();
+        this.#overridesRepo.save(tx);
       }
     }
 
     // re-run categoriser
     // FIXME shouldn't this be outside of loop?
-    uncategorised.forEach((item) => this.#categoriser.categorise(item));
+    uncategorised.forEach((tx) => this.#categoriser.categorise(tx));
   }
 }
 
 async function promptForCategory(
   categories: string[],
-  item: Item
+  tx: Transaction
 ): Promise<string> {
   const answer = await inquirer.prompt([
     {
       type: 'autocomplete',
       name: 'category',
       message:
-        'Enter category for the following item (or enter "split"):\n ' +
-        chalk.reset.yellow(asString(item)) +
+        'Enter category for the following transaction (or enter "split"):\n ' +
+        chalk.reset.yellow(asString(tx)) +
         '\n',
       pageSize: 20,
       source: (_, input: string) => autocompleteCategory(categories, input),
@@ -115,15 +120,6 @@ async function promptForComment(): Promise<string> {
   ]);
   return answer.comment !== '' ? answer.comment : undefined;
 }
-
-// FIXME maybe re-purpose for date validation
-// function guessYear(items: Item[]): number {
-//   if (!items?.length) {
-//     return new Date().getFullYear();
-//   }
-//   const m = _.groupBy(items, (it) => it.date.year());
-//   return Number(_.sortBy(Object.entries(m), ([_, v]) => -v.length)[0][0]);
-// }
 
 // narrow down list of categories or return input when no results found
 function autocompleteCategory(categories: string[], input: string) {

@@ -1,9 +1,9 @@
 import moment from 'moment';
-import { Item } from '../items.js';
+import { Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
-interface VisecaItem {
+interface VisecaRow {
   cardId: string;
   date: moment.Moment;
   amount: number;
@@ -15,29 +15,29 @@ interface VisecaItem {
 }
 
 export class VisecaInputParser implements InputParser {
-  async parse(input: string): Promise<Item[]> {
-    const visecaItems = parseCSV(input)
-      .map((x) => x as VisecaItem)
+  async parse(input: string): Promise<Transaction[]> {
+    const rows = parseCSV(input)
+      .map((x) => x as VisecaRow)
       .filter((x) => x.stateType === 'BOOKED');
 
-    const items: Item[] = [];
-    for (const it of visecaItems) {
-      items.push({
-        date: it.date,
-        amount: -it.amount,
+    const txs: Transaction[] = [];
+    for (const row of rows) {
+      txs.push({
+        date: row.date,
+        amount: -row.amount,
         description: _.join(
           [
-            it.merchantName,
-            it.merchantPlace,
-            it.merchantCountry,
-            it.details,
+            row.merchantName,
+            row.merchantPlace,
+            row.merchantCountry,
+            row.details,
             '#viseca',
           ],
           ' | '
         ),
-      } as Item);
+      } as Transaction);
     }
 
-    return items;
+    return txs;
   }
 }

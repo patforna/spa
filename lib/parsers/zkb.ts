@@ -1,9 +1,9 @@
 import moment from 'moment';
-import { Item } from '../items.js';
+import { Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
-interface ZKBItem {
+interface ZKBRow {
   date?: moment.Moment;
   bookingText: string;
   amountDetails: number;
@@ -13,46 +13,45 @@ interface ZKBItem {
 }
 
 export class ZKBInputParser implements InputParser {
-  async parse(input: string): Promise<Item[]> {
-    const xxx = parseCSV(input);
-    const zkbItems = xxx.map((x) => x as ZKBItem);
+  async parse(input: string): Promise<Transaction[]> {
+    const rows = parseCSV(input).map((x) => x as ZKBRow);
 
-    const items: Item[] = [];
-    let parent: Item;
-    for (const it of zkbItems) {
-      if (it.date) {
-        const amount = it.debitChf > 0 ? -it.debitChf : it.creditChf;
+    const txs: Transaction[] = [];
+    let parent: Transaction;
+    for (const row of rows) {
+      if (row.date) {
+        const amount = row.debitChf > 0 ? -row.debitChf : row.creditChf;
         parent = null; // reset parent to indicate that we are not processing details
-        items.push({
-          date: it.date,
+        txs.push({
+          date: row.date,
           amount: amount,
           description: _.join(
-            [it.bookingText, it.paymentPurpose, '#zkb'],
+            [row.bookingText, row.paymentPurpose, '#zkb'],
             ' | '
           ),
-        } as Item);
+        } as Transaction);
       } else {
         // this happens when a transaction is followed by details on separate lines
         if (!parent) {
-          parent = items.pop(); // only pop parent once in case there is more than one detail transaction
+          parent = txs.pop(); // only pop parent once in case there is more than one detail transaction
         }
 
-        items.push({
+        txs.push({
           date: parent.date,
-          amount: -it.amountDetails,
+          amount: -row.amountDetails,
           description: _.join(
             [
               _.replace(parent.description, '#zkb', ''),
-              it.bookingText,
-              it.paymentPurpose,
+              row.bookingText,
+              row.paymentPurpose,
               '#zkb',
             ],
             ' | '
           ),
-        } as Item);
+        } as Transaction);
       }
     }
 
-    return items;
+    return txs;
   }
 }
