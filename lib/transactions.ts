@@ -70,10 +70,7 @@ export function txsExcludingIgnored(txs: Transaction[]): Transaction[] {
   return txs.filter((tx) => tx.category !== IGNORE);
 }
 
-export function findOverride(
-  overrides: Override[],
-  tx: Transaction
-): Override {
+export function findOverride(overrides: Override[], tx: Transaction): Override {
   return overrides.find(({ date, amount }) => {
     return moment(date).isSame(tx.date) && amount === tx.amount;
   });
@@ -124,10 +121,7 @@ export function asString(tx: Transaction, showCategory = false): string {
  * If an input transaction matches a split override (by date + amount),
  * it is replaced with the split children.
  */
-export function expandSplits(
-  txs: Transaction[],
-  overrides: Override[]
-): void {
+export function expandSplits(txs: Transaction[], overrides: Override[]): void {
   const splitOverrides = overrides.filter(
     (o) => o.splits && o.splits.length > 0
   );
