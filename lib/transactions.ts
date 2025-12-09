@@ -20,19 +20,6 @@ export enum Card {
   Self = 2,
 }
 
-// FIXME this would probably be better done when parsing input
-export function parseCard(description: string): Card {
-  if (description.includes('7837')) return Card.Partner;
-  if (description.includes('5885')) return Card.Partner;
-  if (description.includes('1426')) return Card.Partner;
-  if (description.includes('6107')) return Card.Self;
-  if (description.includes('3048')) return Card.Self;
-  if (description.toLowerCase().includes('self')) return Card.Self;
-  if (description.toLowerCase().includes('partner')) return Card.Partner;
-
-  return Card.Unknown;
-}
-
 export class OverridesRepo {
   #path: string;
 
@@ -44,7 +31,7 @@ export class OverridesRepo {
     const txs = JSON.parse(readFileSync(this.#path).toString());
     txs.forEach((tx) => {
       tx.date = moment.utc(tx.date);
-      tx.card = parseCard(tx.description); // FIXME this should be done when parsing input (it actually is - remove once description is removed from overrides)
+      tx.card = Card.Unknown;
     });
     return txs;
   }

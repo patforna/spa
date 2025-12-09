@@ -1,8 +1,5 @@
-[x] load and wire overrides once! (inject repo only for saving)
-[ ] FIXME and TODOs
-[ ] tidy up item / transaction creation code (incl. shortDescription, card handling, etc.)
-[ ] update card details
 [ ] Separate Override from Transaction
+[ ] Convert rules.ts to json and move to /data
 
 # features (for another day)
 
@@ -11,11 +8,6 @@
 ---
 # claude review
 
-  Worth Fixing (Not Nitpicks)
-
-  5. Duplicate data loading - Rules/overrides are loaded multiple times (in wiring.ts, main.ts, and categorise.ts). There's already a FIXME comment acknowledging this.
-  
-  ---
   Nitpicks / Minor
 
   8. moment is deprecated - Works fine, but dayjs or native Temporal (once stable) would be more modern.

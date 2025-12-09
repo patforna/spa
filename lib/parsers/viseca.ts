@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { Transaction } from '../transactions.js';
+import { Card, Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
@@ -35,9 +35,17 @@ export class VisecaInputParser implements InputParser {
           ],
           ' | '
         ),
+        card: parseVisecaCard(row.cardId),
       } as Transaction);
     }
 
     return txs;
   }
+}
+
+function parseVisecaCard(cardId: string): Card {
+  if (cardId.endsWith('0002')) return Card.Self;
+  if (cardId.endsWith('1250')) return Card.Partner;
+  if (cardId.endsWith('4471')) return Card.Partner;
+  return Card.Unknown;
 }

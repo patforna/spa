@@ -50,14 +50,8 @@ const fakeRulesRepo = {
   },
 } as unknown as RulesRepo;
 
-// Fake FX rate service for testing
 const fakeFxRateService = {
-  convert: async (from: string, to: string, amount: number) => {
-    if (from === 'GBP' && to === 'CHF') return amount * 1.0; // Example GBP to CHF rate
-    if (from === 'EUR' && to === 'CHF') return amount * 1.0; // Example EUR to CHF rate
-    if (from === 'USD' && to === 'CHF') return amount * 1.0; // Example USD to CHF rate
-    throw new Error(`Unsupported currency conversion from ${from} to ${to}`);
-  },
+  convert: async (_from: string, _to: string, amount: number) => amount,
 } as unknown as FxRateService;
 
 describe('Acceptance tests', () => {

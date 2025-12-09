@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { FxRateService } from '../fxRates.js';
-import { Transaction } from '../transactions.js';
+import { Card, Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
@@ -42,6 +42,7 @@ export class WiseInputParser implements InputParser {
           [row.direction, merchant, row.reference, '#wise'],
           ' | '
         ),
+        card: Card.Unknown,
       } as Transaction);
     }
 
