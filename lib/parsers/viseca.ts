@@ -14,13 +14,6 @@ interface VisecaRow {
   details: string;
 }
 
-function parseVisecaCard(cardId: string): Card {
-  if (cardId.endsWith('0002')) return Card.Self;
-  if (cardId.endsWith('1250')) return Card.Partner;
-  if (cardId.endsWith('4471')) return Card.Partner;
-  return Card.Unknown;
-}
-
 export class VisecaInputParser implements InputParser {
   async parse(input: string): Promise<Transaction[]> {
     const rows = parseCSV(input)
