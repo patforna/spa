@@ -9,35 +9,36 @@ import {
   asString,
   txsForCategory,
 } from '../transactions.js';
-import { RulesRepo } from '../rules.js';
+import { Rules } from '../rules.js';
 import { Command } from './index.js';
 
 inquirer.registerPrompt('autocomplete', inquirerPrompt);
 
 export class CategoriseCommand implements Command {
-  #rulesRepo: RulesRepo;
+  #rules: Rules;
+  #overrides: Transaction[];
   #overridesRepo: OverridesRepo;
   #categoriser: Categoriser;
 
   constructor(
-    rulesRepo: RulesRepo,
+    rules: Rules,
+    overrides: Transaction[],
     overridesRepo: OverridesRepo,
     categoriser: Categoriser
   ) {
-    this.#rulesRepo = rulesRepo;
+    this.#rules = rules;
+    this.#overrides = overrides;
     this.#overridesRepo = overridesRepo;
     this.#categoriser = categoriser;
   }
 
   async execute(txs: Transaction[]): Promise<void> {
-    const rules = this.#rulesRepo.load();
-    const categories = _.concat(_.sortBy(Object.keys(rules)), IGNORE);
+    const categories = _.concat(_.sortBy(Object.keys(this.#rules)), IGNORE);
     txs.forEach((tx) => this.#categoriser.categorise(tx));
 
     const uncategorised = txsForCategory(txs, NO_CATEGORY);
 
     // ask user to categorise the ones we couldn't categorise automatically
-    const overrides = this.#overridesRepo.load();
     for (const tx of uncategorised) {
       const category = await promptForCategory(categories, tx);
       if (category === 'split') {
@@ -55,7 +56,7 @@ export class CategoriseCommand implements Command {
           splits.push(split);
           remainingAmount -= splitAmount;
         }
-        overrides.push({
+        this.#overrides.push({
           date: tx.date,
           amount: tx.amount,
           description: tx.description,
@@ -65,10 +66,10 @@ export class CategoriseCommand implements Command {
       } else {
         tx.category = category;
         tx.comment = await promptForComment();
-        overrides.push(tx);
+        this.#overrides.push(tx);
       }
     }
-    this.#overridesRepo.saveAll(overrides);
+    this.#overridesRepo.saveAll(this.#overrides);
   }
 }
 

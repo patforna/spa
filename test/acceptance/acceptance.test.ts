@@ -61,14 +61,13 @@ const fakeFxRateService = {
 } as unknown as FxRateService;
 
 describe('Acceptance tests', () => {
-  const categoriser = new Categoriser(
-    fakeRulesRepo.load(),
-    fakeOverridesRepo.load()
-  );
+  const rules = fakeRulesRepo.load();
+  const overrides = fakeOverridesRepo.load();
+  const categoriser = new Categoriser(rules, overrides);
   const captureCommand = new CaptureTxsCommand();
   const inputParserFactory = new InputParserFactory(fakeFxRateService);
   const commands = [
-    new CategoriseCommand(fakeRulesRepo, fakeOverridesRepo, categoriser),
+    new CategoriseCommand(rules, overrides, fakeOverridesRepo, categoriser),
     captureCommand,
   ];
 

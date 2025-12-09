@@ -16,7 +16,8 @@ import { Wiring } from '../wiring.js';
 export default (): void => {
   const commands: (() => Promise<void>)[] = [];
   const wiring = new Wiring();
-  const rules = wiring.rulesRepo.load();
+  const rules = wiring.rules;
+  const overrides = wiring.overrides;
   const overridesRepo = wiring.overridesRepo;
   const inputParserFactory = wiring.inputParserFactory;
 
@@ -39,7 +40,7 @@ export default (): void => {
       handler: (args) => {
         commands.push(async (): Promise<void> => {
           const data = readFileSync(args['file'], 'utf8');
-          await regen(data, overridesRepo, inputParserFactory);
+          await regen(data, overridesRepo, overrides, inputParserFactory);
         });
       },
     })
@@ -62,6 +63,7 @@ export default (): void => {
           await removeUnnecessaryOverrides(
             rules,
             overridesRepo,
+            overrides,
             inputParserFactory,
             data
           );
@@ -93,7 +95,7 @@ export default (): void => {
       describe: 'Show overrides stats',
       handler: () => {
         commands.push(async (): Promise<void> => {
-          overridesStats(overridesRepo.load());
+          overridesStats(overrides);
         });
       },
     })
@@ -109,9 +111,9 @@ function key(tx: Transaction): string {
 async function regen(
   data: string,
   overridesRepo: OverridesRepo,
+  overrides: Transaction[],
   inputParserFactory: InputParserFactory
 ) {
-  const overrides = overridesRepo.load();
   const txsByKey = _.keyBy(
     await inputParserFactory.createParser(data).parse(data),
     (tx) => key(tx)
@@ -135,6 +137,7 @@ async function regen(
 async function removeUnnecessaryOverrides(
   rules: Rules,
   overridesRepo: OverridesRepo,
+  overrides: Transaction[],
   inputParserFactory: InputParserFactory,
   data: string
 ) {
@@ -143,7 +146,6 @@ async function removeUnnecessaryOverrides(
   txs.forEach((tx) => categoriser.categorise(tx));
   txs = txs.filter((tx) => tx.category !== NO_CATEGORY);
 
-  const overrides = overridesRepo.load();
   const txsByKey = _.keyBy(txs, (tx) => key(tx));
 
   const updated = [];
