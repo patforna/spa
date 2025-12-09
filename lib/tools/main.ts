@@ -8,6 +8,7 @@ import {
   OverridesRepo,
   asString,
   shortDescription,
+  Override,
 } from '../transactions.js';
 import { InputParserFactory } from '../parsers/index.js';
 import { Rules } from '../rules.js';
@@ -104,14 +105,14 @@ export default (): void => {
   Promise.all(commands.map((f) => f()));
 };
 
-function key(tx: Transaction): string {
+function key(tx: Transaction | Override): string {
   return `${tx.date.utc()}:${tx.description}:${tx.amount}`;
 }
 
 async function regen(
   data: string,
   overridesRepo: OverridesRepo,
-  overrides: Transaction[],
+  overrides: Override[],
   inputParserFactory: InputParserFactory
 ) {
   const txsByKey = _.keyBy(
@@ -123,9 +124,13 @@ async function regen(
   overrides.forEach((o) => {
     const tx = txsByKey[key(o)];
     if (tx) {
-      tx.category = o.category;
-      tx.comment = o.comment;
-      updated.push(tx);
+      // Create a new Override object preserving original properties but updating category/comment
+      const newOverride: Override = {
+        ...o,
+        category: tx.category,
+        comment: tx.comment,
+      };
+      updated.push(newOverride);
     } else {
       updated.push(o);
     }
@@ -137,7 +142,7 @@ async function regen(
 async function removeUnnecessaryOverrides(
   rules: Rules,
   overridesRepo: OverridesRepo,
-  overrides: Transaction[],
+  overrides: Override[],
   inputParserFactory: InputParserFactory,
   data: string
 ) {
@@ -156,7 +161,7 @@ async function removeUnnecessaryOverrides(
     } else if (tx.category !== o.category) {
       console.log(
         `Warning: removing override with different category: ${shortDescription(
-          tx
+          tx.description
         )}; C: ${tx.category}; O: ${o.category}`
       );
     }
@@ -229,10 +234,10 @@ async function ruleStats(
   });
 }
 
-function overridesStats(overrides: Transaction[]) {
+function overridesStats(overrides: Override[]) {
   const map: Record<string, number> = {};
   overrides.forEach((o) => {
-    const k = shortDescription(o);
+    const k = shortDescription(o.description);
     if (k in map) map[k] = map[k] + 1;
     else map[k] = 1;
   });

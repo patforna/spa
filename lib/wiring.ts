@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { Categoriser } from './categoriser.js';
 import { FxRateRepo, FxRateService } from './fxRates.js';
-import { OverridesRepo, Transaction } from './transactions.js';
+import { OverridesRepo, Transaction, Override } from './transactions.js';
 import { InputParserFactory } from './parsers/index.js';
 import { Rules, RulesRepo } from './rules.js';
 
@@ -16,7 +16,7 @@ export const FX_API_URL = 'http://data.fixer.io/api/';
 export class Wiring {
   readonly overridesRepo: OverridesRepo;
   readonly rules: Rules;
-  readonly overrides: Transaction[];
+  readonly overrides: Override[];
   readonly categoriser: Categoriser;
   readonly fxRateService: FxRateService;
   readonly inputParserFactory: InputParserFactory;

@@ -77,7 +77,7 @@ describe('shortDescription', () => {
       description: 'Sportshop |  |  | SportShop | #viseca',
     });
 
-    const desc = shortDescription(tx);
+    const desc = shortDescription(tx.description);
     expect(desc).not.toContain('|  |');
     expect(desc).toBe('Sportshop | SportShop | #viseca');
   });
@@ -96,7 +96,7 @@ describe('shortDescription', () => {
       }),
     ];
 
-    const descriptions = txs.map(shortDescription);
+    const descriptions = txs.map((tx) => shortDescription(tx.description));
 
     expect(descriptions[0]).toBe('Amazon | #wise');
     expect(descriptions[1]).toBe('Merchant Name | #zkb');
