@@ -77,7 +77,7 @@ function findBestCluster(
 }
 
 function levenshtein(a: Transaction, b: Transaction): number {
-  return jsLevenshtein(canon(a), canon(b)); // TODO optimise - iff perf is bad
+  return jsLevenshtein(canon(a), canon(b)); // optimise - iff perf is bad
 }
 
 function canon(tx: Transaction): string {
