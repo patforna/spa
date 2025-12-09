@@ -7,7 +7,7 @@ import { DetailsCommand } from './commands/details.js';
 import { Command } from './commands/index.js';
 import { SummaryCommand } from './commands/summary.js';
 import { InputParserFactory } from './parsers/index.js';
-import { Transaction, expandSplits } from './transactions.js';
+import { Transaction, expandSplits, Override } from './transactions.js';
 import { Wiring } from './wiring.js';
 import { expandPaths } from './utils.js';
 
@@ -121,7 +121,7 @@ export async function run(
   inputs: string[],
   inputParserFactory: InputParserFactory,
   commands: Command[],
-  overrides: Transaction[] = []
+  overrides: Override[] = []
 ) {
   const filePaths = await expandPaths(...inputs);
   console.log(

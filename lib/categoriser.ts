@@ -1,4 +1,4 @@
-import { Transaction, findOverride } from './transactions.js';
+import { Transaction, findOverride, Override } from './transactions.js';
 import { Rules } from './rules.js';
 
 export const NO_CATEGORY = 'no_category';
@@ -6,8 +6,8 @@ export const IGNORE = 'ignore';
 
 export class Categoriser {
   #rules: Rules;
-  #overrides: Transaction[];
-  constructor(rules: Rules, overrides: Transaction[]) {
+  #overrides: Override[];
+  constructor(rules: Rules, overrides: Override[]) {
     this.#rules = rules;
     this.#overrides = overrides;
   }

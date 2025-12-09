@@ -104,7 +104,7 @@ const noise = [
 ];
 
 function tidyDesc(tx: Transaction): string {
-  let desc = shortDescription(tx);
+  let desc = shortDescription(tx.description);
   noise.forEach((re) => (desc = desc.replace(re, '')));
   return desc.trim();
 }

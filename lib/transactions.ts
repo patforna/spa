@@ -11,7 +11,21 @@ export interface Transaction {
   category: string;
   comment: string;
   card: Card;
-  splits?: Transaction[];
+}
+
+export interface Override {
+  date: moment.Moment;
+  amount: number;
+  description: string;
+  category: string;
+  comment: string;
+  splits?: OverrideSplit[];
+}
+
+export interface OverrideSplit {
+  amount: number;
+  category: string;
+  comment?: string;
 }
 
 export enum Card {
@@ -27,16 +41,15 @@ export class OverridesRepo {
     this.#path = path;
   }
 
-  load(): Transaction[] {
+  load(): Override[] {
     const txs = JSON.parse(readFileSync(this.#path).toString());
     txs.forEach((tx) => {
       tx.date = moment.utc(tx.date);
-      tx.card = Card.Unknown;
     });
     return txs;
   }
 
-  saveAll(txs: Transaction[]): void {
+  saveAll(txs: Override[]): void {
     const toSave = _.sortBy(txs, 'date').map((tx) =>
       tx.splits
         ? _.pick(tx, ['date', 'amount', 'description', 'splits'])
@@ -58,9 +71,9 @@ export function txsExcludingIgnored(txs: Transaction[]): Transaction[] {
 }
 
 export function findOverride(
-  overrides: Transaction[],
+  overrides: Override[],
   tx: Transaction
-): Transaction {
+): Override {
   return overrides.find(({ date, amount }) => {
     return moment(date).isSame(tx.date) && amount === tx.amount;
   });
@@ -82,8 +95,8 @@ const IGNORED_PATTERNS = [
 
 const IGNORED_STRINGS = new Set(['OUT', 'IN', 'NEUTRAL', 'CHE']);
 
-export function shortDescription(tx: Transaction): string {
-  return tx.description
+export function shortDescription(description: string): string {
+  return description
     .replace('Zahlung - ', '')
     .split('|')
     .map((s) => s.trim())
@@ -100,7 +113,7 @@ export function asString(tx: Transaction, showCategory = false): string {
   parts.push(tx.date.format('YYYY-MM-DD'));
   parts.push(_.padStart(_.round(tx.amount).toLocaleString(), 10));
   parts.push(_.padStart(Card[tx.card] || '-', 8));
-  parts.push(shortDescription(tx));
+  parts.push(shortDescription(tx.description));
   if (tx.comment) parts.push(`| Comment: ${tx.comment}`);
 
   return parts.join(' | ');
@@ -113,7 +126,7 @@ export function asString(tx: Transaction, showCategory = false): string {
  */
 export function expandSplits(
   txs: Transaction[],
-  overrides: Transaction[]
+  overrides: Override[]
 ): void {
   const splitOverrides = overrides.filter(
     (o) => o.splits && o.splits.length > 0
@@ -129,6 +142,7 @@ export function expandSplits(
         date: tx.date,
         description: tx.description,
         card: tx.card,
+        comment: split.comment || tx.comment,
       }));
       txs.splice(i, 1, ...childTxs);
     }

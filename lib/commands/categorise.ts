@@ -8,6 +8,8 @@ import {
   OverridesRepo,
   asString,
   txsForCategory,
+  Override,
+  OverrideSplit,
 } from '../transactions.js';
 import { Rules } from '../rules.js';
 import { Command } from './index.js';
@@ -16,13 +18,13 @@ inquirer.registerPrompt('autocomplete', inquirerPrompt);
 
 export class CategoriseCommand implements Command {
   #rules: Rules;
-  #overrides: Transaction[];
+  #overrides: Override[];
   #overridesRepo: OverridesRepo;
   #categoriser: Categoriser;
 
   constructor(
     rules: Rules,
-    overrides: Transaction[],
+    overrides: Override[],
     overridesRepo: OverridesRepo,
     categoriser: Categoriser
   ) {
@@ -43,7 +45,7 @@ export class CategoriseCommand implements Command {
       const category = await promptForCategory(categories, tx);
       if (category === 'split') {
         console.log('*** SPLIT MODE ***');
-        const splits: Transaction[] = [];
+        const splits: OverrideSplit[] = [];
         const sign = tx.amount < 0 ? -1 : 1;
         let remainingAmount = Math.abs(tx.amount);
         while (remainingAmount > 0) {
@@ -52,7 +54,7 @@ export class CategoriseCommand implements Command {
             amount: sign * splitAmount,
             category: await promptForCategory(categories, tx),
             comment: await promptForComment(),
-          } as Transaction;
+          } as OverrideSplit;
           splits.push(split);
           remainingAmount -= splitAmount;
         }
@@ -60,13 +62,20 @@ export class CategoriseCommand implements Command {
           date: tx.date,
           amount: tx.amount,
           description: tx.description,
-          card: tx.card,
+          category: '',
+          comment: '',
           splits,
-        } as Transaction);
+        } as Override);
       } else {
         tx.category = category;
         tx.comment = await promptForComment();
-        this.#overrides.push(tx);
+        this.#overrides.push({
+          date: tx.date,
+          amount: tx.amount,
+          description: tx.description,
+          category: tx.category,
+          comment: tx.comment,
+        } as Override);
       }
     }
     this.#overridesRepo.saveAll(this.#overrides);
