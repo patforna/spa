@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { Transaction } from '../transactions.js';
+import { Card, Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
@@ -29,6 +29,7 @@ export class ZKBInputParser implements InputParser {
             [row.bookingText, row.paymentPurpose, '#zkb'],
             ' | '
           ),
+          card: Card.Unknown,
         } as Transaction);
       } else {
         // this happens when a transaction is followed by details on separate lines
@@ -48,6 +49,7 @@ export class ZKBInputParser implements InputParser {
             ],
             ' | '
           ),
+          card: Card.Unknown,
         } as Transaction);
       }
     }

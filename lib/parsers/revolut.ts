@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { FxRateService } from '../fxRates.js';
-import { Transaction } from '../transactions.js';
+import { Card, Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
@@ -39,6 +39,7 @@ export class RevolutInputParser implements InputParser {
         date: row.completedDate,
         amount: amount,
         description: _.join([row.type, row.description, '#revolut'], ' | '),
+        card: Card.Self,
       } as Transaction);
     }
 
