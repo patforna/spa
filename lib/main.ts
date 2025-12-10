@@ -1,8 +1,6 @@
 import { readFileSync } from 'fs';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { CategoriseCommand } from './commands/categorise.js';
-import { ClusterCommand } from './commands/cluster.js';
 import { DetailsCommand } from './commands/details.js';
 import { Command } from './commands/index.js';
 import { SummaryCommand } from './commands/summary.js';
@@ -15,11 +13,10 @@ export default (): void => {
   const commands = [];
   const wiring = new Wiring();
   const output = wiring.output;
-  const rules = wiring.rules;
   const overrides = wiring.overrides;
-  const overridesRepo = wiring.overridesRepo;
-  const categoriser = wiring.categoriser;
   const inputParserFactory = wiring.inputParserFactory;
+  const categoriseCommand = wiring.categoriseCommand;
+  const clusterCommand = wiring.clusterCommand;
 
   const args = yargs(hideBin(process.argv))
     .scriptName('money')
@@ -48,7 +45,7 @@ Examples:
       },
       handler: (args) => {
         commands.push(
-          new CategoriseCommand(rules, overrides, overridesRepo, categoriser),
+          categoriseCommand,
           new SummaryCommand(args['sortBy'], output)
         );
       },
@@ -74,7 +71,7 @@ Examples:
       },
       handler: (args) => {
         commands.push(
-          new CategoriseCommand(rules, overrides, overridesRepo, categoriser),
+          categoriseCommand,
           new DetailsCommand(args['sortBy'], args['category'], output)
         );
       },
@@ -93,10 +90,7 @@ Examples:
         });
       },
       handler: () => {
-        commands.push(
-          new CategoriseCommand(rules, overrides, overridesRepo, categoriser),
-          new ClusterCommand(output)
-        );
+        commands.push(categoriseCommand, clusterCommand);
       },
     })
     .options({
