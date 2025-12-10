@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import moment from 'moment-timezone';
+import dayjs from '../../lib/date.js';
 import * as os from 'os';
 import * as path from 'path';
 import { Categoriser } from '../../lib/categoriser.js';
@@ -157,7 +157,7 @@ describe('Acceptance tests', () => {
   });
 
   test('should expand split transactions from overrides', async () => {
-    const date = moment();
+    const date = dayjs();
     const amount = -100;
     const txs = [{ date, amount }] as Transaction[];
     const fakeParserFactory = {

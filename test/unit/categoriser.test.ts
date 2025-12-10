@@ -1,7 +1,7 @@
 import { Categoriser, NO_CATEGORY, IGNORE } from '../../lib/categoriser.js';
 import { Rules } from '../../lib/rules.js';
 import { makeTx } from './factories/transactionFactory.js';
-import moment from 'moment';
+import dayjs from '../../lib/date.js';
 
 describe('Categoriser', () => {
   it('should set NO_CATEGORY when no rules or overrides matches', () => {
@@ -48,7 +48,7 @@ describe('Categoriser', () => {
   });
 
   it('should use override when date and amount match', () => {
-    const date = moment('2024-01-15');
+    const date = dayjs('2024-01-15');
     const override = makeTx({ date, amount: -50, category: 'health' });
     const categoriser = new Categoriser({}, [override]);
     const tx = makeTx({ date, amount: -50, description: 'SOME MERCHANT' });
@@ -59,7 +59,7 @@ describe('Categoriser', () => {
   });
 
   it('should use overrides over rules', () => {
-    const date = moment('2024-01-15');
+    const date = dayjs('2024-01-15');
     const rules: Rules = { groceries: [/migros/i] };
     const override = makeTx({ date, amount: -100, category: 'other' });
     const categoriser = new Categoriser(rules, [override]);

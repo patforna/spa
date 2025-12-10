@@ -1,17 +1,12 @@
-[ ] Separate Override from Transaction
-[ ] Convert rules.ts to json and move to /data
-
 # features (for another day)
 
 [ ] special command to create new rule directly in CLI
 
 ---
-# claude review
+* Heavy lodash usage - Most uses (_.get, _.set, _.orderBy, _.groupBy) have native equivalents now. Please take a look and come up with a proposal and, potentially, a plan on how to evolve.
 
-  Nitpicks / Minor
+* Console.log scattered everywhere - A logger abstraction would probably help with testability etc, but I also want to keep things as simple as possible #KISS #YAGNI. Please take a look and come up with a proposal and, potentially, a plan on how to evolve.
 
-  8. moment is deprecated - Works fine, but dayjs or native Temporal (once stable) would be more modern.
-  9. Heavy lodash usage - Most uses (_.get, _.set, _.orderBy, _.groupBy) have native equivalents now.
-  10. 340-line rules.ts object - Could be externalized to JSON/YAML for easier editing, but it works.
-  11. Console.log scattered everywhere - A logger abstraction would help testability, but for a personal CLI tool this is fine.
-  12. Synchronous file I/O - Acceptable for a CLI, but async would be cleaner.
+* Synchronous file I/O - Acceptable for a CLI, but async would be cleaner. Please take a look and come up with a proposal and, potentially, a plan on how to evolve.
+
+* add sort rules to check.

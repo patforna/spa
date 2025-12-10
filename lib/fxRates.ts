@@ -3,7 +3,7 @@ import currency from 'currency.js';
 import { readFileSync, writeFileSync } from 'fs';
 import stringify from 'json-stringify-pretty-compact';
 import _ from 'lodash';
-import moment from 'moment';
+import dayjs, { Dayjs } from './date.js';
 
 const API_KEY = process.env['FIXER_API_KEY'];
 const API_URL = 'http://data.fixer.io/api/';
@@ -22,18 +22,14 @@ export class FxRateService {
     from: string,
     to: string,
     amount: number,
-    date = moment.utc()
+    date = dayjs.utc()
   ): Promise<number> {
     const rate = await this.getRate(from, to, date);
     return currency(amount).multiply(rate).value;
   }
 
-  async getRate(
-    from: string,
-    to: string,
-    date = moment.utc()
-  ): Promise<number> {
-    const truncatedDate = date.clone().utc().startOf('day');
+  async getRate(from: string, to: string, date = dayjs.utc()): Promise<number> {
+    const truncatedDate = date.utc().startOf('day');
     const pair = createFxRatePair(from, to);
     const item = this.#cache.get(this.cacheKey(truncatedDate, pair));
 
@@ -49,7 +45,7 @@ export class FxRateService {
   private async fetchRate(
     from: string,
     to: string,
-    date: moment.Moment
+    date: Dayjs
   ): Promise<number> {
     try {
       // Rate limiting: wait 1 second between API calls to avoid rate limiting errors
@@ -87,12 +83,12 @@ export class FxRateService {
     }
   }
 
-  private endpointUrl(from: string, to: string, date: moment.Moment): string {
+  private endpointUrl(from: string, to: string, date: Dayjs): string {
     const d = date.format('YYYY-MM-DD');
     return `${API_URL}${d}?access_key=${API_KEY}&base=EUR&symbols=${from},${to}`;
   }
 
-  private cacheKey(date: moment.Moment, pair: string): string {
+  private cacheKey(date: Dayjs, pair: string): string {
     return `${date.toISOString()}_${pair}`;
   }
 
@@ -104,7 +100,7 @@ export class FxRateService {
 }
 
 export interface FxRateItem {
-  date: moment.Moment;
+  date: Dayjs;
   pair: string;
   rate: number;
 }
@@ -113,11 +109,7 @@ function createFxRatePair(from: string, to: string): string {
   return `${from}_${to}`.toUpperCase();
 }
 
-function createFxRateItem(
-  date: moment.Moment,
-  pair: string,
-  rate: number
-): FxRateItem {
+function createFxRateItem(date: Dayjs, pair: string, rate: number): FxRateItem {
   return {
     date,
     pair,
@@ -135,7 +127,7 @@ export class FxRateRepo {
   load(): FxRateItem[] {
     const loaded = JSON.parse(readFileSync(this.#path).toString());
     this.#items = loaded.map((x) =>
-      createFxRateItem(moment.utc(x.date), x.pair, Number(x.rate))
+      createFxRateItem(dayjs.utc(x.date), x.pair, Number(x.rate))
     );
     return this.#items;
   }

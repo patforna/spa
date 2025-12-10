@@ -1,10 +1,10 @@
-import moment from 'moment';
+import { Dayjs } from '../date.js';
 import { Card, Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
 interface ZKBRow {
-  date?: moment.Moment;
+  date?: Dayjs;
   bookingText: string;
   amountDetails: number;
   debitChf: number;

@@ -1,25 +1,28 @@
-import moment from 'moment';
+import dayjs from '../../lib/date.js';
 import {
   Card,
   expandSplits,
   shortDescription,
+  Override,
 } from '../../lib/transactions.js';
 import { makeTx } from './factories/transactionFactory.js';
 
 describe('expandSplits', () => {
-  const date = moment.utc('2025-01-15');
+  const date = dayjs.utc('2025-01-15');
 
   test('should replace parent transaction with split children', () => {
     const txs = [makeTx({ date, amount: -200 })];
-    const overrides = [
-      makeTx({
-        date,
-        amount: -200,
+    const overrides: Override[] = [
+      {
+        ...makeTx({
+          date,
+          amount: -200,
+        }),
         splits: [
           makeTx({ amount: -50, category: 'a' }),
           makeTx({ amount: -150, category: 'b' }),
         ],
-      }),
+      },
     ];
 
     expandSplits(txs, overrides);
@@ -34,12 +37,14 @@ describe('expandSplits', () => {
     const txs = [
       makeTx({ date, amount: -100, description: 'Store', card: Card.Self }),
     ];
-    const overrides = [
-      makeTx({
-        date,
-        amount: -100,
+    const overrides: Override[] = [
+      {
+        ...makeTx({
+          date,
+          amount: -100,
+        }),
         splits: [makeTx({ amount: -100, category: 'shopping' })],
-      }),
+      },
     ];
 
     expandSplits(txs, overrides);
@@ -54,16 +59,18 @@ describe('expandSplits', () => {
       makeTx({ date, amount: -20, category: 'b' }),
       makeTx({ date, amount: -30, category: 'c' }),
     ];
-    const overrides = [
-      makeTx({
-        date,
-        amount: -20,
+    const overrides: Override[] = [
+      {
+        ...makeTx({
+          date,
+          amount: -20,
+        }),
         splits: [
           makeTx({ category: 'u' }),
           makeTx({ category: 'v' }),
           makeTx({ category: 'w' }),
         ],
-      }),
+      },
     ];
 
     expandSplits(txs, overrides);

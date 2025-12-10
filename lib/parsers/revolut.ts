@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { Dayjs } from '../date.js';
 import { FxRateService } from '../fxRates.js';
 import { Card, Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
@@ -8,7 +8,7 @@ import _ from 'lodash';
 // statements from revolut are sliced by completedDate ¯\_(ツ)_/¯
 interface RevolutRow {
   type: string;
-  completedDate: moment.Moment;
+  completedDate: Dayjs;
   amount: number;
   fee: number;
   currency: string;

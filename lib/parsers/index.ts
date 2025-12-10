@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import moment from 'moment-timezone';
+import dayjs from '../date.js';
 import Papa from 'papaparse';
 import { FxRateService } from '../fxRates.js';
 import { Transaction } from '../transactions.js';
@@ -47,19 +47,15 @@ export function parseCSV(input: string): object[] {
     skipEmptyLines: true,
     transformHeader: _.camelCase,
     transform: (value: string) => {
-      // attempt to parse the value as a date using multiple formats and return as moment object
-      const parsedDate = moment.tz(
-        value,
-        [
-          'YYYY-MM-DD HH:mm:ss', // wise
-          'DD.MM.YYYY', // zkb
-          'MM/DD/YYYY HH:mm:ss', // viseca
-        ],
-        true,
-        'Europe/Zurich' // since we don't know the input TZ, we assume date/times are in Zurich
-      );
+      // attempt to parse the value as a date using multiple formats and return as dayjs object
+      const formats = [
+        'YYYY-MM-DD HH:mm:ss', // wise
+        'DD.MM.YYYY', // zkb
+        'MM/DD/YYYY HH:mm:ss', // viseca
+      ];
+      const parsedDate = dayjs(value, formats, true);
       if (parsedDate.isValid()) {
-        return parsedDate;
+        return parsedDate.tz('Europe/Zurich', true);
       }
       return value;
     },

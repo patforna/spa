@@ -1,11 +1,11 @@
-import moment from 'moment';
+import { Dayjs } from '../date.js';
 import { Card, Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
 import _ from 'lodash';
 
 interface VisecaRow {
   cardId: string;
-  date: moment.Moment;
+  date: Dayjs;
   amount: number;
   merchantName: string;
   merchantPlace: string;

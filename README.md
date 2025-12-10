@@ -62,7 +62,7 @@ Install dependencies:
 
     npm install
 
-Build (after every *.ts change):
+Build (after every \*.ts change):
 
     npm run build
 

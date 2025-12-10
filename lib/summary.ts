@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import moment from 'moment';
+import dayjs from './date.js';
 import { Transaction, txsExcludingIgnored } from './transactions.js';
 
 export interface Total {
@@ -33,7 +33,7 @@ export class Summary {
   }
 
   get monthNames(): string[] {
-    return _.take(moment.monthsShort(), this.data.months.length);
+    return _.take(dayjs.monthsShort(), this.data.months.length);
   }
 
   // all category names - sorted alphabetically

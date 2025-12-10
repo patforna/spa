@@ -1,11 +1,11 @@
 import { readFileSync, writeFileSync } from 'fs';
 import stringify from 'json-stringify-pretty-compact';
 import _ from 'lodash';
-import moment from 'moment';
+import dayjs, { Dayjs } from './date.js';
 import { IGNORE } from './categoriser.js';
 
 export interface Transaction {
-  date: moment.Moment;
+  date: Dayjs;
   amount: number;
   description: string;
   category: string;
@@ -14,7 +14,7 @@ export interface Transaction {
 }
 
 export interface Override {
-  date: moment.Moment;
+  date: Dayjs;
   amount: number;
   category: string;
   comment: string;
@@ -43,7 +43,7 @@ export class OverridesRepo {
   load(): Override[] {
     const txs = JSON.parse(readFileSync(this.#path).toString());
     txs.forEach((tx) => {
-      tx.date = moment.utc(tx.date);
+      tx.date = dayjs.utc(tx.date);
     });
     return txs;
   }
@@ -71,7 +71,7 @@ export function txsExcludingIgnored(txs: Transaction[]): Transaction[] {
 
 export function findOverride(overrides: Override[], tx: Transaction): Override {
   return overrides.find(({ date, amount }) => {
-    return moment(date).isSame(tx.date) && amount === tx.amount;
+    return dayjs(date).isSame(tx.date) && amount === tx.amount;
   });
 }
 

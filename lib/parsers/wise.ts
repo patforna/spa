@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { Dayjs } from '../date.js';
 import { FxRateService } from '../fxRates.js';
 import { Card, Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
@@ -7,7 +7,7 @@ import _ from 'lodash';
 interface WiseRow {
   status: string;
   direction: string;
-  createdOn: moment.Moment;
+  createdOn: Dayjs;
   sourceAmountAfterFees: number;
   sourceCurrency: string;
   sourceName: string;
