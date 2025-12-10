@@ -36,4 +36,13 @@ describe('VisecaInputParser', () => {
     const txs = await parser.parse(makeCsv('XXXX9999'));
     expect(txs[0].card).toBe(Card.Unknown);
   });
+
+  test('should handle null cardId as Unknown', async () => {
+    const csv =
+      `${csvHeader}\n` +
+      `,,"01/01/2025 00:00:00","","1.00","CHF","","",` +
+      `"Test","Place","CHE","BOOKED","Details",""`;
+    const txs = await parser.parse(csv);
+    expect(txs[0].card).toBe(Card.Unknown);
+  });
 });
