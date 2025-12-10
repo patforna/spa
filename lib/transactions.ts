@@ -54,7 +54,7 @@ export class OverridesRepo {
         ? _.pick(tx, ['date', 'amount', 'splits'])
         : _.pick(tx, ['date', 'amount', 'category', 'comment'])
     );
-    writeFileSync(this.#path, stringify(toSave));
+    writeFileSync(this.#path, stringify(toSave, { maxLength: 0 }) + '\n');
   }
 }
 
