@@ -8,13 +8,12 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit -p tsconfig.build.json",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "check": "npm test && npm run lint && npm run format && npm run typecheck && npm run sort-rules",
     "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --silent",
-    "check": "npm run sort-rules && npm test && npm run lint && npm run format:check && npm run typecheck",
-    "sort-rules": "node scripts/sort-rules.js && prettier --write data/rules.json"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.build.json",
+    "format": "prettier --write .",
+    "sort-rules": "node scripts/sort-rules.js"
   },
   "bin": {
     "money": "bin/money"

@@ -66,7 +66,7 @@ Build (after every \*.ts change):
 
     npm run build
 
-Run before committing 🚨 (test, lint, format check, typecheck):
+Run before committing 🚨 (test, lint, typecheck, format, sort-rules):
 
     npm run check
 
@@ -74,11 +74,3 @@ Run tests directly:
 
     npm test
     npm test -- --watch # watch mode
-
-Sort rules (after editing `data/rules.json`):
-
-    npm run sort-rules
-
-Fix formatting:
-
-    npm run format
