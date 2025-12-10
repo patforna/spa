@@ -91,22 +91,13 @@ export default (): void => {
         });
       },
     })
-    .command({
-      command: 'overrides_stats',
-      describe: 'Show overrides stats',
-      handler: () => {
-        commands.push(async (): Promise<void> => {
-          overridesStats(overrides);
-        });
-      },
-    })
     .parse();
 
   Promise.all(commands.map((f) => f()));
 };
 
 function key(tx: Transaction | Override): string {
-  return `${tx.date.utc()}:${tx.description}:${tx.amount}`;
+  return `${tx.date.utc()}:${tx.amount}`;
 }
 
 async function regen(
@@ -232,19 +223,4 @@ async function ruleStats(
     );
     s.txs.forEach((tx) => console.log(asString(tx)));
   });
-}
-
-function overridesStats(overrides: Override[]) {
-  const map: Record<string, number> = {};
-  overrides.forEach((o) => {
-    const k = shortDescription(o.description);
-    if (k in map) map[k] = map[k] + 1;
-    else map[k] = 1;
-  });
-
-  const result = _.filter(Object.entries(map), ([_, v]) => v > 1);
-
-  _.orderBy(result, [([_, v]) => v], ['desc']).forEach(([k, v]) =>
-    console.log(`${_.padStart(_.toString(v), 3)}: ${k}`)
-  );
 }
