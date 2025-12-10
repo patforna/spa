@@ -16,7 +16,6 @@ export interface Transaction {
 export interface Override {
   date: moment.Moment;
   amount: number;
-  description: string;
   category: string;
   comment: string;
   splits?: OverrideSplit[];
@@ -52,8 +51,8 @@ export class OverridesRepo {
   saveAll(txs: Override[]): void {
     const toSave = _.sortBy(txs, 'date').map((tx) =>
       tx.splits
-        ? _.pick(tx, ['date', 'amount', 'description', 'splits'])
-        : _.pick(tx, ['date', 'amount', 'description', 'category', 'comment'])
+        ? _.pick(tx, ['date', 'amount', 'splits'])
+        : _.pick(tx, ['date', 'amount', 'category', 'comment'])
     );
     writeFileSync(this.#path, stringify(toSave));
   }
