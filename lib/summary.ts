@@ -25,7 +25,8 @@ export class Summary {
       months: _.range(12).map(() => ({ categories: {} })),
     };
 
-    if (_.uniq(txs.map((tx) => tx.date.year())).length > 1)
+    // Use Zurich timezone for year check
+    if (_.uniq(txs.map((tx) => tx.date.tz('Europe/Zurich').year())).length > 1)
       throw new Error('Cannot summarise transactions from multiple years.');
 
     this.txs = txsExcludingIgnored(txs);
@@ -106,7 +107,8 @@ function mean(totals: Total[]): Total {
 }
 
 function add(data: SummaryData, field: string, tx: Transaction): void {
-  const month = tx.date.month();
+  // Use Zurich timezone for month calculation
+  const month = tx.date.tz('Europe/Zurich').month();
 
   let obj = _.get(data.months[month], field);
   if (!obj) {

@@ -55,7 +55,8 @@ export function parseCSV(input: string): object[] {
       ];
       const parsedDate = dayjs(value, formats, true);
       if (parsedDate.isValid()) {
-        return parsedDate.tz('Europe/Zurich', true);
+        // Interpret as Zurich time, then convert to UTC for internal use
+        return parsedDate.tz('Europe/Zurich', true).utc();
       }
       return value;
     },
