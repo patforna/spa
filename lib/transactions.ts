@@ -107,7 +107,7 @@ export function asString(tx: Transaction, showCategory = false): string {
   const parts = [];
   if (showCategory) parts.push(_.padStart(tx.category.toUpperCase(), 12));
   parts.push(tx.date.format('YYYY-MM-DD'));
-  parts.push(_.padStart(_.round(tx.amount).toLocaleString(), 10));
+  parts.push(_.padStart(Math.round(tx.amount).toLocaleString(), 10));
   parts.push(_.padStart(Card[tx.card] || '-', 8));
   parts.push(shortDescription(tx.description));
   if (tx.comment) parts.push(`| Comment: ${tx.comment}`);

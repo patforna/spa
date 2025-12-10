@@ -30,7 +30,7 @@ export class ClusterCommand implements Command {
     clusters = _.orderBy(clusters, [computeTotal]);
 
     clusters.forEach((c) => {
-      console.log(_.repeat('-', 80));
+      console.log('-'.repeat(80));
       const name = tidyDesc(c[0]);
       const categories = computeCategories(c);
       const total = computeTotal(c);
@@ -39,7 +39,7 @@ export class ClusterCommand implements Command {
       console.log(`Cluster: ${name}`);
       console.log(
         `Total: ${_.padStart(
-          _.ceil(total, 0).toLocaleString(),
+          Math.ceil(total).toLocaleString(),
           5
         )} | Size: ${_.padStart(
           c.length.toString(),
@@ -48,7 +48,7 @@ export class ClusterCommand implements Command {
       );
 
       if (details) {
-        console.log(_.repeat('-', 80));
+        console.log('-'.repeat(80));
         _.uniq(c.map(tidyDesc)).forEach((i) => console.log(i + '\n'));
       }
     });
@@ -110,7 +110,7 @@ function tidyDesc(tx: Transaction): string {
 }
 
 function computeTotal(cluster: Transaction[]): number {
-  return _.reduce(cluster, (total, tx) => (total += tx.amount), 0);
+  return cluster.reduce((total, tx) => total + tx.amount, 0);
 }
 
 function computeCategories(cluster: Transaction[]): string[] {

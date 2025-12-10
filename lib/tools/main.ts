@@ -191,12 +191,12 @@ async function ruleStats(
       res.forEach((re: RegExp) => {
         const k = ruleKey([cat, re]);
         if (re.test(tx.description)) {
-          const ruleStat: RuleStat = _.defaultTo(stats[k], {
+          const ruleStat: RuleStat = stats[k] ?? {
             category: cat,
             rule: re.source,
             txs: [],
             conflicts: [],
-          });
+          };
           if (tx.category !== undefined && tx.category != cat)
             ruleStat.conflicts.push(tx.category);
           else {

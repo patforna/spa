@@ -1,7 +1,6 @@
 import { Dayjs } from '../date.js';
 import { Card, Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
-import _ from 'lodash';
 
 interface VisecaRow {
   cardId: string;
@@ -25,16 +24,13 @@ export class VisecaInputParser implements InputParser {
       txs.push({
         date: row.date,
         amount: -row.amount,
-        description: _.join(
-          [
-            row.merchantName,
-            row.merchantPlace,
-            row.merchantCountry,
-            row.details,
-            '#viseca',
-          ],
-          ' | '
-        ),
+        description: [
+          row.merchantName,
+          row.merchantPlace,
+          row.merchantCountry,
+          row.details,
+          '#viseca',
+        ].join(' | '),
         card: parseVisecaCard(row.cardId),
       } as Transaction);
     }

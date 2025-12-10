@@ -2,7 +2,6 @@ import { Dayjs } from '../date.js';
 import { FxRateService } from '../fxRates.js';
 import { Card, Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
-import _ from 'lodash';
 
 // using completedDate here as opposed to startedDate because monthly
 // statements from revolut are sliced by completedDate ¯\_(ツ)_/¯
@@ -38,7 +37,7 @@ export class RevolutInputParser implements InputParser {
       txs.push({
         date: row.completedDate,
         amount: amount,
-        description: _.join([row.type, row.description, '#revolut'], ' | '),
+        description: [row.type, row.description, '#revolut'].join(' | '),
         card: Card.Self,
       } as Transaction);
     }

@@ -30,7 +30,7 @@ export class Summary {
       throw new Error('Cannot summarise transactions from multiple years.');
 
     this.txs = txsExcludingIgnored(txs);
-    this.txs.forEach((tx) => add(this.data, `categories.${tx.category}`, tx));
+    this.txs.forEach((tx) => add(this.data, tx.category, tx));
   }
 
   get monthNames(): string[] {
@@ -78,10 +78,7 @@ export class Summary {
   }
 
   totalFor(month: number, category: string): Total {
-    return _.defaultTo(
-      this.data.months[month].categories[category],
-      ZERO_TOTAL
-    );
+    return this.data.months[month].categories[category] ?? ZERO_TOTAL;
   }
 
   avg(): Total {
@@ -106,16 +103,15 @@ function mean(totals: Total[]): Total {
   return { amount, transactions };
 }
 
-function add(data: SummaryData, field: string, tx: Transaction): void {
+function add(data: SummaryData, category: string, tx: Transaction): void {
   // Use Zurich timezone for month calculation
   const month = tx.date.tz('Europe/Zurich').month();
 
-  let obj = _.get(data.months[month], field);
-  if (!obj) {
-    _.set(data.months[month], field, { amount: 0, transactions: 0 });
-    obj = _.get(data.months[month], field);
+  if (!data.months[month].categories[category]) {
+    data.months[month].categories[category] = { amount: 0, transactions: 0 };
   }
 
+  const obj = data.months[month].categories[category];
   obj.amount += Math.sign(tx.amount) * Math.round(Math.abs(tx.amount));
   obj.transactions += 1;
 }

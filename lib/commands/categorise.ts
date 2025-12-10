@@ -35,7 +35,7 @@ export class CategoriseCommand implements Command {
   }
 
   async execute(txs: Transaction[]): Promise<void> {
-    const categories = _.concat(_.sortBy(Object.keys(this.#rules)), IGNORE);
+    const categories = [..._.sortBy(Object.keys(this.#rules)), IGNORE];
     txs.forEach((tx) => this.#categoriser.categorise(tx));
 
     const uncategorised = txsForCategory(txs, NO_CATEGORY);
@@ -97,7 +97,7 @@ async function promptForCategory(
       pageSize: 20,
       source: (_, input: string) => autocompleteCategory(categories, input),
       validate: (input) => {
-        if (_.trim(input) === '')
+        if (input.trim() === '')
           throw new Error('Please provide a category name.');
         return true;
       },
@@ -137,8 +137,7 @@ async function promptForComment(): Promise<string> {
 
 // narrow down list of categories or return input when no results found
 function autocompleteCategory(categories: string[], input: string) {
-  const filtered = _.filter(
-    categories,
+  const filtered = categories.filter(
     (c) => input == undefined || c.startsWith(input.toLowerCase())
   );
 

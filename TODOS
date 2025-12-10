@@ -3,10 +3,7 @@
 [ ] special command to create new rule directly in CLI
 
 ---
-* Heavy lodash usage - Most uses (_.get, _.set, _.orderBy, _.groupBy) have native equivalents now. Please take a look and come up with a proposal and, potentially, a plan on how to evolve.
 
-* Console.log scattered everywhere - A logger abstraction would probably help with testability etc, but I also want to keep things as simple as possible #KISS #YAGNI. Please take a look and come up with a proposal and, potentially, a plan on how to evolve.
+- Console.log scattered everywhere - A logger abstraction would probably help with testability etc, but I also want to keep things as simple as possible #KISS #YAGNI. Please take a look and come up with a proposal and, potentially, a plan on how to evolve.
 
-* Synchronous file I/O - Acceptable for a CLI, but async would be cleaner. Please take a look and come up with a proposal and, potentially, a plan on how to evolve.
-
-* add sort rules to check.
+- Synchronous file I/O - Acceptable for a CLI, but async would be cleaner. Please take a look and come up with a proposal and, potentially, a plan on how to evolve.

@@ -30,17 +30,18 @@ export function tableFrom(summary: Summary, sortBy: string): string {
 
 export function tableData(summary: Summary, sortBy: string): string[][] {
   let rows = [];
-  rows = _.concat(rows, [
-    headerOrFooterRow(_.concat(summary.monthNames, 'Avg', 'Total', '%')),
-  ]);
-  rows = _.concat(rows, categoryRows(summary, sortBy));
-  rows = _.concat(rows, [headerOrFooterRow(totalsRow(summary))]);
+  rows = [
+    ...rows,
+    headerOrFooterRow([...summary.monthNames, 'Avg', 'Total', '%']),
+  ];
+  rows = [...rows, ...categoryRows(summary, sortBy)];
+  rows = [...rows, headerOrFooterRow(totalsRow(summary))];
 
   return rows;
 }
 
 function headerOrFooterRow(values: string[]): string[] {
-  return _.concat('', values).map((x) => chalk.yellow(x));
+  return ['', ...values].map((x) => chalk.yellow(x));
 }
 
 function categoryRows(summary: Summary, sortBy: string): string[][] {
@@ -52,23 +53,18 @@ function categoryRows(summary: Summary, sortBy: string): string[][] {
       (c) => -summary.totalForCategory(c).amount
     );
 
-  return categories.map((c) =>
-    _.concat(
-      chalk.yellow(c),
-      formatTotals(summary.totalsForCategoryByMonth(c)),
-      chalk.yellow(format(summary.avgForCategory(c))),
-      chalk.yellow(format(summary.totalForCategory(c))),
-      chalk.yellow(summary.percentageForCategory(c) + '%')
-    )
-  );
+  return categories.map((c) => [
+    chalk.yellow(c),
+    ...formatTotals(summary.totalsForCategoryByMonth(c)),
+    chalk.yellow(format(summary.avgForCategory(c))),
+    chalk.yellow(format(summary.totalForCategory(c))),
+    chalk.yellow(summary.percentageForCategory(c) + '%'),
+  ]);
 }
 
 function totalsRow(summary: Summary): string[] {
   const totals = summary.totalsByMonth();
-  return _.concat(
-    formatTotals(_.concat(totals, summary.avg(), summary.total())),
-    ''
-  );
+  return [...formatTotals([...totals, summary.avg(), summary.total()]), ''];
 }
 
 function formatTotals(totals: Total[]): string[] {
@@ -83,7 +79,7 @@ function format(total: Total): string {
     ).toLocaleString()
   );
   parts.push(
-    _.padStart('(' + _.round(total.transactions).toLocaleString() + ')', 4)
+    _.padStart('(' + Math.round(total.transactions).toLocaleString() + ')', 4)
   );
   return parts.join(' ');
 }

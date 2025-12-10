@@ -1,7 +1,6 @@
 import { Dayjs } from '../date.js';
 import { Card, Transaction } from '../transactions.js';
 import { InputParser, parseCSV } from './index.js';
-import _ from 'lodash';
 
 interface ZKBRow {
   date?: Dayjs;
@@ -25,8 +24,7 @@ export class ZKBInputParser implements InputParser {
         txs.push({
           date: row.date,
           amount: amount,
-          description: _.join(
-            [row.bookingText, row.paymentPurpose, '#zkb'],
+          description: [row.bookingText, row.paymentPurpose, '#zkb'].join(
             ' | '
           ),
           card: Card.Unknown,
@@ -40,15 +38,12 @@ export class ZKBInputParser implements InputParser {
         txs.push({
           date: parent.date,
           amount: -row.amountDetails,
-          description: _.join(
-            [
-              _.replace(parent.description, '#zkb', ''),
-              row.bookingText,
-              row.paymentPurpose,
-              '#zkb',
-            ],
-            ' | '
-          ),
+          description: [
+            parent.description.replace('#zkb', ''),
+            row.bookingText,
+            row.paymentPurpose,
+            '#zkb',
+          ].join(' | '),
           card: Card.Unknown,
         } as Transaction);
       }
