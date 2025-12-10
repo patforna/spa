@@ -1,6 +1,26 @@
-/*
- * Personal categorisation rules were removed when this history
- * was scrubbed for public release. Rules now live in
- * data/rules.json - a generic starter set ships with the repo,
- * point SPA_DATA_DIR at your own.
- */
+import { readFileSync } from 'fs';
+
+export interface Rules {
+  [category: string]: RegExp[];
+}
+
+export class RulesRepo {
+  #path: string;
+
+  constructor(path: string) {
+    this.#path = path;
+  }
+
+  load(): Rules {
+    const raw = JSON.parse(readFileSync(this.#path).toString()) as {
+      [category: string]: string[];
+    };
+
+    const rules: Rules = {};
+    for (const [category, patterns] of Object.entries(raw)) {
+      rules[category] = patterns.map((s) => new RegExp(s, 'i'));
+    }
+
+    return rules;
+  }
+}

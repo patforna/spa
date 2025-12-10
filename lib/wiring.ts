@@ -9,6 +9,7 @@ const PROJECT_ROOT = process.cwd();
 
 const OVERRIDES_PATH = join(PROJECT_ROOT, 'data/overrides.json');
 const FX_RATES_PATH = join(PROJECT_ROOT, 'data/fxRates.json');
+const RULES_PATH = join(PROJECT_ROOT, 'data/rules.json');
 
 export const FX_API_KEY = process.env['FIXER_API_KEY'];
 export const FX_API_URL = 'http://data.fixer.io/api/';
@@ -22,7 +23,7 @@ export class Wiring {
   readonly inputParserFactory: InputParserFactory;
 
   constructor() {
-    const rulesRepo = new RulesRepo();
+    const rulesRepo = new RulesRepo(RULES_PATH);
     this.overridesRepo = new OverridesRepo(OVERRIDES_PATH);
     this.fxRateService = new FxRateService(new FxRateRepo(FX_RATES_PATH));
     this.inputParserFactory = new InputParserFactory(this.fxRateService);

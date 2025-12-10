@@ -62,31 +62,23 @@ Install dependencies:
 
     npm install
 
-Transpile TypeScript:
+Build (after every *.ts change):
 
     npm run build
 
-Type-check only:
+Run before committing 🚨 (test, lint, format check, typecheck):
 
-    npm run typecheck
+    npm run check
 
-Run tests:
+Run tests directly:
 
     npm test
     npm test -- --watch # watch mode
 
-Lint:
+Sort rules (after editing `data/rules.json`):
 
-    npm run lint
+    npm run sort-rules
 
-Format:
+Fix formatting:
 
     npm run format
-
-🚨🚨🚨 Before committing (test, lint, format check, typecheck):
-
-    npm run check
-
-## Debugging
-
-    node --inspect-brk bin/money.mjs <other args>
