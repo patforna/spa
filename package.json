@@ -13,8 +13,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --silent",
-    "check": "npm test && npm run lint && npm run format:check && npm run typecheck",
-    "sort-rules": "node scripts/sort-rules.js"
+    "check": "npm run sort-rules && npm test && npm run lint && npm run format:check && npm run typecheck",
+    "sort-rules": "node scripts/sort-rules.js && prettier --write data/rules.json"
   },
   "bin": {
     "money": "bin/money"
