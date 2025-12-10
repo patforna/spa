@@ -1,5 +1,6 @@
 import jsLevenshtein from 'js-levenshtein';
 import _ from 'lodash';
+import { Output } from '../output.js';
 import {
   Transaction,
   txsExcludingIgnored,
@@ -11,6 +12,8 @@ import { Command } from './index.js';
 const n = 5;
 
 export class ClusterCommand implements Command {
+  constructor(private readonly output: Output) {}
+
   async execute(txs: Transaction[]): Promise<void> {
     txs = txsExcludingIgnored(txs);
 
@@ -23,21 +26,21 @@ export class ClusterCommand implements Command {
       else cluster.push(tx);
     });
 
-    console.log(`Found ${clusters.length} clusters.`);
-    console.log();
+    this.output.log(`Found ${clusters.length} clusters.`);
+    this.output.log('');
 
     // clusters = _.orderBy(clusters, [(c) => c.length], ['desc']);
     clusters = _.orderBy(clusters, [computeTotal]);
 
     clusters.forEach((c) => {
-      console.log('-'.repeat(80));
+      this.output.log('-'.repeat(80));
       const name = tidyDesc(c[0]);
       const categories = computeCategories(c);
       const total = computeTotal(c);
       const details = false;
 
-      console.log(`Cluster: ${name}`);
-      console.log(
+      this.output.log(`Cluster: ${name}`);
+      this.output.log(
         `Total: ${_.padStart(
           Math.ceil(total).toLocaleString(),
           5
@@ -48,8 +51,8 @@ export class ClusterCommand implements Command {
       );
 
       if (details) {
-        console.log('-'.repeat(80));
-        _.uniq(c.map(tidyDesc)).forEach((i) => console.log(i + '\n'));
+        this.output.log('-'.repeat(80));
+        _.uniq(c.map(tidyDesc)).forEach((i) => this.output.log(i + '\n'));
       }
     });
   }

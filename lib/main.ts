@@ -14,6 +14,7 @@ import { expandPaths } from './utils.js';
 export default (): void => {
   const commands = [];
   const wiring = new Wiring();
+  const output = wiring.output;
   const rules = wiring.rules;
   const overrides = wiring.overrides;
   const overridesRepo = wiring.overridesRepo;
@@ -48,7 +49,7 @@ Examples:
       handler: (args) => {
         commands.push(
           new CategoriseCommand(rules, overrides, overridesRepo, categoriser),
-          new SummaryCommand(args['sortBy'])
+          new SummaryCommand(args['sortBy'], output)
         );
       },
     })
@@ -74,7 +75,7 @@ Examples:
       handler: (args) => {
         commands.push(
           new CategoriseCommand(rules, overrides, overridesRepo, categoriser),
-          new DetailsCommand(args['sortBy'], args['category'])
+          new DetailsCommand(args['sortBy'], args['category'], output)
         );
       },
     })
@@ -94,7 +95,7 @@ Examples:
       handler: () => {
         commands.push(
           new CategoriseCommand(rules, overrides, overridesRepo, categoriser),
-          new ClusterCommand()
+          new ClusterCommand(output)
         );
       },
     })
