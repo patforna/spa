@@ -1,6 +1,6 @@
 import dayjs from '../../lib/date.js';
 import { Summary } from '../../lib/summary.js';
-import { makeTx } from './factories/transactionFactory.js';
+import { makeTx } from '../helpers.js';
 
 describe('Summary', () => {
   test('should fail if txs span multiple years', () => {

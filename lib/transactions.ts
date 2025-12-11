@@ -3,6 +3,8 @@ import stringify from 'json-stringify-pretty-compact';
 import _ from 'lodash';
 import dayjs, { Dayjs } from './date.js';
 import { IGNORE } from './categoriser.js';
+import { InputParserFactory } from './parsers/index.js';
+import { expandPaths } from './utils.js';
 
 export interface Transaction {
   date: Dayjs;
@@ -115,29 +117,60 @@ export function asString(tx: Transaction, showCategory = false): string {
   return parts.join(' | ');
 }
 
-/**
- * Expands split transactions in place.
- * If an input transaction matches a split override (by date + amount),
- * it is replaced with the split children.
- */
-export function expandSplits(txs: Transaction[], overrides: Override[]): void {
-  const splitOverrides = overrides.filter(
-    (o) => o.splits && o.splits.length > 0
-  );
+export class TxLoader {
+  constructor(
+    private readonly inputParserFactory: InputParserFactory,
+    private readonly overrides: Override[]
+  ) {}
 
-  for (let i = txs.length - 1; i >= 0; i--) {
-    const tx = txs[i];
-    const splitOverride = findOverride(splitOverrides, tx);
+  async load(inputs: string[]): Promise<Transaction[]> {
+    const filePaths = await expandPaths(...inputs);
+    console.log(
+      `Processing ${filePaths.length} files from input patterns: ${inputs.join(', ')}\n` +
+        `Files to process:\n${filePaths.map((file) => `  - ${file}`).join('\n')}`
+    );
 
-    if (splitOverride?.splits) {
-      const childTxs = splitOverride.splits.map((split) => ({
-        ...split,
-        date: tx.date,
-        description: tx.description,
-        card: tx.card,
-        comment: split.comment || tx.comment,
-      }));
-      txs.splice(i, 1, ...childTxs);
+    const txs: Transaction[] = [];
+    for (const filePath of filePaths) {
+      const content = readFileSync(filePath, 'utf8');
+      const parser = this.inputParserFactory.createParser(content);
+      txs.push(...(await parser.parse(content)));
+    }
+
+    return this.loadFromTransactions(txs);
+  }
+
+  /** Loads transactions from an array (for testing without file I/O). */
+  async loadFromTransactions(txs: Transaction[]): Promise<Transaction[]> {
+    const result = [...txs];
+    this.expandSplits(result);
+    return result;
+  }
+
+  /**
+   * Expands split transactions in place.
+   * If an input transaction matches a split override (by date + amount),
+   * it is replaced with the split children.
+   */
+  private expandSplits(txs: Transaction[]): void {
+    const splitOverrides = this.overrides.filter(
+      (o) => o.splits && o.splits.length > 0
+    );
+
+    for (let i = txs.length - 1; i >= 0; i--) {
+      const tx = txs[i];
+      const splitOverride = findOverride(splitOverrides, tx);
+
+      if (splitOverride?.splits) {
+        const childTxs = splitOverride.splits.map((split) => ({
+          ...split,
+          date: tx.date,
+          description: tx.description,
+          card: tx.card,
+          comment: split.comment || tx.comment,
+        }));
+        txs.splice(i, 1, ...childTxs);
+      }
     }
   }
 }

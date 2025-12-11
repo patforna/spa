@@ -1,40 +1,66 @@
 import { join } from 'path';
 import { Categoriser } from './categoriser.js';
-import { CategoriseCommand } from './commands/categorise.js';
+import {
+  CategoriseCommand,
+  defaultPrompter,
+  Prompter,
+} from './commands/categorise.js';
 import { ClusterCommand } from './commands/cluster.js';
 import { FxRateRepo, FxRateService } from './fxRates.js';
+import { App } from './main.js';
 import { Output, consoleOutput } from './output.js';
 import { InputParserFactory } from './parsers/index.js';
 import { Rules, RulesRepo } from './rules.js';
-import { OverridesRepo, Override } from './transactions.js';
+import { OverridesRepo, Override, TxLoader } from './transactions.js';
 
 const PROJECT_ROOT = process.cwd();
 
-const OVERRIDES_PATH = join(PROJECT_ROOT, 'data/overrides.json');
-const FX_RATES_PATH = join(PROJECT_ROOT, 'data/fxRates.json');
-const RULES_PATH = join(PROJECT_ROOT, 'data/rules.json');
+const DEFAULT_OVERRIDES_PATH = join(PROJECT_ROOT, 'data/overrides.json');
+const DEFAULT_FX_RATES_PATH = join(PROJECT_ROOT, 'data/fxRates.json');
+const DEFAULT_RULES_PATH = join(PROJECT_ROOT, 'data/rules.json');
 
 export const FX_API_KEY = process.env['FIXER_API_KEY'];
 export const FX_API_URL = 'http://data.fixer.io/api/';
 
+const defaultFxRateService = new FxRateService(
+  new FxRateRepo(DEFAULT_FX_RATES_PATH)
+);
+
+export interface WiringConfig {
+  rulesPath?: string;
+  overridesPath?: string;
+  prompter?: Prompter;
+  fxRateService?: FxRateService;
+}
+
 export class Wiring {
+  readonly app: App;
   readonly output: Output;
-  readonly rules: Rules;
-  readonly overrides: Override[];
-  readonly overridesRepo: OverridesRepo;
+  readonly txLoader: TxLoader;
   readonly inputParserFactory: InputParserFactory;
   readonly categoriseCommand: CategoriseCommand;
   readonly clusterCommand: ClusterCommand;
+  readonly overridesRepo: OverridesRepo;
+  readonly rules: Rules;
+  readonly overrides: Override[];
 
-  constructor() {
-    const rulesRepo = new RulesRepo(RULES_PATH);
-    const fxRateService = new FxRateService(new FxRateRepo(FX_RATES_PATH));
+  constructor(config: WiringConfig = {}) {
+    const {
+      rulesPath = DEFAULT_RULES_PATH,
+      overridesPath = DEFAULT_OVERRIDES_PATH,
+      prompter = defaultPrompter,
+      fxRateService = defaultFxRateService,
+    } = config;
+
+    const rulesRepo = new RulesRepo(rulesPath);
 
     this.output = consoleOutput;
     this.rules = rulesRepo.load();
-    this.overridesRepo = new OverridesRepo(OVERRIDES_PATH);
+    this.overridesRepo = new OverridesRepo(overridesPath);
     this.overrides = this.overridesRepo.load();
     this.inputParserFactory = new InputParserFactory(fxRateService);
+    this.txLoader = new TxLoader(this.inputParserFactory, this.overrides);
+    this.app = new App(this.txLoader);
 
     const categoriser = new Categoriser(this.rules, this.overrides);
 
@@ -42,7 +68,8 @@ export class Wiring {
       this.rules,
       this.overrides,
       this.overridesRepo,
-      categoriser
+      categoriser,
+      prompter
     );
     this.clusterCommand = new ClusterCommand(this.output);
   }

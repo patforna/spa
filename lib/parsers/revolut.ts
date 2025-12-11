@@ -21,7 +21,10 @@ export class RevolutInputParser implements InputParser {
   async parse(input: string): Promise<Transaction[]> {
     const rows = parseCSV(input)
       .map((x) => x as RevolutRow)
-      .filter((x) => x.type != 'TOPUP' && x.state == 'COMPLETED');
+      .filter(
+        (x) =>
+          x.type !== 'TOPUP' && x.type !== 'TRANSFER' && x.state === 'COMPLETED'
+      );
 
     const txs: Transaction[] = [];
     for (const row of rows) {

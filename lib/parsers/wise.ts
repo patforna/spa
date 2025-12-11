@@ -20,7 +20,8 @@ export class WiseInputParser implements InputParser {
   async parse(input: string): Promise<Transaction[]> {
     const rows = parseCSV(input)
       .map((x) => x as WiseRow)
-      .filter((x) => x.sourceAmountAfterFees != 0);
+      .filter((x) => x.sourceAmountAfterFees != 0)
+      .filter((x) => x.direction !== 'NEUTRAL');
 
     const txs: Transaction[] = [];
     for (const row of rows) {

@@ -1,59 +1,74 @@
 import dayjs from '../../lib/date.js';
 import {
   Card,
-  expandSplits,
-  shortDescription,
   Override,
+  shortDescription,
+  TxLoader,
 } from '../../lib/transactions.js';
-import { makeTx } from './factories/transactionFactory.js';
+import { InputParserFactory } from '../../lib/parsers/index.js';
+import { FxRateService } from '../../lib/fxRates.js';
+import { makeTx } from '../helpers.js';
 
-describe('expandSplits', () => {
+const fakeFxRateService = {
+  convert: async (_from: string, _to: string, amount: number) => amount,
+} as unknown as FxRateService;
+
+describe('TxLoader.expandSplits', () => {
   const date = dayjs.utc('2025-01-15');
 
-  test('should replace parent transaction with split children', () => {
+  function createLoader(overrides: Override[]): TxLoader {
+    const inputParserFactory = new InputParserFactory(fakeFxRateService);
+    return new TxLoader(inputParserFactory, overrides);
+  }
+
+  test('should replace parent transaction with split children', async () => {
     const txs = [makeTx({ date, amount: -200 })];
     const overrides: Override[] = [
       {
-        ...makeTx({
-          date,
-          amount: -200,
-        }),
+        date,
+        amount: -200,
+        category: '',
+        comment: '',
         splits: [
-          makeTx({ amount: -50, category: 'a' }),
-          makeTx({ amount: -150, category: 'b' }),
+          { amount: -50, category: 'a', comment: '' },
+          { amount: -150, category: 'b', comment: '' },
         ],
       },
     ];
 
-    expandSplits(txs, overrides);
-    expect(txs).toHaveLength(2);
-    expect(txs[0].amount).toBe(-50);
-    expect(txs[0].category).toBe('a');
-    expect(txs[1].amount).toBe(-150);
-    expect(txs[1].category).toBe('b');
+    const loader = createLoader(overrides);
+    const result = await loader.loadFromTransactions(txs);
+
+    expect(result).toHaveLength(2);
+    expect(result[0].amount).toBe(-50);
+    expect(result[0].category).toBe('a');
+    expect(result[1].amount).toBe(-150);
+    expect(result[1].category).toBe('b');
   });
 
-  test('should inherit date, description, and card from parent', () => {
+  test('should inherit date, description, and card from parent', async () => {
     const txs = [
       makeTx({ date, amount: -100, description: 'Store', card: Card.Self }),
     ];
     const overrides: Override[] = [
       {
-        ...makeTx({
-          date,
-          amount: -100,
-        }),
-        splits: [makeTx({ amount: -100, category: 'shopping' })],
+        date,
+        amount: -100,
+        category: '',
+        comment: '',
+        splits: [{ amount: -100, category: 'shopping', comment: '' }],
       },
     ];
 
-    expandSplits(txs, overrides);
-    expect(txs[0].date.isSame(date)).toBe(true);
-    expect(txs[0].description).toBe('Store');
-    expect(txs[0].card).toBe(Card.Self);
+    const loader = createLoader(overrides);
+    const result = await loader.loadFromTransactions(txs);
+
+    expect(result[0].date.isSame(date)).toBe(true);
+    expect(result[0].description).toBe('Store');
+    expect(result[0].card).toBe(Card.Self);
   });
 
-  test('should expand splits in place preserving order', () => {
+  test('should expand splits in place preserving order', async () => {
     const txs = [
       makeTx({ date, amount: -10, category: 'a' }),
       makeTx({ date, amount: -20, category: 'b' }),
@@ -61,20 +76,22 @@ describe('expandSplits', () => {
     ];
     const overrides: Override[] = [
       {
-        ...makeTx({
-          date,
-          amount: -20,
-        }),
+        date,
+        amount: -20,
+        category: '',
+        comment: '',
         splits: [
-          makeTx({ category: 'u' }),
-          makeTx({ category: 'v' }),
-          makeTx({ category: 'w' }),
+          { amount: 0, category: 'u', comment: '' },
+          { amount: 0, category: 'v', comment: '' },
+          { amount: 0, category: 'w', comment: '' },
         ],
       },
     ];
 
-    expandSplits(txs, overrides);
-    expect(txs.map((t) => t.category)).toEqual(['a', 'u', 'v', 'w', 'c']);
+    const loader = createLoader(overrides);
+    const result = await loader.loadFromTransactions(txs);
+
+    expect(result.map((t) => t.category)).toEqual(['a', 'u', 'v', 'w', 'c']);
   });
 });
 

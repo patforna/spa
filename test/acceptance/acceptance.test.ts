@@ -1,192 +1,177 @@
 import * as fs from 'fs';
-import dayjs from '../../lib/date.js';
 import * as os from 'os';
 import * as path from 'path';
-import { Categoriser } from '../../lib/categoriser.js';
-import { CategoriseCommand } from '../../lib/commands/categorise.js';
+import { Prompter } from '../../lib/commands/categorise.js';
 import { Command } from '../../lib/commands/index.js';
-import { FxRateService } from '../../lib/fxRates.js';
-import { Transaction, OverridesRepo } from '../../lib/transactions.js';
-import { run } from '../../lib/main.js';
-import { InputParserFactory } from '../../lib/parsers/index.js';
-import { Rules, RulesRepo } from '../../lib/rules.js';
-import { Summary } from '../../lib/summary.js';
+import { Override, Transaction } from '../../lib/transactions.js';
+import { Rules } from '../../lib/rules.js';
+import { Wiring } from '../../lib/wiring.js';
+import { makeOverride, makeTx } from '../helpers.js';
 
-const dataDir = path.join(process.cwd(), 'test', 'acceptance', 'data');
-
-function createTempFile(content: string): string {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'money-test-'));
-  const filePath = path.join(tempDir, 'test.csv');
-  fs.writeFileSync(filePath, content, 'utf8');
-  return filePath;
-}
+const RULES_FILE = 'rules.json';
+const OVERRIDES_FILE = 'overrides.json';
 
 class CaptureTxsCommand implements Command {
-  summary: Summary;
-
-  async execute(txs: Transaction[]): Promise<void> {
-    this.summary = new Summary(txs);
-  }
+  txs: Transaction[] = [];
+  execute = async (txs: Transaction[]) => void (this.txs = txs);
 }
 
-const fakeOverridesRepo = {
-  load(): Transaction[] {
-    return [];
-  },
-  saveAll(): void {},
-} as unknown as OverridesRepo;
-
-// Fake rules repo for testing
-const fakeRulesRepo = {
-  load(): Rules {
-    return {
-      activities: [new RegExp('#activities', 'i')],
-      shopping: [new RegExp('#shopping', 'i')],
-      ignore: [new RegExp('#ignore', 'i')],
-      other: [
-        new RegExp('^(?!.*#activities)(?!.*#shopping)(?!.*#ignore).*$', 'i'),
-      ], // everything else
-    };
-  },
-} as unknown as RulesRepo;
-
-const fakeFxRateService = {
-  convert: async (_from: string, _to: string, amount: number) => amount,
-} as unknown as FxRateService;
+let tempDir: string;
+let captureCommand: CaptureTxsCommand;
 
 describe('Acceptance tests', () => {
-  const rules = fakeRulesRepo.load();
-  const overrides = fakeOverridesRepo.load();
-  const categoriser = new Categoriser(rules, overrides);
-  const captureCommand = new CaptureTxsCommand();
-  const inputParserFactory = new InputParserFactory(fakeFxRateService);
-  const commands = [
-    new CategoriseCommand(rules, overrides, fakeOverridesRepo, categoriser),
-    captureCommand,
-  ];
-
-  test('should process Wise transactions', async () => {
-    await run(
-      [path.join(dataDir, 'wise-transactions.csv')],
-      inputParserFactory,
-      commands
-    );
-
-    const { amount, transactions } = captureCommand.summary.total();
-    expect(transactions).toBe(6);
-    expect(amount).toBe(-4);
-
-    const shopping = captureCommand.summary.totalForCategory('shopping');
-    expect(shopping.transactions).toBe(3);
-    expect(shopping.amount).toBe(-1);
-
-    const other = captureCommand.summary.totalForCategory('other');
-    expect(other.transactions).toBe(3);
-    expect(other.amount).toBe(-3);
+  beforeEach(() => {
+    resetTempDir();
+    captureCommand = new CaptureTxsCommand();
   });
 
-  test('should process ZKB transactions', async () => {
-    await run(
-      [path.join(dataDir, 'zkb-transactions.csv')],
-      inputParserFactory,
-      commands
-    );
+  test('should categorise transaction by matching rule', async () => {
+    const txs = [makeTx({ description: 'MIGROS supermarket' })];
+    const rules: Rules = {
+      groceries: [/MIGROS/],
+    };
 
-    const { amount, transactions } = captureCommand.summary.total();
-    expect(transactions).toBe(5);
-    expect(amount).toBe(-3);
+    await run({ txs, rules });
 
-    const shopping = captureCommand.summary.totalForCategory('shopping');
-    expect(shopping.transactions).toBe(3);
-    expect(shopping.amount).toBe(-1);
-
-    const activities = captureCommand.summary.totalForCategory('activities');
-    expect(activities.transactions).toBe(1);
-    expect(activities.amount).toBe(-1);
-
-    const other = captureCommand.summary.totalForCategory('other');
-    expect(other.transactions).toBe(1);
-    expect(other.amount).toBe(-1);
+    expect(captureCommand.txs).toHaveLength(1);
+    expect(captureCommand.txs[0].category).toBe('groceries');
   });
 
-  test('should process Viseca transactions', async () => {
-    await run(
-      [path.join(dataDir, 'viseca-transactions.csv')],
-      inputParserFactory,
-      commands
-    );
+  test('should categorise transaction by matching override', async () => {
+    const txs = [makeTx({ amount: -50, description: 'Some store' })];
+    const overrides = [
+      makeOverride({
+        date: txs[0].date,
+        amount: txs[0].amount,
+        category: 'shopping',
+        comment: 'birthday gift',
+      }),
+    ];
 
-    const { amount, transactions } = captureCommand.summary.total();
-    expect(transactions).toBe(6);
-    expect(amount).toBe(-4);
+    await run({ txs, overrides });
+
+    expect(captureCommand.txs).toHaveLength(1);
+    expect(captureCommand.txs[0].category).toBe('shopping');
+    expect(captureCommand.txs[0].comment).toBe('birthday gift');
   });
 
-  test('should process Revolut transactions', async () => {
-    await run(
-      [path.join(dataDir, 'revolut-transactions.csv')],
-      inputParserFactory,
-      commands
-    );
+  test('should prefer override over rule', async () => {
+    const txs = [makeTx({ amount: -50, description: 'MIGROS supermarket' })];
+    const rules: Rules = {
+      groceries: [/MIGROS/],
+    };
+    const overrides = [
+      makeOverride({
+        date: txs[0].date,
+        amount: txs[0].amount,
+        category: 'gifts',
+      }),
+    ];
 
-    const { amount, transactions } = captureCommand.summary.total();
-    expect(transactions).toBe(4);
-    expect(amount).toBe(-2);
+    await run({ txs, rules, overrides });
 
-    const shopping = captureCommand.summary.totalForCategory('shopping');
-    expect(shopping.transactions).toBe(2);
-    expect(shopping.amount).toBe(0);
-
-    const other = captureCommand.summary.totalForCategory('other');
-    expect(other.transactions).toBe(2);
-    expect(other.amount).toBe(-2);
+    expect(captureCommand.txs).toHaveLength(1);
+    expect(captureCommand.txs[0].category).toBe('gifts');
   });
 
-  test('should process multiple files', async () => {
-    await run(
-      [
-        path.join(dataDir, 'zkb-transactions.csv'),
-        path.join(dataDir, 'viseca-transactions.csv'),
-      ],
-      inputParserFactory,
-      commands
-    );
+  test('should prompt user to categorise uncategorised transactions', async () => {
+    const txs = [makeTx({ amount: -50 })];
+    const fakePrompter: Prompter = {
+      promptForCategory: async () => 'groceries',
+      promptForComment: async () => 'weekly grocery shop',
+      promptForAmount: async () => 0,
+    };
 
-    const { amount, transactions } = captureCommand.summary.total();
-    expect(transactions).toBe(11);
-    expect(amount).toBe(-7);
+    await run({ txs, prompter: fakePrompter });
+
+    expect(captureCommand.txs).toHaveLength(1);
+    expect(captureCommand.txs[0].category).toBe('groceries');
+    expect(captureCommand.txs[0].amount).toBe(-50);
+
+    const overridesPath = path.join(tempDir, OVERRIDES_FILE);
+    const savedOverrides = JSON.parse(fs.readFileSync(overridesPath, 'utf8'));
+    expect(savedOverrides).toHaveLength(1);
+    expect(savedOverrides[0].category).toBe('groceries');
+    expect(savedOverrides[0].comment).toBe('weekly grocery shop');
   });
 
   test('should expand split transactions from overrides', async () => {
-    const date = dayjs();
-    const amount = -100;
-    const txs = [{ date, amount }] as Transaction[];
-    const fakeParserFactory = {
-      createParser: () => ({ parse: async () => txs }),
-    } as unknown as InputParserFactory;
-
+    const txs = [makeTx({ amount: -100 })];
     const overrides = [
-      {
-        date,
-        amount,
+      makeOverride({
+        date: txs[0].date,
+        amount: txs[0].amount,
         splits: [
           { amount: -60, category: 'a' },
           { amount: -40, category: 'b' },
         ],
-      },
-    ] as unknown as Transaction[];
+      }),
+    ];
 
-    await run(
-      [createTempFile('')],
-      fakeParserFactory,
-      [captureCommand],
-      overrides
-    );
+    await run({ txs, overrides });
 
-    const splitA = captureCommand.summary.totalForCategory('a');
-    expect(splitA.transactions).toBe(1);
-    expect(splitA.amount).toBe(-60);
-    const splitB = captureCommand.summary.totalForCategory('b');
-    expect(splitB.transactions).toBe(1);
-    expect(splitB.amount).toBe(-40);
+    expect(captureCommand.txs).toHaveLength(2);
+    expect(captureCommand.txs[0].amount).toBe(-60);
+    expect(captureCommand.txs[0].category).toBe('a');
+    expect(captureCommand.txs[1].amount).toBe(-40);
+    expect(captureCommand.txs[1].category).toBe('b');
   });
 });
+
+function resetTempDir(): void {
+  if (tempDir) {
+    fs.rmSync(tempDir, { recursive: true });
+  }
+  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'money-test-'));
+}
+
+function createInputFile(txs: Transaction[]): string {
+  return writeJson('input.json', txs);
+}
+
+function createRulesFile(rules: Rules): string {
+  return writeJson(RULES_FILE, serializeRules(rules));
+}
+
+function createOverridesFile(overrides: Override[]): string {
+  return writeJson(OVERRIDES_FILE, overrides);
+}
+
+/**
+ * Runs the app with the given config. Results are captured in `captureCommand`.
+ */
+async function run({
+  txs = [],
+  rules = {},
+  overrides = [],
+  prompter,
+}: {
+  txs?: Transaction[];
+  rules?: Rules;
+  overrides?: Override[];
+  prompter?: Prompter;
+} = {}): Promise<void> {
+  const wiring = new Wiring({
+    rulesPath: createRulesFile(rules),
+    overridesPath: createOverridesFile(overrides),
+    prompter,
+  });
+  await wiring.app.run(
+    [createInputFile(txs)],
+    [wiring.categoriseCommand, captureCommand]
+  );
+}
+
+function writeJson(filename: string, data: unknown): string {
+  const filePath = path.join(tempDir, filename);
+  fs.writeFileSync(filePath, JSON.stringify(data));
+  return filePath;
+}
+
+function serializeRules(rules: Rules): { [category: string]: string[] } {
+  const result: { [category: string]: string[] } = {};
+  for (const [category, patterns] of Object.entries(rules)) {
+    result[category] = patterns.map((r) => r.source);
+  }
+  return result;
+}

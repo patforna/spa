@@ -12,11 +12,23 @@ export interface InputParser {
   parse(input: string): Promise<Transaction[]>;
 }
 
+export class JsonInputParser implements InputParser {
+  async parse(input: string): Promise<Transaction[]> {
+    const data = JSON.parse(input) as Array<Record<string, unknown>>;
+    return data.map((row) => ({
+      ...row,
+      date: dayjs.utc(row['date'] as string),
+    })) as Transaction[];
+  }
+}
+
 export class InputParserFactory {
   constructor(private readonly fxRateService: FxRateService) {}
 
   createParser(input: string): InputParser {
     const firstLine = input.trimStart().split('\n')[0];
+
+    if (firstLine.startsWith('[')) return new JsonInputParser();
 
     if (firstLine.startsWith('ID,Status,Direction'))
       return new WiseInputParser(this.fxRateService);

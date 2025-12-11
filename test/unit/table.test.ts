@@ -1,6 +1,6 @@
 import { Summary } from '../../lib/summary.js';
 import { tableData } from '../../lib/table.js';
-import { makeTx } from './factories/transactionFactory.js';
+import { makeTx } from '../helpers.js';
 
 describe('Table', () => {
   test('should return data with categories sorted alphabetically by default', () => {

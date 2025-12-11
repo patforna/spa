@@ -1,6 +1,6 @@
 import { Categoriser, NO_CATEGORY, IGNORE } from '../../lib/categoriser.js';
 import { Rules } from '../../lib/rules.js';
-import { makeTx } from './factories/transactionFactory.js';
+import { makeTx } from '../helpers.js';
 import dayjs from '../../lib/date.js';
 
 describe('Categoriser', () => {

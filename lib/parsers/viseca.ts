@@ -42,6 +42,7 @@ export class VisecaInputParser implements InputParser {
 function parseVisecaCard(cardId: string | null): Card {
   if (!cardId) return Card.Unknown;
   if (cardId.endsWith('0002')) return Card.Self;
+  if (cardId.endsWith('0219')) return Card.Self;
   if (cardId.endsWith('1250')) return Card.Partner;
   if (cardId.endsWith('4471')) return Card.Partner;
   return Card.Unknown;

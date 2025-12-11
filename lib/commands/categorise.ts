@@ -16,22 +16,31 @@ import { Command } from './index.js';
 
 inquirer.registerPrompt('autocomplete', inquirerPrompt);
 
+export interface Prompter {
+  promptForCategory(categories: string[], tx: Transaction): Promise<string>;
+  promptForAmount(remaining: number): Promise<number>;
+  promptForComment(): Promise<string | undefined>;
+}
+
 export class CategoriseCommand implements Command {
   #rules: Rules;
   #overrides: Override[];
   #overridesRepo: OverridesRepo;
   #categoriser: Categoriser;
+  #prompter: Prompter;
 
   constructor(
     rules: Rules,
     overrides: Override[],
     overridesRepo: OverridesRepo,
-    categoriser: Categoriser
+    categoriser: Categoriser,
+    prompter: Prompter = defaultPrompter
   ) {
     this.#rules = rules;
     this.#overrides = overrides;
     this.#overridesRepo = overridesRepo;
     this.#categoriser = categoriser;
+    this.#prompter = prompter;
   }
 
   async execute(txs: Transaction[]): Promise<void> {
@@ -42,18 +51,19 @@ export class CategoriseCommand implements Command {
 
     // ask user to categorise the ones we couldn't categorise automatically
     for (const tx of uncategorised) {
-      const category = await promptForCategory(categories, tx);
+      const category = await this.#prompter.promptForCategory(categories, tx);
       if (category === 'split') {
         console.log('*** SPLIT MODE ***');
         const splits: OverrideSplit[] = [];
         const sign = tx.amount < 0 ? -1 : 1;
         let remainingAmount = Math.abs(tx.amount);
         while (remainingAmount > 0) {
-          const splitAmount = await promptForAmount(remainingAmount);
+          const splitAmount =
+            await this.#prompter.promptForAmount(remainingAmount);
           const split = {
             amount: sign * splitAmount,
-            category: await promptForCategory(categories, tx),
-            comment: await promptForComment(),
+            category: await this.#prompter.promptForCategory(categories, tx),
+            comment: await this.#prompter.promptForComment(),
           } as OverrideSplit;
           splits.push(split);
           remainingAmount -= splitAmount;
@@ -68,7 +78,7 @@ export class CategoriseCommand implements Command {
         } as Override);
       } else {
         tx.category = category;
-        tx.comment = await promptForComment();
+        tx.comment = await this.#prompter.promptForComment();
         this.#overrides.push({
           date: tx.date,
           amount: tx.amount,
@@ -143,3 +153,9 @@ function autocompleteCategory(categories: string[], input: string) {
 
   return filtered.length > 0 ? filtered : [input];
 }
+
+export const defaultPrompter: Prompter = {
+  promptForCategory,
+  promptForAmount,
+  promptForComment,
+};

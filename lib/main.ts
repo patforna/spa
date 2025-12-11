@@ -1,20 +1,28 @@
-import { readFileSync } from 'fs';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { DetailsCommand } from './commands/details.js';
 import { Command } from './commands/index.js';
 import { SummaryCommand } from './commands/summary.js';
-import { InputParserFactory } from './parsers/index.js';
-import { expandSplits, Override } from './transactions.js';
+import { TxLoader } from './transactions.js';
 import { Wiring } from './wiring.js';
-import { expandPaths } from './utils.js';
+
+export class App {
+  constructor(private readonly txLoader: TxLoader) {}
+
+  async run(inputs: string[], commands: Command[]): Promise<void> {
+    const txs = await this.txLoader.load(inputs);
+
+    for (const command of commands) {
+      await command.execute(txs);
+    }
+  }
+}
 
 export default (): void => {
   const commands = [];
   const wiring = new Wiring();
+  const app = wiring.app;
   const output = wiring.output;
-  const overrides = wiring.overrides;
-  const inputParserFactory = wiring.inputParserFactory;
   const categoriseCommand = wiring.categoriseCommand;
   const clusterCommand = wiring.clusterCommand;
 
@@ -104,36 +112,8 @@ Examples:
     })
     .parseSync();
 
-  run(args.inputs as string[], inputParserFactory, commands, overrides).catch(
-    (error) => {
-      console.error('Error:', error.message);
-      process.exit(1);
-    }
-  );
+  app.run(args.inputs as string[], commands).catch((error) => {
+    console.error('Error:', error.message);
+    process.exit(1);
+  });
 };
-
-export async function run(
-  inputs: string[],
-  inputParserFactory: InputParserFactory,
-  commands: Command[],
-  overrides: Override[] = []
-) {
-  const filePaths = await expandPaths(...inputs);
-  console.log(
-    `Processing ${filePaths.length} files from input patterns: ${inputs.join(', ')}\n` +
-      `Files to process:\n${filePaths.map((file) => `  - ${file}`).join('\n')}`
-  );
-
-  const txs = [];
-  for (const filePath of filePaths) {
-    const content = readFileSync(filePath, 'utf8');
-    const parser = inputParserFactory.createParser(content);
-    txs.push(...(await parser.parse(content)));
-  }
-
-  expandSplits(txs, overrides);
-
-  for (const command of commands) {
-    await command.execute(txs);
-  }
-}
