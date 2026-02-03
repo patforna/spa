@@ -41,6 +41,12 @@ Or, to get help on a subcommand:
     # Import overrides from a JSON file (for automation)
     bin/money import-overrides --profile patric /tmp/overrides.json
 
+### Monthly Workflow
+
+For the full monthly transaction processing workflow (used with Claude Code), see:
+
+    ~/.claude/skills/monthly-spending/SKILL.md
+
 ## Development
 
 Install dependencies:
