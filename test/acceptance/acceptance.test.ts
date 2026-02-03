@@ -2,9 +2,10 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { Prompter } from '../../lib/commands/categorise.js';
+import { ImportOverridesCommand } from '../../lib/commands/importOverrides.js';
 import { Command } from '../../lib/commands/index.js';
 import { Output } from '../../lib/output.js';
-import { Override, Transaction } from '../../lib/transactions.js';
+import { Override, OverridesRepo, Transaction } from '../../lib/transactions.js';
 import { Rules } from '../../lib/rules.js';
 import { Wiring } from '../../lib/wiring.js';
 import { makeOverride, makeTx } from '../helpers.js';
@@ -168,6 +169,31 @@ describe('Acceptance tests', () => {
     await run({ txs, overridesPath: profileOverridesPath });
 
     expect(captureCommand.txs[0].category).toBe('from-profile');
+  });
+
+  test('import-overrides: imported overrides are applied to transactions', async () => {
+    const overridesPath = path.join(tempDir, OVERRIDES_FILE);
+    fs.writeFileSync(overridesPath, '[]');
+
+    const tx = makeTx({ description: 'Unknown merchant', amount: -75 });
+    const proposedPath = path.join(tempDir, 'proposed.json');
+    fs.writeFileSync(
+      proposedPath,
+      JSON.stringify([
+        { date: tx.date.toISOString(), amount: tx.amount, category: 'shopping' },
+      ])
+    );
+
+    new ImportOverridesCommand(
+      proposedPath,
+      new OverridesRepo(overridesPath),
+      [],
+      { log: () => {}, error: () => {} }
+    ).execute();
+
+    await run({ txs: [tx], overridesPath });
+
+    expect(captureCommand.txs[0].category).toBe('shopping');
   });
 });
 

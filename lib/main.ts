@@ -2,6 +2,7 @@ import { join } from 'path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { DetailsCommand } from './commands/details.js';
+import { ImportOverridesCommand } from './commands/importOverrides.js';
 import { Command } from './commands/index.js';
 import { SummaryCommand } from './commands/summary.js';
 import { TxLoader } from './transactions.js';
@@ -42,6 +43,8 @@ export default (): void => {
   const output = wiring.output;
   const categoriseCommand = wiring.categoriseCommand;
   const clusterCommand = wiring.clusterCommand;
+  const overridesRepo = wiring.overridesRepo;
+  const overrides = wiring.overrides;
 
   // Shared option for commands that process transaction files
   const inputsOption = {
@@ -127,6 +130,28 @@ Examples:
       },
       handler: () => {
         commands.push(categoriseCommand, clusterCommand);
+      },
+    })
+    .command({
+      command: 'import-overrides <file>',
+      describe:
+        'Merge overrides from JSON into profile (for Claude Code automation). ' +
+        'Format: [{date, amount, category, comment?}, ...]',
+      builder: (yargs) => {
+        return yargs.positional('file', {
+          type: 'string',
+          describe: 'JSON file with overrides to import',
+        });
+      },
+      handler: (args) => {
+        const cmd = new ImportOverridesCommand(
+          args.file as string,
+          overridesRepo,
+          overrides,
+          output
+        );
+        cmd.execute();
+        process.exit(0);
       },
     })
     .options({

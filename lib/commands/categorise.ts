@@ -62,7 +62,7 @@ export class CategoriseCommand implements Command {
       if (uncategorised.length > 0 && this.#output) {
         const output = {
           uncategorised: uncategorised.map((tx) => ({
-            date: tx.date.format('YYYY-MM-DD'),
+            date: tx.date.toISOString(),
             amount: tx.amount,
             description: tx.description,
           })),
