@@ -1,27 +1,5 @@
 # Money
 
-## The painful process
-
-At the beginning of each month...
-
-- Download common transactions to: `~/Drive/money/common/2025`
-  - Download Viseca transactions (viseca-common-jane, viseca-common-patric)
-  - Download ZKB transactions (zkb-common)
-  - Download Wise transactions (wise-common)
-
-- Download private transactions to: `~/Drive/money/patric/2025`
-  - Download Viseca transactions (viseca-patric)
-  - Download ZKB transactions (zkb-patric)
-  - Download Revolut transactions (revolut-patric)
-
-- Run common analysis for entire year:
-
-  bin/money summary -i ~/Drive/money/common/2025
-
-- Run private analysis for last month:
-
-  bin/money summary -i ~/Drive/money/patric/2025-03\*
-
 ## Prerequisite
 
 Node >= 20.6.0
@@ -43,18 +21,25 @@ Or, to get help on a subcommand:
 ### Examples
 
     # Process a single file
-    bin/money summary -i ~/Drive/money/common/2023/common-2023.csv
+    bin/money summary -i ~/Drive/finance/transactions/common/2025-10-viseca-common-patric.csv
 
-    # Process entire directories or multiple files
-    bin/money summary -i ~/Drive/money/common/2025
-    bin/money summary -i ~/Drive/money/common/2025/*.csv
-    bin/money summary -i ~/Drive/money/common/2025/**/*
+    # Process multiple files with glob pattern
+    bin/money summary -i ~/Drive/finance/transactions/common/2025*
+
+    # Use a different profile (uses data/overrides-patric.json)
+    bin/money summary --profile patric -i ~/Drive/finance/transactions/patric/2025-12*
+
+    # Non-interactive mode: output uncategorised as JSON instead of prompting
+    bin/money summary --non-interactive -i ~/Drive/finance/transactions/common/2025-12*
 
     # Show details for a category, sorted by amount
-    bin/money details -c other -s amount -i ~/Drive/money/common/2023
+    bin/money details -c other -s amount -i ~/Drive/finance/transactions/common/2025-10*
 
-    # Find similar transactions
-    bin/money cluster -i ~/Drive/money/common/2023/common-2023.csv
+    # Find similar transactions (useful for identifying new rules)
+    bin/money cluster -i ~/Drive/finance/transactions/common/2025*
+
+    # Import overrides from a JSON file (for automation)
+    bin/money import-overrides --profile patric /tmp/overrides.json
 
 ## Development
 
