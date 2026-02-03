@@ -13,7 +13,7 @@ import { InputParserFactory } from './parsers/index.js';
 import { Rules, RulesRepo } from './rules.js';
 import { OverridesRepo, Override, TxLoader } from './transactions.js';
 
-const PROJECT_ROOT = process.cwd();
+export const PROJECT_ROOT = process.cwd();
 
 const DEFAULT_OVERRIDES_PATH = join(PROJECT_ROOT, 'data/overrides.json');
 const DEFAULT_FX_RATES_PATH = join(PROJECT_ROOT, 'data/fxRates.json');
@@ -31,6 +31,8 @@ export interface WiringConfig {
   overridesPath?: string;
   prompter?: Prompter;
   fxRateService?: FxRateService;
+  nonInteractive?: boolean;
+  output?: Output;
 }
 
 export class Wiring {
@@ -50,11 +52,13 @@ export class Wiring {
       overridesPath = DEFAULT_OVERRIDES_PATH,
       prompter = defaultPrompter,
       fxRateService = defaultFxRateService,
+      nonInteractive = false,
+      output = consoleOutput,
     } = config;
 
     const rulesRepo = new RulesRepo(rulesPath);
 
-    this.output = consoleOutput;
+    this.output = output;
     this.rules = rulesRepo.load();
     this.overridesRepo = new OverridesRepo(overridesPath);
     this.overrides = this.overridesRepo.load();
@@ -69,7 +73,9 @@ export class Wiring {
       this.overrides,
       this.overridesRepo,
       categoriser,
-      prompter
+      prompter,
+      nonInteractive,
+      output
     );
     this.clusterCommand = new ClusterCommand(this.output);
   }

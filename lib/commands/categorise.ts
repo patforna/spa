@@ -3,6 +3,7 @@ import inquirer from 'inquirer';
 import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import _ from 'lodash';
 import { Categoriser, IGNORE, NO_CATEGORY } from '../categoriser.js';
+import { Output } from '../output.js';
 import {
   Transaction,
   OverridesRepo,
@@ -28,19 +29,25 @@ export class CategoriseCommand implements Command {
   #overridesRepo: OverridesRepo;
   #categoriser: Categoriser;
   #prompter: Prompter;
+  #nonInteractive: boolean;
+  #output?: Output;
 
   constructor(
     rules: Rules,
     overrides: Override[],
     overridesRepo: OverridesRepo,
     categoriser: Categoriser,
-    prompter: Prompter = defaultPrompter
+    prompter: Prompter = defaultPrompter,
+    nonInteractive: boolean = false,
+    output?: Output
   ) {
     this.#rules = rules;
     this.#overrides = overrides;
     this.#overridesRepo = overridesRepo;
     this.#categoriser = categoriser;
     this.#prompter = prompter;
+    this.#nonInteractive = nonInteractive;
+    this.#output = output;
   }
 
   async execute(txs: Transaction[]): Promise<void> {
@@ -48,6 +55,22 @@ export class CategoriseCommand implements Command {
     txs.forEach((tx) => this.#categoriser.categorise(tx));
 
     const uncategorised = txsForCategory(txs, NO_CATEGORY);
+
+    // In non-interactive mode, simply output uncategorised txs as JSON
+    // instead of prompting the user to categorise them.
+    if (this.#nonInteractive) {
+      if (uncategorised.length > 0 && this.#output) {
+        const output = {
+          uncategorised: uncategorised.map((tx) => ({
+            date: tx.date.format('YYYY-MM-DD'),
+            amount: tx.amount,
+            description: tx.description,
+          })),
+        };
+        this.#output.log(JSON.stringify(output));
+      }
+      return;
+    }
 
     // ask user to categorise the ones we couldn't categorise automatically
     for (const tx of uncategorised) {

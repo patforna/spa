@@ -1,10 +1,11 @@
+import { join } from 'path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { DetailsCommand } from './commands/details.js';
 import { Command } from './commands/index.js';
 import { SummaryCommand } from './commands/summary.js';
 import { TxLoader } from './transactions.js';
-import { Wiring } from './wiring.js';
+import { PROJECT_ROOT, Wiring } from './wiring.js';
 
 export class App {
   constructor(private readonly txLoader: TxLoader) {}
@@ -19,8 +20,24 @@ export class App {
 }
 
 export default (): void => {
+  // Parse global args first to configure Wiring
+  const preArgs = yargs(hideBin(process.argv))
+    .help(false)
+    .version(false)
+    .option('non-interactive', { type: 'boolean', default: false })
+    .option('profile', { alias: 'p', type: 'string', default: 'common' })
+    .parseSync();
+
+  const overridesPath = join(
+    PROJECT_ROOT,
+    `data/overrides-${preArgs.profile}.json`
+  );
+  const wiring = new Wiring({
+    nonInteractive: preArgs['non-interactive'],
+    overridesPath,
+  });
+
   const commands = [];
-  const wiring = new Wiring();
   const app = wiring.app;
   const output = wiring.output;
   const categoriseCommand = wiring.categoriseCommand;
@@ -108,6 +125,18 @@ Examples:
         describe:
           'Input files, directories, or glob patterns. Can be specified multiple times or space-separated.',
         demandOption: true,
+      },
+      'non-interactive': {
+        type: 'boolean',
+        default: false,
+        describe:
+          'Output uncategorised txs as JSON instead of prompting. Mainly used for automation.',
+      },
+      profile: {
+        alias: 'p',
+        type: 'string',
+        default: 'common',
+        describe: 'Profile name (uses data/overrides-<profile>.json).',
       },
     })
     .parseSync();

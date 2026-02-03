@@ -3,6 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { Prompter } from '../../lib/commands/categorise.js';
 import { Command } from '../../lib/commands/index.js';
+import { Output } from '../../lib/output.js';
 import { Override, Transaction } from '../../lib/transactions.js';
 import { Rules } from '../../lib/rules.js';
 import { Wiring } from '../../lib/wiring.js';
@@ -116,6 +117,58 @@ describe('Acceptance tests', () => {
     expect(captureCommand.txs[1].amount).toBe(-40);
     expect(captureCommand.txs[1].category).toBe('b');
   });
+
+  describe('non-interactive mode', () => {
+    test('outputs uncategorised txs as JSON', async () => {
+      const txs = [
+        makeTx({ description: 'Unknown merchant', amount: -50 }),
+        makeTx({ description: 'Another unknown', amount: -30 }),
+      ];
+      const outputLines: string[] = [];
+      const fakeOutput: Output = {
+        log: (msg: string) => outputLines.push(msg),
+        error: () => {},
+      };
+
+      await run({ txs, nonInteractive: true, output: fakeOutput });
+
+      const parsed = JSON.parse(outputLines[0]);
+      expect(parsed.uncategorised).toHaveLength(2);
+    });
+
+    test('outputs nothing when all txs categorised', async () => {
+      const txs = [makeTx({ description: 'MIGROS supermarket' })];
+      const rules: Rules = { groceries: [/MIGROS/] };
+      const outputLines: string[] = [];
+      const fakeOutput: Output = {
+        log: (msg: string) => outputLines.push(msg),
+        error: () => {},
+      };
+
+      await run({ txs, rules, nonInteractive: true, output: fakeOutput });
+
+      expect(outputLines).toHaveLength(0);
+    });
+  });
+
+  test('uses custom overrides path when provided', async () => {
+    const txs = [makeTx({ amount: -50 })];
+    const profileOverridesPath = path.join(tempDir, 'overrides-profile.json');
+    fs.writeFileSync(
+      profileOverridesPath,
+      JSON.stringify([
+        makeOverride({
+          date: txs[0].date,
+          amount: txs[0].amount,
+          category: 'from-profile',
+        }),
+      ])
+    );
+
+    await run({ txs, overridesPath: profileOverridesPath });
+
+    expect(captureCommand.txs[0].category).toBe('from-profile');
+  });
 });
 
 function resetTempDir(): void {
@@ -144,17 +197,25 @@ async function run({
   txs = [],
   rules = {},
   overrides = [],
+  overridesPath,
   prompter,
+  nonInteractive,
+  output,
 }: {
   txs?: Transaction[];
   rules?: Rules;
   overrides?: Override[];
+  overridesPath?: string;
   prompter?: Prompter;
+  nonInteractive?: boolean;
+  output?: Output;
 } = {}): Promise<void> {
   const wiring = new Wiring({
     rulesPath: createRulesFile(rules),
-    overridesPath: createOverridesFile(overrides),
+    overridesPath: overridesPath ?? createOverridesFile(overrides),
     prompter,
+    nonInteractive,
+    output,
   });
   await wiring.app.run(
     [createInputFile(txs)],
