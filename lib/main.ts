@@ -43,6 +43,14 @@ export default (): void => {
   const categoriseCommand = wiring.categoriseCommand;
   const clusterCommand = wiring.clusterCommand;
 
+  // Shared option for commands that process transaction files
+  const inputsOption = {
+    alias: 'i',
+    type: 'array' as const,
+    describe: 'Input files, directories, or glob patterns.',
+    demandOption: true,
+  };
+
   const args = yargs(hideBin(process.argv))
     .scriptName('money')
     .usage(
@@ -59,6 +67,7 @@ Examples:
       describe: 'Summarises transactions for the year.',
       builder: (yargs) => {
         return yargs.options({
+          inputs: inputsOption,
           sortBy: {
             alias: 's',
             type: 'string',
@@ -80,6 +89,7 @@ Examples:
       describe: 'Show all transactions.',
       builder: (yargs) => {
         return yargs.options({
+          inputs: inputsOption,
           sortBy: {
             alias: 's',
             type: 'string',
@@ -106,6 +116,7 @@ Examples:
       describe: 'Cluster transactions',
       builder: (yargs) => {
         return yargs.options({
+          inputs: inputsOption,
           n: {
             type: 'number',
             describe:
@@ -119,13 +130,6 @@ Examples:
       },
     })
     .options({
-      inputs: {
-        alias: 'i',
-        type: 'array',
-        describe:
-          'Input files, directories, or glob patterns. Can be specified multiple times or space-separated.',
-        demandOption: true,
-      },
       'non-interactive': {
         type: 'boolean',
         default: false,
@@ -141,7 +145,7 @@ Examples:
     })
     .parseSync();
 
-  app.run(args.inputs as string[], commands).catch((error) => {
+  app.run(args['inputs'] as string[], commands).catch((error) => {
     console.error('Error:', error.message);
     process.exit(1);
   });
