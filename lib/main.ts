@@ -57,8 +57,10 @@ export default (): void => {
   const args = yargs(hideBin(process.argv))
     .scriptName('money')
     .usage('$0 <command> -i <inputs...>')
-    .example('$0 summary -i *.csv', 'Summarise all CSV files')
-    .example('$0 details -i data/', 'Show transactions from directory')
+    .example('$0 summary -i file.csv', 'Single file')
+    .example('$0 summary -i a.csv b.csv', 'Multiple files')
+    .example('$0 summary -i data/', 'Directory')
+    .example('$0 summary -i **/*.csv', 'Glob pattern')
     .command({
       command: 'summary',
       describe: 'Summarises transactions for the year.',
