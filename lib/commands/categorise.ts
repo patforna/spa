@@ -130,7 +130,9 @@ async function promptForCategory(
       pageSize: 20,
       source: (_, input: string) => autocompleteCategory(categories, input),
       validate: (input) => {
-        if (input.trim() === '')
+        // input can be a Choice object or a string depending on selection method
+        const value = typeof input === 'string' ? input : (input?.value ?? '');
+        if (value.trim() === '')
           throw new Error('Please provide a category name.');
         return true;
       },
