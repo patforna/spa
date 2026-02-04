@@ -50,7 +50,7 @@ function categoryRows(summary: Summary, sortBy: string): string[][] {
   if (sortBy === 'amount')
     categories = _.sortBy(
       categories,
-      (c) => -summary.totalForCategory(c).amount
+      (c) => summary.totalForCategory(c).amount
     );
 
   return categories.map((c) => [

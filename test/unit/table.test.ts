@@ -14,12 +14,12 @@ describe('Table', () => {
 
   test('should return data with categories sorted by amount descending if requested', () => {
     const txs = [
-      makeTx({ category: 'CatB', amount: 10 }),
-      makeTx({ category: 'CatA', amount: 20 }),
+      makeTx({ category: 'CatB', amount: -10 }),
+      makeTx({ category: 'CatA', amount: -20 }),
     ];
     const data = tableData(new Summary(txs), 'amount');
 
-    // Row 0 is header
+    // Row 0 is header, largest spend (most negative) first
     expect(data[1][0]).toContain('CatA');
     expect(data[2][0]).toContain('CatB');
   });
