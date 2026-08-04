@@ -5,7 +5,11 @@ import { Prompter } from '../../lib/commands/categorise.js';
 import { ImportOverridesCommand } from '../../lib/commands/importOverrides.js';
 import { Command } from '../../lib/commands/index.js';
 import { Output } from '../../lib/output.js';
-import { Override, OverridesRepo, Transaction } from '../../lib/transactions.js';
+import {
+  Override,
+  OverridesRepo,
+  Transaction,
+} from '../../lib/transactions.js';
 import { Rules } from '../../lib/rules.js';
 import { Wiring } from '../../lib/wiring.js';
 import { makeOverride, makeTx } from '../helpers.js';
@@ -180,7 +184,11 @@ describe('Acceptance tests', () => {
     fs.writeFileSync(
       proposedPath,
       JSON.stringify([
-        { date: tx.date.toISOString(), amount: tx.amount, category: 'shopping' },
+        {
+          date: tx.date.toISOString(),
+          amount: tx.amount,
+          category: 'shopping',
+        },
       ])
     );
 
