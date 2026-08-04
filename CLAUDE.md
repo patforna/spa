@@ -15,7 +15,9 @@ npm run lint               # Run ESLint
 npm run format             # Format code with Prettier
 npm test                   # Run Jest tests
 npm test -- --watch        # Watch mode for single test iteration
-npm run check              # Run all: test, lint, format:check, typecheck (run before commits)
+npm run check              # Run all: test, lint, format, typecheck, sort-rules (run before commits)
+                           # Note: writes — prettier reformats and rules.json gets sorted,
+                           # so stage the resulting changes too
 ```
 
 Run the CLI: `bin/money <command> -i <input-files>`
@@ -33,9 +35,9 @@ CSV Files → InputParserFactory → Transactions → Categoriser → Commands (
 **Key Components:**
 
 - `lib/main.ts` - CLI setup with yargs, entry point
-- `lib/categoriser.ts` - Rule-based + override categorization. Applies regex rules from `rules.ts`, falls back to user overrides (matched by date + amount)
+- `lib/categoriser.ts` - Override + rule-based categorization. Overrides win (matched by date + amount); otherwise regex rules apply
 - `lib/transactions.ts` - Transaction model (date, amount, description, category, comment, card) and OverridesRepo persistence
-- `lib/rules.ts` - Hardcoded regex patterns for 33 categories (groceries, travel, insurance, etc.)
+- `lib/rules.ts` - Loads `data/rules.json`, which holds the regex patterns for 20 categories (groceries, travel, insurance, etc.)
 - `lib/wiring.ts` - Dependency injection container, initializes all repos/services
 - `lib/fxRates.ts` - Currency conversion via Fixer.io API with caching
 - `lib/parsers/*.ts` - CSV parsers for each bank format, auto-detected by InputParserFactory
@@ -43,7 +45,7 @@ CSV Files → InputParserFactory → Transactions → Categoriser → Commands (
 
 **Card Detection:** Hardcoded card number patterns in `parseCard()` identify transactions by cardholder (Self/Partner/Unknown).
 
-**Data Persistence:** JSON files in `data/` - `overrides.json` for user categorizations, `fxRates.json` for cached exchange rates.
+**Data Persistence:** JSON files in `data/` - `overrides-{profile}.json` for user categorizations, `rules.json` for the category patterns, `fxRates.json` for cached exchange rates.
 
 ## Conventions
 
@@ -68,7 +70,7 @@ Judgement calls the rule engine can't make — rules match description text only
 | Task                | Files                                      |
 | ------------------- | ------------------------------------------ |
 | Add new bank format | `lib/parsers/*.ts`, `lib/parsers/index.ts` |
-| Add new category    | `lib/rules.ts`                             |
+| Add new category    | `data/rules.json`                          |
 | Fix categorization  | `lib/categoriser.ts`                       |
 | Add new command     | `lib/commands/*.ts`, `lib/main.ts`         |
 | Fix FX conversion   | `lib/fxRates.ts`                           |
