@@ -54,6 +54,15 @@ CSV Files → InputParserFactory → Transactions → Categoriser → Commands (
 - Category `NO_CATEGORY` triggers user prompt
 - FX rates fetched from Fixer.io (requires `FIXER_API_KEY` in `.env`)
 
+## Categorisation Conventions
+
+Judgement calls the rule engine can't make — rules match description text only, so they know nothing about context. Apply these when categorising:
+
+- Holiday spend is split by nature, not lumped into `travel` — restaurants → `eating_out`, supermarkets → `groceries`, attractions → `activities`
+- `travel` is getting there and sleeping there: accommodation, flights, car rental, **plus fuel and road tolls/vignettes incurred on a trip**
+- `car` is running the car at home: domestic fuel, servicing, repairs, fines
+- Fuel and toll rules therefore default to `car`/`transport`; move trip ones to `travel` with overrides during the monthly run
+
 ## Key Files for Common Tasks
 
 | Task                | Files                                      |
