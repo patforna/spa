@@ -64,6 +64,7 @@ Judgement calls the rule engine can't make — rules match description text only
 - `travel` is getting there and sleeping there: accommodation, flights, car rental, **plus fuel and road tolls/vignettes incurred on a trip**
 - `car` is running the car at home: domestic fuel, servicing, repairs, fines
 - Fuel and toll rules therefore default to `car`/`transport`; move trip ones to `travel` with overrides during the monthly run
+- STWEG Nebenkosten count in full as `housing_nebenkosten`, Erneuerungsfonds contribution included — treat it as spent, don't split it out as a reserve
 
 ## Key Files for Common Tasks
 
