@@ -4,6 +4,8 @@
 
 Local-first CLI that turns bank exports into an honest answer to where it all went.
 
+[![CI](https://github.com/patforna/spa/actions/workflows/ci.yml/badge.svg)](https://github.com/patforna/spa/actions/workflows/ci.yml)
+
 ```console
 $ spa summary -i samples/*
 Processing 5 files from input patterns: samples/*
