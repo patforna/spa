@@ -1,0 +1,30 @@
+[
+  {
+    "date": "2025-04-12T12:20:00.000Z",
+    "amount": -264,
+    "splits": [
+      {
+        "amount": -164,
+        "category": "shopping",
+        "comment": "clothes"
+      },
+      {
+        "amount": -100,
+        "category": "housing_furnishing",
+        "comment": "bed linen"
+      }
+    ]
+  },
+  {
+    "date": "2025-06-06T14:45:00.000Z",
+    "amount": -412.35,
+    "category": "housing_furnishing",
+    "comment": "garden bench, not a building job"
+  },
+  {
+    "date": "2025-11-28T12:10:00.000Z",
+    "amount": -549,
+    "category": "shopping",
+    "comment": "laptop replacement"
+  }
+]

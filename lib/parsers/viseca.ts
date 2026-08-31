@@ -39,11 +39,11 @@ export class VisecaInputParser implements InputParser {
   }
 }
 
+// Viseca exports identify the card by an opaque token, not a PAN. Map the
+// last four characters of your own cards here to attribute spend per person.
 function parseVisecaCard(cardId: string | null): Card {
   if (!cardId) return Card.Unknown;
-  if (cardId.endsWith('0002')) return Card.Self;
-  if (cardId.endsWith('0219')) return Card.Self;
-  if (cardId.endsWith('1250')) return Card.Partner;
-  if (cardId.endsWith('4471')) return Card.Partner;
+  if (cardId.endsWith('1001')) return Card.Self;
+  if (cardId.endsWith('2002')) return Card.Partner;
   return Card.Unknown;
 }

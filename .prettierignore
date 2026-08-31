@@ -1,1 +1,6 @@
-data/rules.json
+dist
+coverage
+# app-managed data files: written by the CLI, sorted by scripts/sort-rules.js
+data
+# fixtures are exact copies of real bank export formats
+samples

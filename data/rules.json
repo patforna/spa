@@ -1,0 +1,170 @@
+{
+  "activities": [
+    "#activities",
+    "aquapark",
+    "cinema",
+    "hallenbad",
+    "kletterhalle",
+    "kunsthaus",
+    "museum(?!.*shop)",
+    "zoo(?!.*restaurant)"
+  ],
+  "allowance": [
+    "#allowance",
+    "standing order.*pocket money"
+  ],
+  "car": [
+    "#car",
+    "\\bavia\\b",
+    "\\bbp\\b",
+    "\\bsocar\\b",
+    "autohaus",
+    "garage.*service",
+    "ordnungsbusse",
+    "shell(?! energy)"
+  ],
+  "eating_out": [
+    "#eating_out",
+    "(?<!hotel.*)restaurant(?!.*hotel)",
+    "\\bpret\\b",
+    "bakery",
+    "brasserie",
+    "cafe",
+    "coffee",
+    "kebab",
+    "mcdonald.s",
+    "pizzeria",
+    "starbucks",
+    "take ?away",
+    "uber.+eats",
+    "wagamama"
+  ],
+  "groceries": [
+    "#groceries",
+    "\\bspar\\b",
+    "^(?!.*coop\\s+restaurant).*coop(?!.*(tankstelle|vitality))",
+    "aldi",
+    "denner",
+    "farmers market",
+    "lidl",
+    "migros(?!.*restaurant)",
+    "sainsbury",
+    "tesco",
+    "volg",
+    "waitrose"
+  ],
+  "health": [
+    "#health",
+    "apotheke",
+    "coiffeur",
+    "fitnesspark",
+    "optiker",
+    "pharmacy"
+  ],
+  "health_care": [
+    "#health_care",
+    "hausarzt",
+    "krankenkasse",
+    "spital",
+    "zahnarzt"
+  ],
+  "housing_costs": [
+    "#housing_costs",
+    "elektrizitaetswerk",
+    "gemeindeverwaltung",
+    "sanitaer",
+    "swisscom",
+    "wasserversorgung"
+  ],
+  "housing_furnishing": [
+    "#housing_furnishing",
+    "ikea",
+    "micasa",
+    "moebel pfister"
+  ],
+  "housing_mortgage": [
+    "#housing_mortgage",
+    "transfer to mortgage no\\."
+  ],
+  "housing_nebenkosten": [
+    "#housing_nebenkosten",
+    "nebenkosten",
+    "stweg"
+  ],
+  "housing_upgrades": [
+    "#housing_upgrades",
+    "hornbach",
+    "jumbo",
+    "obi bau"
+  ],
+  "ignore": [
+    "#ignore",
+    "^topup",
+    "credit.*own account",
+    "debit from lsv.*card services",
+    "debit.*revolut bank uab",
+    "debit.*wise payments limited",
+    "exchanged to",
+    "google pay top-up",
+    "steueramt",
+    "transfer \\| revolut"
+  ],
+  "insurance": [
+    "#insurance",
+    "\\baxa\\b",
+    "helvetia",
+    "mobiliar",
+    "rechtsschutz"
+  ],
+  "other": [],
+  "services": [
+    "#services",
+    "die post",
+    "payment transaction prices",
+    "serafe",
+    "wingo"
+  ],
+  "shopping": [
+    "#shopping",
+    "amazon",
+    "amzn mktp",
+    "decathlon",
+    "digitec",
+    "dm-drogerie",
+    "galaxus",
+    "h ?& ?m",
+    "manor",
+    "zalando",
+    "zara"
+  ],
+  "subscriptions": [
+    "#subscriptions",
+    "apple.com/bill",
+    "github",
+    "google one",
+    "netflix",
+    "openai",
+    "spotify",
+    "youtube"
+  ],
+  "transport": [
+    "#transport",
+    "(?<!eats.*)uber(?!.*eats)",
+    "\\blime\\b",
+    "parkhaus",
+    "sbb cff ffs",
+    "taxi",
+    "trainline",
+    "transport for london"
+  ],
+  "travel": [
+    "#travel",
+    "airbnb",
+    "booking.com",
+    "easyjet",
+    "europcar",
+    "hostel",
+    "hotel(?!.*restaurant)",
+    "swiss int"
+  ]
+}

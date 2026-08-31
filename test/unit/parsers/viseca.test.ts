@@ -64,18 +64,13 @@ describe('VisecaInputParser', () => {
     expect(txs[0].description).toContain('Coop-2623');
   });
 
-  test('should identify card ending with 0002 as Self', async () => {
-    const txs = await parser.parse(makeCsv('404703ES07AN0002'));
+  test('should identify card ending with 1001 as Self', async () => {
+    const txs = await parser.parse(makeCsv('404703AB01CD1001'));
     expect(txs[0].card).toBe(Card.Self);
   });
 
-  test('should identify card ending with 1250 as Partner', async () => {
-    const txs = await parser.parse(makeCsv('40470327O1OX1250'));
-    expect(txs[0].card).toBe(Card.Partner);
-  });
-
-  test('should identify card ending with 4471 as Partner', async () => {
-    const txs = await parser.parse(makeCsv('404703RSL62F4471'));
+  test('should identify card ending with 2002 as Partner', async () => {
+    const txs = await parser.parse(makeCsv('404703AB01CD2002'));
     expect(txs[0].card).toBe(Card.Partner);
   });
 
@@ -91,10 +86,5 @@ describe('VisecaInputParser', () => {
       `"Test","Place","CHE","BOOKED","Details","","1.000000"`;
     const txs = await parser.parse(csv);
     expect(txs[0].card).toBe(Card.Unknown);
-  });
-
-  test('should identify card ending with 0219 as Self', async () => {
-    const txs = await parser.parse(makeCsv('540948603TJZ0219'));
-    expect(txs[0].card).toBe(Card.Self);
   });
 });
