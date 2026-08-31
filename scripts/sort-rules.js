@@ -3,7 +3,8 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
-const rulesPath = join(process.cwd(), 'data/rules.json');
+const dataDir = process.env.SPA_DATA_DIR ?? join(process.cwd(), 'data');
+const rulesPath = join(dataDir, 'rules.json');
 const rules = JSON.parse(readFileSync(rulesPath, 'utf-8'));
 
 // Sort categories alphabetically

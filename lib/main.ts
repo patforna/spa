@@ -6,7 +6,7 @@ import { ImportOverridesCommand } from './commands/importOverrides.js';
 import { Command } from './commands/index.js';
 import { SummaryCommand } from './commands/summary.js';
 import { TxLoader } from './transactions.js';
-import { PROJECT_ROOT, Wiring } from './wiring.js';
+import { DATA_DIR, Wiring } from './wiring.js';
 
 export class App {
   constructor(private readonly txLoader: TxLoader) {}
@@ -29,10 +29,7 @@ export default (): void => {
     .option('profile', { alias: 'p', type: 'string', default: 'common' })
     .parseSync();
 
-  const overridesPath = join(
-    PROJECT_ROOT,
-    `data/overrides-${preArgs.profile}.json`
-  );
+  const overridesPath = join(DATA_DIR, `overrides-${preArgs.profile}.json`);
   const wiring = new Wiring({
     nonInteractive: preArgs['non-interactive'],
     overridesPath,
@@ -59,7 +56,7 @@ export default (): void => {
     .usage('$0 <command> -i <inputs...>')
     .example('$0 summary -i file.csv', 'Single file')
     .example('$0 summary -i a.csv b.csv', 'Multiple files')
-    .example('$0 summary -i data/', 'Directory')
+    .example('$0 summary -i samples/', 'Directory')
     .example('$0 summary -i **/*.csv', 'Glob pattern')
     .command({
       command: 'summary',
@@ -161,7 +158,7 @@ export default (): void => {
         alias: 'p',
         type: 'string',
         default: 'common',
-        describe: 'Profile name (uses data/overrides-<profile>.json).',
+        describe: 'Profile name (uses <data-dir>/overrides-<profile>.json).',
       },
     })
     .parseSync();

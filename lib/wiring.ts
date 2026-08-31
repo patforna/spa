@@ -13,11 +13,15 @@ import { InputParserFactory } from './parsers/index.js';
 import { Rules, RulesRepo } from './rules.js';
 import { OverridesRepo, Override, TxLoader } from './transactions.js';
 
-export const PROJECT_ROOT = process.cwd();
+// Where rules, overrides and cached FX rates live. Defaults to ./data so a
+// fresh clone runs against the starter set; point SPA_DATA_DIR at your own
+// directory to keep personal data outside the repo.
+export const DATA_DIR =
+  process.env['SPA_DATA_DIR'] ?? join(process.cwd(), 'data');
 
-const DEFAULT_OVERRIDES_PATH = join(PROJECT_ROOT, 'data/overrides.json');
-const DEFAULT_FX_RATES_PATH = join(PROJECT_ROOT, 'data/fxRates.json');
-const DEFAULT_RULES_PATH = join(PROJECT_ROOT, 'data/rules.json');
+const DEFAULT_OVERRIDES_PATH = join(DATA_DIR, 'overrides-common.json');
+const DEFAULT_FX_RATES_PATH = join(DATA_DIR, 'fxRates.json');
+const DEFAULT_RULES_PATH = join(DATA_DIR, 'rules.json');
 
 export const FX_API_KEY = process.env['FIXER_API_KEY'];
 export const FX_API_URL = 'http://data.fixer.io/api/';
