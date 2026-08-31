@@ -1,77 +1,99 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) when working in this repository.
 
 ## Project Overview
 
-A CLI-based personal finance tool that processes CSV exports from multiple banking platforms (Viseca, ZKB, Wise, Revolut) to categorize and analyze transactions. Users manually categorize uncategorized transactions via interactive prompts, with support for transaction splitting and currency conversion.
+A CLI that turns CSV exports from several banks (Viseca, ZKB, Wise, Revolut) into
+a categorised view of household spending. Regex rules categorise the bulk;
+per-transaction overrides pin the exceptions. Everything runs locally against
+files on disk.
 
 ## Commands
 
+Development goes through `just` — the same entry point CI uses.
+
 ```bash
-npm run build              # Compile TypeScript to dist/
-npm run typecheck          # Type-check only (no emit)
-npm run lint               # Run ESLint
-npm run format             # Format code with Prettier
-npm test                   # Run Jest tests
-npm test -- --watch        # Watch mode for single test iteration
-npm run check              # Run all: test, lint, format, typecheck, sort-rules (run before commits)
-                           # Note: writes — prettier reformats and rules.json gets sorted,
-                           # so stage the resulting changes too
+just              # = just check
+just check        # format-check, lint, typecheck, build, CLI smoke test, tests
+just fix          # prettier --write, eslint --fix, sort data/rules.json
+just build        # compile TypeScript to dist/
+just test <args>  # run tests, optionally scoped
 ```
 
-Run the CLI: `bin/money <command> -i <input-files>`
+`bin/spa` runs from `dist/`, so run `just build` after changing anything under
+`lib/`.
+
+Run the CLI: `bin/spa <command> -i <inputs>` (`bin/spa --help` for the rest).
 
 ## Architecture
 
-**Data Flow:**
-
 ```
-CSV Files → InputParserFactory → Transactions → Categoriser → Commands (summary/details/cluster)
-                                                    ↓
-                                          data/overrides.json (user categorizations)
+CSV files ──> InputParserFactory ──> Transaction[] ──> Categoriser ──> Command
+                (sniffs header)                            │           (summary /
+                                                           │            details /
+                                        <data-dir>/rules.json            cluster)
+                                        <data-dir>/overrides-<profile>.json
 ```
 
-**Key Components:**
+- `lib/main.ts` — yargs CLI, entry point
+- `lib/wiring.ts` — dependency injection container; owns `DATA_DIR`
+- `lib/parsers/*.ts` — one parser per bank format, chosen by sniffing the header
+  line in `InputParserFactory`
+- `lib/categoriser.ts` — overrides win (matched on date + amount), otherwise the
+  regex rules apply
+- `lib/rules.ts` — `RulesRepo` loads `<data-dir>/rules.json` and compiles each
+  pattern to a case-insensitive `RegExp`
+- `lib/transactions.ts` — `Transaction`/`Override` model, `OverridesRepo`,
+  split expansion
+- `lib/fxRates.ts` — Fixer.io conversion, cached on disk
+- `lib/commands/*.ts` — `summary`, `details`, `cluster`, `categorise`,
+  `import-overrides`
+- `lib/tools/main.ts` — `bin/tools`, maintenance commands over the data files
 
-- `lib/main.ts` - CLI setup with yargs, entry point
-- `lib/categoriser.ts` - Override + rule-based categorization. Overrides win (matched by date + amount); otherwise regex rules apply
-- `lib/transactions.ts` - Transaction model (date, amount, description, category, comment, card) and OverridesRepo persistence
-- `lib/rules.ts` - Loads `data/rules.json`, which holds the regex patterns for 20 categories (groceries, travel, insurance, etc.)
-- `lib/wiring.ts` - Dependency injection container, initializes all repos/services
-- `lib/fxRates.ts` - Currency conversion via Fixer.io API with caching
-- `lib/parsers/*.ts` - CSV parsers for each bank format, auto-detected by InputParserFactory
-- `lib/commands/*.ts` - Command implementations (summary, details, cluster, categorise)
+**Data directory.** `SPA_DATA_DIR` decides where `rules.json`,
+`overrides-<profile>.json` and `fxRates.json` are read and written; it defaults
+to `./data`, the starter set that ships with the repo. Point it at a private
+directory to keep real data out of the repo. `scripts/sort-rules.js` honours it
+too.
 
-**Card Detection:** Hardcoded card number patterns in `parseCard()` identify transactions by cardholder (Self/Partner/Unknown).
-
-**Data Persistence:** JSON files in `data/` - `overrides-{profile}.json` for user categorizations, `rules.json` for the category patterns, `fxRates.json` for cached exchange rates.
+**Card detection.** `parseVisecaCard()` maps the last four characters of the
+Viseca card token to `Card.Self` / `Card.Partner`. Those suffixes are
+installation-specific — change them, don't assume them.
 
 ## Conventions
 
 - TypeScript strict mode, max 80 chars/line
-- All dates use Zurich timezone via moment-timezone
+- Dates are parsed as Europe/Zurich and stored as UTC (dayjs + its
+  timezone/customParseFormat plugins, see `lib/date.ts`); month bucketing in
+  `lib/summary.ts` converts back to Zurich
 - Amounts: negative = debit, positive = credit
-- Category `ignore` excludes transactions from analysis
-- Category `NO_CATEGORY` triggers user prompt
-- FX rates fetched from Fixer.io (requires `FIXER_API_KEY` in `.env`)
+- Category `ignore` excludes a transaction from analysis
+- Category `no_category` triggers the interactive prompt
+- Rules never see anything but the description text — no amount, no date, no
+  account. Anything needing context is an override.
 
 ## Categorisation Conventions
 
-Judgement calls the rule engine can't make — rules match description text only, so they know nothing about context. Apply these when categorising:
+Judgement calls the rule engine cannot make, because rules match description
+text only:
 
-- Holiday spend is split by nature, not lumped into `travel` — restaurants → `eating_out`, supermarkets → `groceries`, attractions → `activities`
-- `travel` is getting there and sleeping there: accommodation, flights, car rental, **plus fuel and road tolls/vignettes incurred on a trip**
+- Holiday spend is split by nature, not lumped into `travel` — restaurants →
+  `eating_out`, supermarkets → `groceries`, attractions → `activities`
+- `travel` is getting there and sleeping there: accommodation, flights, car
+  rental, **plus fuel and road tolls/vignettes incurred on a trip**
 - `car` is running the car at home: domestic fuel, servicing, repairs, fines
-- Fuel and toll rules therefore default to `car`/`transport`; move trip ones to `travel` with overrides during the monthly run
-- STWEG Nebenkosten count in full as `housing_nebenkosten`, Erneuerungsfonds contribution included — treat it as spent, don't split it out as a reserve
+- Fuel and toll rules therefore default to `car`/`transport`; move trip ones to
+  `travel` with overrides during the monthly run
+- STWEG Nebenkosten count in full as `housing_nebenkosten`, renewal-fund
+  contribution included — treat it as spent, don't split it out as a reserve
 
 ## Key Files for Common Tasks
 
-| Task                | Files                                      |
-| ------------------- | ------------------------------------------ |
-| Add new bank format | `lib/parsers/*.ts`, `lib/parsers/index.ts` |
-| Add new category    | `data/rules.json`                          |
-| Fix categorization  | `lib/categoriser.ts`                       |
-| Add new command     | `lib/commands/*.ts`, `lib/main.ts`         |
-| Fix FX conversion   | `lib/fxRates.ts`                           |
+| Task                  | Files                                      |
+| --------------------- | ------------------------------------------ |
+| Add a new bank format | `lib/parsers/*.ts`, `lib/parsers/index.ts` |
+| Add a category        | `<data-dir>/rules.json`                    |
+| Fix categorisation    | `lib/categoriser.ts`                       |
+| Add a command         | `lib/commands/*.ts`, `lib/main.ts`         |
+| Fix FX conversion     | `lib/fxRates.ts`                           |
