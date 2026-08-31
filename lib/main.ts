@@ -52,7 +52,7 @@ export default (): void => {
   };
 
   const args = yargs(hideBin(process.argv))
-    .scriptName('money')
+    .scriptName('spa')
     .usage('$0 <command> -i <inputs...>')
     .example('$0 summary -i file.csv', 'Single file')
     .example('$0 summary -i a.csv b.csv', 'Multiple files')

@@ -1,1 +1,2 @@
-bin/tools.mjs "$@"
+#!/bin/sh
+exec "$(dirname "$0")/tools.mjs" "$@"

@@ -1,8 +1,7 @@
 import eslint from '@eslint/js';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
-import prettier from 'eslint-plugin-prettier';
-import importPlugin from 'eslint-plugin-import';
 
 export default [
   {
@@ -16,34 +15,11 @@ export default [
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
-        commonjs: true,
-        es6: true,
-        jest: true,
-        node: true,
-        process: true,
-        console: true,
-        describe: true,
-        expect: true,
-        afterAll: true,
-        test: true,
-        module: true,
-      },
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
-    settings: {
-      'import/resolver': {
-        node: {
-          extensions: ['.js', '.jsx', '.ts', '.tsx'],
-        },
+        ...globals.node,
+        ...globals.jest,
       },
     },
     rules: {
-      'prettier/prettier': 'off',
-      'import/extensions': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -72,21 +48,13 @@ export default [
       'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
       'no-useless-escape': 'error',
       'prefer-const': 'warn',
-      '@typescript-eslint/ban-types': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
-    },
-    plugins: {
-      prettier,
-      import: importPlugin,
     },
   },
   {
     files: ['**/*.cjs'],
     languageOptions: {
       sourceType: 'commonjs',
-      globals: {
-        module: true,
-      },
     },
   },
   eslintConfigPrettier,
