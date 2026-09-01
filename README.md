@@ -64,32 +64,43 @@ Node ≥ 22.9.
 ```bash
 git clone https://github.com/patforna/spa && cd spa
 npm install && npm run build
+cp -r examples data          # starter rules, a few overrides, cached FX rates
 bin/spa summary -i samples/*
 ```
 
-No API key, no config. The repo ships a starter rule set, a year of made-up
-bank exports and the exchange rates they need.
+No API key needed. `examples/` is read-only reference; `data/` is where the tool
+actually reads and writes, and it's git-ignored so your spending can't end up in
+a commit by accident. The samples are a year of made-up bank exports in the four
+formats below.
 
 ## How it works
 
-Two layers.
+Two layers, and they don't work the same way.
 
-**Rules** are regexes grouped by category in `data/rules.json`, and they handle
-almost everything. A rule only ever sees the description text, never the amount
-or the date. That's restrictive on purpose: anything needing context has to
-become an override instead.
+**Rules are yours.** Regexes grouped by category in `rules.json`, hand-edited and
+committed. This is the file that accumulates, and it's what makes the tool worth
+anything by year two.
 
 ```jsonc
-// data/rules.json (excerpt)
+// rules.json (excerpt)
 "groceries": ["aldi", "lidl", "^(?!.*coop\\s+restaurant).*coop(?!.*tankstelle)"],
 "eating_out": ["(?<!hotel.*)restaurant(?!.*hotel)", "uber.+eats"],
 "transport":  ["(?<!eats.*)uber(?!.*eats)", "sbb cff ffs"]
 ```
 
-**Overrides** pin one transaction, matched on `(date, amount)`, in
-`data/overrides-<profile>.json`. They beat rules. This is where the judgement
-calls live. Petrol bought on holiday is `travel`, not `car`. That hardware shop
-run was a garden bench, so it isn't a repair.
+**Overrides are the tool's.** When nothing matches, `spa` asks you, once:
+
+```console
+? Enter category for the following transaction (or enter "split"):
+ 2025-09-08 |        -24 |  Partner | Kiosk am Bahnhof | Uster | KIOSK AM BAHNHOF | #viseca
+ s
+❯ services
+  shopping
+  subscriptions
+```
+
+Your answer is written to `overrides-<profile>.json`, keyed on `(date, amount)`,
+and it beats any rule. You almost never open this file yourself:
 
 ```json
 {
@@ -100,9 +111,12 @@ run was a garden bench, so it isn't a repair.
 }
 ```
 
-Anything matching neither comes back as `no_category` and you get prompted for
-it. Pick a category, add a comment if you want, and it's saved as an override so
-you never see it again. Type `split` to divide one payment across categories.
+So the question at the prompt is really: am I going to see this merchant again?
+If yes, it's worth a rule. If it's a one-off, or the right answer depends on
+something the description can't tell you (the petrol was bought on holiday, so
+it's `travel` rather than `car`), just answer and let it become an override.
+
+Type `split` instead of a category to divide one payment across several.
 
 Two smaller things:
 
@@ -112,13 +126,50 @@ Two smaller things:
 - **`ignore`.** Internal transfers, card bills and top-ups are dropped, otherwise
   the totals measure cash sloshing about rather than money actually spent.
 
+## Writing rules
+
+One array of patterns per category:
+
+```json
+{
+  "groceries": ["aldi", "lidl", "^(?!.*coop\\s+restaurant).*coop"],
+  "transport": ["sbb cff ffs", "\\blime\\b"]
+}
+```
+
+Each string becomes a case-insensitive JavaScript regex, tested against the
+whole description. That description is everything the parser could find, joined
+with `|`, ending in a tag naming the source:
+
+```
+Denner | Zurich | CHE | Denner | #viseca
+Debit Account transfer: Hornbach Baumarkt | badezimmer umbau | #zkb
+```
+
+Two useful consequences. You can pin a rule to one bank (`wagamama.*#revolut`),
+and for bank transfers you can match on the payment reference, which you control,
+rather than on a merchant name you don't. The terminal shows a tidied version of
+this string, but rules see the raw one.
+
+Adding a category is adding a key. Nothing else needs to change.
+
+The one hard constraint: **two categories must never match the same
+transaction**. `spa` raises an error rather than picking one, which is where the
+ugly lookaheads come from — `coop` also matches Coop's restaurants and its petrol
+stations, and neither of those is groceries. Expect to write one of these every
+few months.
+
+`just fix` sorts the file so diffs stay readable. `cluster` is how you find the
+next pattern worth adding: it groups descriptions by edit distance, so a merchant
+you've paid eleven times shows up once.
+
 ## Commands
 
-| Command                   | What it does                                                         |
-| ------------------------- | -------------------------------------------------------------------- |
-| `summary`                 | Category × month table for the year, with averages, totals and share |
-| `details`                 | Every transaction, filterable by `-c <category>`, sortable           |
-| `cluster`                 | Groups similar descriptions by edit distance — finds missing rules   |
+| Command   | What it does                                                         |
+| --------- | -------------------------------------------------------------------- |
+| `summary` | Category × month table for the year, with averages, totals and share |
+| `details` | Every transaction, filterable by `-c <category>`, sortable           |
+| `cluster` | Groups similar descriptions by edit distance — finds missing rules   |
 
 `--profile` chooses which override file to use, which is how I keep household
 and personal spend apart. `--non-interactive` prints uncategorised transactions
@@ -174,13 +225,16 @@ There are four parsers in `test/unit/parsers/` to crib from.
 
 ## Your own data
 
-`SPA_DATA_DIR` says where rules, overrides and the FX cache live. It defaults to
-`./data`, which is the starter set. Point it at a directory outside the repo and
-your real data stays out of git:
+`data/` is git-ignored, so the default already keeps your spending out of
+commits. If you'd rather version it separately, or keep it nowhere near the repo,
+point `SPA_DATA_DIR` at another directory:
 
 ```bash
 cp .env.example .env      # then set SPA_DATA_DIR (and FIXER_API_KEY, if needed)
 ```
+
+Mine lives in a second, private repo, so the rules and overrides get the same
+history as the code without any of it being public.
 
 Don't expect the starter rules to fit you. Mine are up to about 500 patterns
 after six years, added a merchant at a time whenever the monthly run turned one

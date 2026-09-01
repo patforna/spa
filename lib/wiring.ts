@@ -13,9 +13,9 @@ import { InputParserFactory } from './parsers/index.js';
 import { Rules, RulesRepo } from './rules.js';
 import { OverridesRepo, Override, TxLoader } from './transactions.js';
 
-// Where rules, overrides and cached FX rates live. Defaults to ./data so a
-// fresh clone runs against the starter set; point SPA_DATA_DIR at your own
-// directory to keep personal data outside the repo.
+// Where rules, overrides and cached FX rates live. Defaults to ./data, which
+// is git-ignored and seeded by copying examples/. Point SPA_DATA_DIR at your
+// own directory to keep personal data outside the repo entirely.
 export const DATA_DIR =
   process.env['SPA_DATA_DIR'] ?? join(process.cwd(), 'data');
 

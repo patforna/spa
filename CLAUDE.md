@@ -16,7 +16,7 @@ Development goes through `just` — the same entry point CI uses.
 ```bash
 just              # = just check
 just check        # format-check, lint, typecheck, build, CLI smoke test, tests
-just fix          # prettier --write, eslint --fix, sort data/rules.json
+just fix          # prettier --write, eslint --fix, sort the rules file
 just build        # compile TypeScript to dist/
 just test <args>  # run tests, optionally scoped
 ```
@@ -41,9 +41,11 @@ CSV files ──> InputParserFactory ──> Transaction[] ──> Categoriser �
 - `lib/parsers/*.ts` — one parser per bank format, chosen by sniffing the header
   line in `InputParserFactory`
 - `lib/categoriser.ts` — overrides win (matched on date + amount), otherwise the
-  regex rules apply
+  regex rules apply. Rules are hand-curated; overrides are produced by the
+  interactive prompt and rarely edited by hand
 - `lib/rules.ts` — `RulesRepo` loads `<data-dir>/rules.json` and compiles each
-  pattern to a case-insensitive `RegExp`
+  pattern to a case-insensitive `RegExp`, tested against the raw joined
+  description (not the tidied `shortDescription` shown in the terminal)
 - `lib/transactions.ts` — `Transaction`/`Override` model, `OverridesRepo`,
   split expansion
 - `lib/fxRates.ts` — Fixer.io conversion, cached on disk
@@ -53,9 +55,10 @@ CSV files ──> InputParserFactory ──> Transaction[] ──> Categoriser �
 
 **Data directory.** `SPA_DATA_DIR` decides where `rules.json`,
 `overrides-<profile>.json` and `fxRates.json` are read and written; it defaults
-to `./data`, the starter set that ships with the repo. Point it at a private
-directory to keep real data out of the repo. `scripts/sort-rules.js` honours it
-too.
+to `./data`, which is git-ignored and seeded by `cp -r examples data`.
+`examples/` is the shipped starter set and is read-only — never write to it, and
+never edit it during a real categorisation run. `scripts/sort-rules.js` honours
+`SPA_DATA_DIR` too.
 
 **Card detection.** `parseVisecaCard()` maps the last four characters of the
 Viseca card token to `Card.Self` / `Card.Partner`. Those suffixes are

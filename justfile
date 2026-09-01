@@ -34,6 +34,7 @@ test *args:
 # smoke-test the CLI against the sample data that ships with the repo
 cli-check:
     ./bin/spa --help > /dev/null
+    [ -d data ] || cp -r examples data
     SPA_DATA_DIR=data ./bin/spa summary --non-interactive -i samples/ > /dev/null
 
 # everything CI runs: formatting, lint, types, build, smoke test, tests
