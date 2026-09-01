@@ -55,7 +55,8 @@ Processing 5 files from input patterns: samples/*
 
 I wrote this in 2020 because I genuinely had no idea where our money was going,
 and I've run it every month since. It reads CSV exports from four banks and
-prints the table above. Nothing leaves the machine.
+prints the table above. Nothing leaves the machine. Since the end of 2025, I'm
+primarily using the CLI via Claude Code.
 
 ## Quick start
 
