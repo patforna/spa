@@ -4,6 +4,11 @@
 
 - `cluster --n` is documented and accepted but ignored — `lib/commands/cluster.ts`
   hardcodes the distance threshold
+- `main.ts` builds `Wiring` before yargs parses, and `wiring.ts` constructs the
+  FX service as an import side effect, so even `spa --help` reads all three data
+  files. On a fresh clone, before `cp -r examples data`, `spa --help` dies with
+  an ENOENT stack trace. Fix is to defer `Wiring` until after the parse, which
+  also fixes the two below
 - No `demandCommand`: running `spa` with no command throws instead of printing
   help. `Wiring` construction errors (e.g. an unknown `--profile`) surface as raw
   stack traces; only `app.run` errors are caught
