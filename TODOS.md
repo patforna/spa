@@ -19,8 +19,6 @@
 
 - Tidy up description rendering (`shortDescription` in `lib/transactions.ts` is a
   pile of accumulated special cases)
-- `lib/main.ts` parses argv twice, and `import-overrides` runs inside the yargs
-  handler while every other command queues into `app.run` — two execution models
 - `TxLoader.load` and `fxRates.ts` log via `console` directly, bypassing the
   `Output` port that exists for exactly this reason
 
