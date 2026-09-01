@@ -1,4 +1,4 @@
-# 🫧 spa — Know where it hurts.
+# 🫧 spa - know where it hurts.
 
 Local-first CLI that turns bank exports into an honest answer to where it all went.
 
@@ -244,9 +244,8 @@ up. `cluster` is what tells me which one to add next.
 
 This is a personal tool and it shows. Amounts are CHF, summaries cover one year
 at a time, and all it does is categorise spending. No budgets, no forecasts, no
-net worth. Two rough edges I've never got round to: `cluster --n` is accepted
-and then quietly ignored, and running `spa` with no command at all gives you a
-stack trace instead of help.
+net worth. One rough edge I've never got round to: `cluster --n` is accepted and
+then quietly ignored. `TODOS.md` has the rest.
 
 ## Development
 

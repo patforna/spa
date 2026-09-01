@@ -21,27 +21,10 @@ export class App {
 }
 
 export default (): void => {
-  // Parse global args first to configure Wiring
-  const preArgs = yargs(hideBin(process.argv))
-    .help(false)
-    .version(false)
-    .option('non-interactive', { type: 'boolean', default: false })
-    .option('profile', { alias: 'p', type: 'string', default: 'common' })
-    .parseSync();
-
-  const overridesPath = join(DATA_DIR, `overrides-${preArgs.profile}.json`);
-  const wiring = new Wiring({
-    nonInteractive: preArgs['non-interactive'],
-    overridesPath,
-  });
-
-  const commands = [];
-  const app = wiring.app;
-  const output = wiring.output;
-  const categoriseCommand = wiring.categoriseCommand;
-  const clusterCommand = wiring.clusterCommand;
-  const overridesRepo = wiring.overridesRepo;
-  const overrides = wiring.overrides;
+  // What the chosen command will do, once we have a Wiring to do it with.
+  // Deferred so that --help, --version and usage errors never touch the data
+  // directory - a fresh clone has none until `cp -r examples data`.
+  let run: ((wiring: Wiring) => Promise<void>) | undefined;
 
   // Shared option for commands that process transaction files
   const inputsOption = {
@@ -74,10 +57,11 @@ export default (): void => {
         });
       },
       handler: (args) => {
-        commands.push(
-          categoriseCommand,
-          new SummaryCommand(args['sortBy'], output)
-        );
+        run = (wiring) =>
+          wiring.app.run(args['inputs'] as string[], [
+            wiring.categoriseCommand,
+            new SummaryCommand(args['sortBy'], wiring.output),
+          ]);
       },
     })
     .command({
@@ -101,10 +85,11 @@ export default (): void => {
         });
       },
       handler: (args) => {
-        commands.push(
-          categoriseCommand,
-          new DetailsCommand(args['sortBy'], args['category'], output)
-        );
+        run = (wiring) =>
+          wiring.app.run(args['inputs'] as string[], [
+            wiring.categoriseCommand,
+            new DetailsCommand(args['sortBy'], args['category'], wiring.output),
+          ]);
       },
     })
     .command({
@@ -121,8 +106,12 @@ export default (): void => {
           },
         });
       },
-      handler: () => {
-        commands.push(categoriseCommand, clusterCommand);
+      handler: (args) => {
+        run = (wiring) =>
+          wiring.app.run(args['inputs'] as string[], [
+            wiring.categoriseCommand,
+            wiring.clusterCommand,
+          ]);
       },
     })
     .command({
@@ -137,14 +126,14 @@ export default (): void => {
         });
       },
       handler: (args) => {
-        const cmd = new ImportOverridesCommand(
-          args.file as string,
-          overridesRepo,
-          overrides,
-          output
-        );
-        cmd.execute();
-        process.exit(0);
+        run = async (wiring) => {
+          new ImportOverridesCommand(
+            args.file as string,
+            wiring.overridesRepo,
+            wiring.overrides,
+            wiring.output
+          ).execute();
+        };
       },
     })
     .options({
@@ -161,10 +150,36 @@ export default (): void => {
         describe: 'Profile name (uses <data-dir>/overrides-<profile>.json).',
       },
     })
+    .demandCommand(1, 'Specify a command. Run `spa --help` to see them all.')
+    .strict()
     .parseSync();
 
-  app.run(args['inputs'] as string[], commands).catch((error) => {
-    console.error('Error:', error.message);
-    process.exit(1);
-  });
+  if (!run) return;
+
+  let wiring: Wiring;
+  try {
+    wiring = new Wiring({
+      nonInteractive: args['non-interactive'],
+      overridesPath: join(DATA_DIR, `overrides-${args.profile}.json`),
+    });
+  } catch (error) {
+    fail(error);
+  }
+
+  run(wiring).catch(fail);
 };
+
+/** Reports a startup or run failure without a stack trace, then exits. */
+function fail(error: unknown): never {
+  const err = error as NodeJS.ErrnoException;
+  if (err?.code === 'ENOENT') {
+    console.error(
+      `Error: cannot read ${err.path}\n` +
+        'Create a data directory with `cp -r examples data`, or point ' +
+        'SPA_DATA_DIR at your own.'
+    );
+  } else {
+    console.error('Error:', err?.message ?? error);
+  }
+  process.exit(1);
+}

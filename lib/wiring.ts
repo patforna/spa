@@ -26,9 +26,17 @@ const DEFAULT_RULES_PATH = join(DATA_DIR, 'rules.json');
 export const FX_API_KEY = process.env['FIXER_API_KEY'];
 export const FX_API_URL = 'http://data.fixer.io/api/';
 
-const defaultFxRateService = new FxRateService(
-  new FxRateRepo(DEFAULT_FX_RATES_PATH)
-);
+// Built on first use, not at import time: loading it eagerly meant importing
+// this module read the FX cache off disk, so even `spa --help` needed a data
+// directory to exist.
+let defaultFxRateService: FxRateService | undefined;
+
+function getDefaultFxRateService(): FxRateService {
+  defaultFxRateService ??= new FxRateService(
+    new FxRateRepo(DEFAULT_FX_RATES_PATH)
+  );
+  return defaultFxRateService;
+}
 
 export interface WiringConfig {
   rulesPath?: string;
@@ -55,7 +63,7 @@ export class Wiring {
       rulesPath = DEFAULT_RULES_PATH,
       overridesPath = DEFAULT_OVERRIDES_PATH,
       prompter = defaultPrompter,
-      fxRateService = defaultFxRateService,
+      fxRateService = getDefaultFxRateService(),
       nonInteractive = false,
       output = consoleOutput,
     } = config;

@@ -33,8 +33,9 @@ test *args:
 
 # smoke-test the CLI against the sample data that ships with the repo
 cli-check:
+    # --help must work before any data directory exists
+    SPA_DATA_DIR=/nonexistent ./bin/spa --help > /dev/null
     [ -d data ] || cp -r examples data
-    ./bin/spa --help > /dev/null
     SPA_DATA_DIR=data ./bin/spa summary --non-interactive -i samples/ > /dev/null
 
 # everything CI runs: formatting, lint, types, build, smoke test, tests
