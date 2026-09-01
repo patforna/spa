@@ -1,6 +1,4 @@
-# 🫧 spa
-
-### Know where it hurts.
+# 🫧 spa — Know where it hurts.
 
 Local-first CLI that turns bank exports into an honest answer to where it all went.
 
