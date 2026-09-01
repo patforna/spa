@@ -119,7 +119,6 @@ Two smaller things:
 | `summary`                 | Category × month table for the year, with averages, totals and share |
 | `details`                 | Every transaction, filterable by `-c <category>`, sortable           |
 | `cluster`                 | Groups similar descriptions by edit distance — finds missing rules   |
-| `import-overrides <file>` | Merges overrides from JSON, skipping duplicates                      |
 
 `--profile` chooses which override file to use, which is how I keep household
 and personal spend apart. `--non-interactive` prints uncategorised transactions
