@@ -55,9 +55,9 @@ Processing 5 files from input patterns: samples/*
 └─────────────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴─────────────┴───────────────┴─────┘
 ```
 
-Built in 2020 to answer one question — _where does the money actually go?_ — and
-run every month since. Four bank formats, no cloud, no account linking, no
-subscription. CSVs in, a table out, everything on disk.
+I wrote this in 2020 because I genuinely had no idea where our money was going,
+and I've run it every month since. It reads CSV exports from four banks and
+prints the table above. Nothing leaves the machine.
 
 ## Quick start
 
@@ -69,17 +69,17 @@ npm install && npm run build
 bin/spa summary -i samples/*
 ```
 
-That works offline: the repo ships a starter rule set, a small FX cache and a
-year of synthetic bank exports in the formats below. No API key needed.
+No API key, no config. The repo ships a starter rule set, a year of made-up
+bank exports and the exchange rates they need.
 
 ## How it works
 
-Two layers, in that order:
+Two layers.
 
-**Rules** — regex per category in `data/rules.json`. They do ~95% of the work and
-match the description text only: no amount, no date, no account. That constraint
-is deliberate — it keeps rules portable and forces anything context-dependent
-into the layer below.
+**Rules** are regexes grouped by category in `data/rules.json`, and they handle
+almost everything. A rule only ever sees the description text, never the amount
+or the date. That's restrictive on purpose: anything needing context has to
+become an override instead.
 
 ```jsonc
 // data/rules.json (excerpt)
@@ -88,10 +88,10 @@ into the layer below.
 "transport":  ["(?<!eats.*)uber(?!.*eats)", "sbb cff ffs"]
 ```
 
-**Overrides** — an exception pinned to one transaction by `(date, amount)`, in
-`data/overrides-<profile>.json`. They win over rules. Use them for the calls a
-regex can't make: the trip fuel that belongs to `travel` rather than `car`, the
-hardware-store run that was furniture rather than repairs.
+**Overrides** pin one transaction, matched on `(date, amount)`, in
+`data/overrides-<profile>.json`. They beat rules. This is where the judgement
+calls live. Petrol bought on holiday is `travel`, not `car`. That hardware shop
+run was a garden bench, so it isn't a repair.
 
 ```json
 {
@@ -102,17 +102,17 @@ hardware-store run that was furniture rather than repairs.
 }
 ```
 
-A transaction that matches neither is `no_category`, and `spa` prompts for it —
-autocomplete over your categories, an optional comment, and the answer is saved
-as an override so you are never asked twice. Answer `split` to break one payment
-across several categories.
+Anything matching neither comes back as `no_category` and you get prompted for
+it. Pick a category, add a comment if you want, and it's saved as an override so
+you never see it again. Type `split` to divide one payment across categories.
 
-Two more things worth knowing:
+Two smaller things:
 
-- **Hashtags.** Every category also matches its own name — put `#housing_upgrades`
-  in a bank transfer's payment reference and it categorises itself.
-- **`ignore`.** Internal transfers, card-bill debits and top-ups are excluded, so
-  the total is spend rather than net cash flow.
+- **Hashtags.** Every category matches its own name, so putting
+  `#housing_upgrades` in a bank transfer's payment reference categorises it for
+  you. Handy for the transfers you make yourself.
+- **`ignore`.** Internal transfers, card bills and top-ups are dropped, otherwise
+  the totals measure cash sloshing about rather than money actually spent.
 
 ## Commands
 
@@ -123,9 +123,9 @@ Two more things worth knowing:
 | `cluster`                 | Groups similar descriptions by edit distance — finds missing rules   |
 | `import-overrides <file>` | Merges overrides from JSON, skipping duplicates                      |
 
-Global flags: `--profile` picks the override set (household vs personal),
-`--non-interactive` emits uncategorised transactions as JSON instead of
-prompting, which is what makes the monthly run scriptable.
+`--profile` chooses which override file to use, which is how I keep household
+and personal spend apart. `--non-interactive` prints uncategorised transactions
+as JSON rather than prompting, which is what makes the monthly run scriptable.
 
 ```console
 $ spa details -c travel -s date -i samples/*
@@ -141,7 +141,8 @@ $ spa details -c travel -s date -i samples/*
 
 ## Adapters
 
-Formats are detected by sniffing the header line — no flags, no configuration.
+The format is worked out from the header line, so you never have to say which
+bank a file came from.
 
 | Bank        | Export           | Notes                                                |
 | ----------- | ---------------- | ---------------------------------------------------- |
@@ -151,12 +152,12 @@ Formats are detected by sniffing the header line — no flags, no configuration.
 | **Revolut** | Statement CSV    | Multi-currency; skips top-ups and pending rows       |
 | —           | JSON             | Pre-parsed transactions, for piping between tools    |
 
-Foreign-currency rows are converted via [Fixer.io](https://fixer.io) and cached
-on disk, so a given date is fetched once and never again.
+Foreign currency goes through [Fixer.io](https://fixer.io). Rates are cached on
+disk, so each date is only ever fetched once.
 
 ### Adding one
 
-Implement the interface, register a sniff:
+Write a parser and add one line to the factory:
 
 ```ts
 export interface InputParser {
@@ -170,30 +171,31 @@ if (firstLine.startsWith('Type,Product'))
   return new RevolutInputParser(this.fxRateService);
 ```
 
-Then a unit test with three fixture rows — one ordinary, one refund, one your
-bank does something strange with. `test/unit/parsers/` has four to copy from.
+Then a unit test with a handful of rows pasted from a real export. Include a
+refund, and whatever odd thing your bank does that you'll otherwise forget about.
+There are four parsers in `test/unit/parsers/` to crib from.
 
 ## Your own data
 
-`SPA_DATA_DIR` decides where rules, overrides and the FX cache live. It defaults
-to `./data` — the starter set — so point it somewhere private and the repo stays
-clean:
+`SPA_DATA_DIR` says where rules, overrides and the FX cache live. It defaults to
+`./data`, which is the starter set. Point it at a directory outside the repo and
+your real data stays out of git:
 
 ```bash
 cp .env.example .env      # then set SPA_DATA_DIR (and FIXER_API_KEY, if needed)
 ```
 
-The starter rules are a beginning, not a taxonomy. Mine grew to ~500 patterns
-over six years, mostly one merchant at a time during the monthly run; `cluster`
-is what surfaces the next one worth adding.
+Don't expect the starter rules to fit you. Mine are up to about 500 patterns
+after six years, added a merchant at a time whenever the monthly run turned one
+up. `cluster` is what tells me which one to add next.
 
 ## Scope
 
-A personal tool, kept honest rather than general. Specifically: CHF-centric,
-summaries are single-year, and it categorises spending — it is not a budget,
-a forecast or a net-worth tracker. Some rough edges are known and left alone:
-`cluster --n` is accepted but ignored, and running with no command at all
-produces a stack trace rather than help.
+This is a personal tool and it shows. Amounts are CHF, summaries cover one year
+at a time, and all it does is categorise spending. No budgets, no forecasts, no
+net worth. Two rough edges I've never got round to: `cluster --n` is accepted
+and then quietly ignored, and running `spa` with no command at all gives you a
+stack trace instead of help.
 
 ## Development
 
@@ -203,9 +205,9 @@ just check    # format, lint, types, build, CLI smoke test, 60 tests
 just fix      # prettier --write, eslint --fix, sort the rules file
 ```
 
-CI runs `just check`, the same entry point. Domain logic — categoriser, summary,
-table, every parser — is covered at 90–100%; CLI wiring and the interactive
-prompt are not.
+CI runs `just check` as well, so there's one thing to remember. Coverage is
+90-100% on the parts that do the thinking (categoriser, summary, table, the
+parsers) and thin on the CLI wiring and the interactive prompt.
 
 ## Licence
 
