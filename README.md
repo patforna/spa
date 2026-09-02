@@ -236,24 +236,13 @@ Don't expect the starter rules to fit you. Mine are up to about 500 patterns
 after six years, added a merchant at a time whenever the monthly run turned one
 up. `cluster` is what tells me which one to add next.
 
-## Scope
-
-This is a personal tool and it shows. Amounts are CHF, summaries cover one year
-at a time, and all it does is categorise spending. No budgets, no forecasts, no
-net worth. One rough edge I've never got round to: `cluster --n` is accepted and
-then quietly ignored. `TODOS.md` has the rest.
-
 ## Development
 
 ```bash
-just          # = just check
+just          # = just check (what CI runs)
 just check    # format, lint, types, build, CLI smoke test, 60 tests
 just fix      # prettier --write, eslint --fix, sort the rules file
 ```
-
-CI runs `just check` as well, so there's one thing to remember. Coverage is
-90-100% on the parts that do the thinking (categoriser, summary, table, the
-parsers) and thin on the CLI wiring and the interactive prompt.
 
 ## Licence
 
