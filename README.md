@@ -84,20 +84,19 @@ anything by year two.
 
 ```jsonc
 // rules.json (excerpt)
-"groceries": ["aldi", "lidl", "^(?!.*coop\\s+restaurant).*coop(?!.*tankstelle)"],
-"eating_out": ["(?<!hotel.*)restaurant(?!.*hotel)", "uber.+eats"],
-"transport":  ["(?<!eats.*)uber(?!.*eats)", "sbb cff ffs"]
+"groceries":  ["migros", "carrefour"],
+"eating_out": ["mame cafe", "pizza", "uber.+eats"],
+"travel":     ["airbnb", "booking\\.com", "easyjet"],
+"transport":  ["uber(?!.+eats)", "trainline"]
 ```
 
 **Overrides are the tool's.** When nothing matches, `spa` asks you, once:
 
 ```console
 ? Enter category for the following transaction (or enter "split"):
- 2025-09-08 |        -24 |  Partner | Kiosk am Bahnhof | Uster | KIOSK AM BAHNHOF | #viseca
- s
-❯ services
-  shopping
-  subscriptions
+ 2025-09-08 |        -24 |  Partner | Caravan | London | CARAVAN KINGS CROSS | #viseca
+ e
+❯ eating_out
 ```
 
 Your answer is written to `overrides-<profile>.json`, keyed on `(date, amount)`,
@@ -105,10 +104,9 @@ and it beats any rule. You almost never open this file yourself:
 
 ```json
 {
-  "date": "2025-06-06T14:45:00.000Z",
-  "amount": -412.35,
-  "category": "housing_furnishing",
-  "comment": "garden bench, not a building job"
+  "date": "2025-09-08T17:40:00.000Z",
+  "amount": -24,
+  "category": "eating_out"
 }
 ```
 
@@ -129,12 +127,12 @@ Two smaller things:
 
 ## Writing rules
 
-One array of patterns per category:
+One array of regex patterns per category:
 
 ```json
 {
-  "groceries": ["aldi", "lidl", "^(?!.*coop\\s+restaurant).*coop"],
-  "transport": ["sbb cff ffs", "\\blime\\b"]
+  "eating_out": ["caravan", "\\bcaf[eé]\\b"],
+  "transport": ["uber(?!.+eats)", "lime ltd"]
 }
 ```
 
@@ -155,10 +153,7 @@ this string, but rules see the raw one.
 Adding a category is adding a key. Nothing else needs to change.
 
 The one hard constraint: **two categories must never match the same
-transaction**. `spa` raises an error rather than picking one, which is where the
-ugly lookaheads come from — `coop` also matches Coop's restaurants and its petrol
-stations, and neither of those is groceries. Expect to write one of these every
-few months.
+transaction**. `spa` raises an error rather than picking one.
 
 `just fix` sorts the file so diffs stay readable. `cluster` is how you find the
 next pattern worth adding: it groups descriptions by edit distance, so a merchant
